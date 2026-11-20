@@ -22,8 +22,8 @@
 Business_Hub_2/
 ├── admin-website/          # React Admin Control Center (Vite + React + Recharts + Redux)
 ├── admin-mobile/           # React Native / Expo Admin Mobile App
-├── users-website/          # React Users Website (Vite + React + TS + Tailwind + Redux)
-├── user-mobile/            # React Native / Expo Users Mobile App
+├── user-website/           # React User Website (Vite + React + TS + Tailwind + Redux)
+├── user-mobile/            # React Native / Expo User Mobile App
 ├── backend/                # ONE Common Unified Node.js / Express / TypeScript Backend
 │   ├── src/
 │   │   ├── config/         # Environment, ports, database connectors
@@ -109,13 +109,13 @@ npm run dev
 ```
 *API runs at `http://localhost:5000` (Health check at `http://localhost:5000/api/health`).*
 
-### Step 2: Start the Users Website
+### Step 2: Start the User Website
 ```bash
-cd users-website
+cd user-website
 npm install
 npm run dev
 ```
-*Users website runs at `http://localhost:3000`.*
+*User website runs at `http://localhost:3000`.*
 
 ### Step 3: Start the Admin Website
 ```bash

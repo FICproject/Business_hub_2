@@ -5,15 +5,15 @@
   "description": "Business Hub - All-in-one digital platform for Marketplace, Education, Jobs, and Business Management",
   "workspaces": [
     "backend",
-    "users-website",
+    "user-website",
     "admin-website",
     "user-mobile",
     "admin-mobile"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:users\" \"npm run dev:admin\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:user\" \"npm run dev:admin\"",
     "dev:backend": "cd backend && npm run dev",
-    "dev:users": "cd users-website && npm run dev",
+    "dev:user": "cd user-website && npm run dev",
     "dev:admin": "cd admin-website && npm run dev",
     "build": "npm run build --workspaces",
     "seed": "cd backend && npm run seed",
