@@ -1,0 +1,23 @@
+{
+  "name": "business-hub-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Business Hub - All-in-one digital platform for Marketplace, Education, Jobs, and Business Management",
+  "workspaces": [
+    "api",
+    "users-website",
+    "admin-website",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:users\" \"npm run dev:admin\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:users": "cd users-website && npm run dev",
+    "dev:admin": "cd admin-website && npm run dev",
+    "build": "npm run build --workspaces",
+    "seed": "cd api && npm run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,710 @@
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { dbStore } from '../services/storage';
+
+export const seedData = async () => {
+  console.log('[Seed]: Populating database with comprehensive demo dataset...');
+
+  // Password hashes
+  const salt = await bcrypt.genSalt(10);
+  const adminPassword = await bcrypt.hash('admin12345', salt);
+  const teacherPassword = await bcrypt.hash('teacher12345', salt);
+  const studentPassword = await bcrypt.hash('student12345', salt);
+  const businessPassword = await bcrypt.hash('business12345', salt);
+  const userPassword = await bcrypt.hash('user12345', salt);
+
+  // 1. Users
+  const adminId = 'user-admin-001';
+  const teacherId = 'user-teacher-001';
+  const studentId = 'user-student-001';
+  const businessId = 'user-business-001';
+  const entrepreneurId = 'user-entrepreneur-001';
+  const normalUserId = 'user-normal-001';
+
+  const users = [
+    {
+      _id: adminId,
+      fullName: 'Sarah Sterling (Admin)',
+      email: 'admin@businesshub.com',
+      mobile: '+1-555-0101',
+      dob: '1990-05-14',
+      password: adminPassword,
+      roles: ['admin'],
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-01-10T08:00:00.000Z',
+      updatedAt: '2026-01-10T08:00:00.000Z',
+    },
+    {
+      _id: teacherId,
+      fullName: 'Prof. David Vance',
+      email: 'teacher@businesshub.com',
+      mobile: '+1-555-0102',
+      dob: '1988-11-20',
+      password: teacherPassword,
+      roles: ['teacher'],
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-01-15T09:30:00.000Z',
+      updatedAt: '2026-01-15T09:30:00.000Z',
+    },
+    {
+      _id: studentId,
+      fullName: 'Alex Chen',
+      email: 'student@businesshub.com',
+      mobile: '+1-555-0103',
+      dob: '2001-08-25',
+      password: studentPassword,
+      roles: ['student'],
+      avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-02-01T10:15:00.000Z',
+      updatedAt: '2026-02-01T10:15:00.000Z',
+    },
+    {
+      _id: businessId,
+      fullName: 'Marcus Vance (Apex Tech)',
+      email: 'business@businesshub.com',
+      mobile: '+1-555-0104',
+      dob: '1985-03-12',
+      password: businessPassword,
+      roles: ['businessman'],
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-01-20T11:00:00.000Z',
+      updatedAt: '2026-01-20T11:00:00.000Z',
+    },
+    {
+      _id: entrepreneurId,
+      fullName: 'Elena Rostova (NextGen)',
+      email: 'entrepreneur@businesshub.com',
+      mobile: '+1-555-0105',
+      dob: '1993-09-30',
+      password: businessPassword,
+      roles: ['entrepreneur'],
+      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-02-10T14:20:00.000Z',
+      updatedAt: '2026-02-10T14:20:00.000Z',
+    },
+    {
+      _id: normalUserId,
+      fullName: 'Jordan Taylor',
+      email: 'user@businesshub.com',
+      mobile: '+1-555-0106',
+      dob: '1998-12-04',
+      password: userPassword,
+      roles: ['normal'],
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80',
+      isEmailVerified: true,
+      isMobileVerified: true,
+      status: 'active',
+      createdAt: '2026-02-15T16:00:00.000Z',
+      updatedAt: '2026-02-15T16:00:00.000Z',
+    },
+  ];
+
+  // 2. Businesses
+  const biz1Id = 'biz-apex-001';
+  const biz2Id = 'biz-nextgen-002';
+
+  const businesses = [
+    {
+      _id: biz1Id,
+      ownerId: businessId,
+      businessName: 'Apex Global Technologies Ltd',
+      businessType: 'technology',
+      description: 'Pioneering smart hardware, enterprise SaaS solutions, and developer accessories.',
+      address: {
+        street: '100 Silicon Way',
+        city: 'San Francisco',
+        state: 'CA',
+        postalCode: '94105',
+        country: 'United States',
+      },
+      phone: '+1-555-0104',
+      email: 'contact@apexglobal.tech',
+      verificationStatus: 'approved',
+      logoUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+      documents: [
+        { documentType: 'Certificate of Incorporation', documentUrl: 'https://example.com/docs/inc.pdf', uploadedAt: '2026-01-21T10:00:00Z' },
+        { documentType: 'Tax Identification Number (EIN)', documentUrl: 'https://example.com/docs/ein.pdf', uploadedAt: '2026-01-21T10:00:00Z' },
+      ],
+      createdAt: '2026-01-20T11:00:00.000Z',
+      updatedAt: '2026-01-22T14:00:00.000Z',
+    },
+    {
+      _id: biz2Id,
+      ownerId: entrepreneurId,
+      businessName: 'NextGen Robotics & AI Labs',
+      businessType: 'manufacturing',
+      description: 'Next-generation robotics components and autonomous vision sensors.',
+      address: {
+        street: '45 Innovation Parkway',
+        city: 'Austin',
+        state: 'TX',
+        postalCode: '78701',
+        country: 'United States',
+      },
+      phone: '+1-555-0105',
+      email: 'operations@nextgenrobotics.io',
+      verificationStatus: 'pending', // Pending for Admin verification demonstration
+      logoUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=200&auto=format&fit=crop&q=80',
+      documents: [
+        { documentType: 'Business Registration Certificate', documentUrl: 'https://example.com/docs/reg.pdf', uploadedAt: '2026-02-11T09:00:00Z' },
+        { documentType: 'Identity Verification (Passport)', documentUrl: 'https://example.com/docs/passport.pdf', uploadedAt: '2026-02-11T09:00:00Z' },
+      ],
+      createdAt: '2026-02-10T14:20:00.000Z',
+      updatedAt: '2026-02-11T09:00:00.000Z',
+    },
+  ];
+
+  // 3. Products (Notice: Owner personal details are strictly excluded)
+  const products = [
+    {
+      _id: 'prod-001',
+      businessId: biz1Id,
+      title: 'Ergonomic Mechanical Keyboard (Wireless Bluetooth)',
+      slug: 'ergonomic-mechanical-keyboard',
+      description: 'Ultra-low latency wireless mechanical keyboard designed for software engineers and executives. Hot-swappable switches and PBT keycaps.',
+      category: 'Electronics',
+      price: 149.99,
+      discountPrice: 119.99,
+      stock: 45,
+      variants: [
+        { name: 'Switch Type', options: ['Tactile Brown', 'Linear Red', 'Clicky Blue'], priceOffset: 0, stock: 15 },
+        { name: 'Color', options: ['Midnight Slate', 'Arctic White'], priceOffset: 0, stock: 20 },
+      ],
+      specifications: [
+        { key: 'Connectivity', value: 'Bluetooth 5.2 & 2.4GHz USB' },
+        { key: 'Battery Life', value: 'Up to 240 hours' },
+        { key: 'Weight', value: '820 grams' },
+      ],
+      images: [
+        'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&auto=format&fit=crop&q=80',
+      ],
+      status: 'approved',
+      isFeatured: true,
+      rating: 4.9,
+      reviewsCount: 38,
+      createdAt: '2026-01-25T12:00:00.000Z',
+      updatedAt: '2026-01-25T12:00:00.000Z',
+    },
+    {
+      _id: 'prod-002',
+      businessId: biz1Id,
+      title: '4K Ultra-Wide USB-C Executive Monitor 34"',
+      slug: '4k-ultrawide-monitor',
+      description: 'Curved IPS display with 99% sRGB color accuracy, 90W power delivery over USB-C, and built-in KVM switch for multi-device productivity.',
+      category: 'Electronics',
+      price: 649.0,
+      discountPrice: 579.0,
+      stock: 18,
+      variants: [],
+      specifications: [
+        { key: 'Resolution', value: '3440 x 1440 WQHD' },
+        { key: 'Refresh Rate', value: '144Hz' },
+        { key: 'Ports', value: 'HDMI 2.1, DP 1.4, USB-C (90W PD)' },
+      ],
+      images: [
+        'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80',
+      ],
+      status: 'approved',
+      isFeatured: true,
+      rating: 4.8,
+      reviewsCount: 22,
+      createdAt: '2026-01-26T15:00:00.000Z',
+      updatedAt: '2026-01-26T15:00:00.000Z',
+    },
+    {
+      _id: 'prod-003',
+      businessId: biz1Id,
+      title: 'Noise-Cancelling Studio Headset Pro',
+      slug: 'noise-cancelling-headset',
+      description: 'Active noise cancellation with dual MEMS microphones for crystal-clear client calls, remote conferences, and deep work sessions.',
+      category: 'Audio',
+      price: 199.0,
+      discountPrice: 169.0,
+      stock: 60,
+      variants: [],
+      specifications: [
+        { key: 'ANC Depth', value: '-35dB' },
+        { key: 'Battery', value: '40 Hours Playback' },
+      ],
+      images: [
+        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
+      ],
+      status: 'approved',
+      isFeatured: false,
+      rating: 4.7,
+      reviewsCount: 19,
+      createdAt: '2026-01-28T10:00:00.000Z',
+      updatedAt: '2026-01-28T10:00:00.000Z',
+    },
+    {
+      _id: 'prod-004',
+      businessId: biz1Id,
+      title: 'Smart Standing Desk Controller & Memory Presets',
+      slug: 'smart-standing-desk-controller',
+      description: 'Touch-sensitive controller with Bluetooth health reminders, anti-collision sensor, and programmable height memory presets.',
+      category: 'Office',
+      price: 79.0,
+      stock: 85,
+      variants: [],
+      specifications: [
+        { key: 'Input', value: '110-240V AC' },
+        { key: 'Memory slots', value: '4 Height Presets' },
+      ],
+      images: [
+        'https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=800&auto=format&fit=crop&q=80',
+      ],
+      status: 'approved',
+      isFeatured: false,
+      rating: 4.9,
+      reviewsCount: 14,
+      createdAt: '2026-02-02T11:00:00.000Z',
+      updatedAt: '2026-02-02T11:00:00.000Z',
+    },
+  ];
+
+  // 4. Services
+  const services = [
+    {
+      _id: 'srv-001',
+      businessId: biz1Id,
+      title: 'Cloud Architecture & Kubernetes Infrastructure Migration',
+      description: 'End-to-end cloud migration consulting, zero-downtime deployment, infrastructure-as-code, and AWS/GCP cost optimization.',
+      category: 'Technology',
+      pricingType: 'quote',
+      price: 2500.0,
+      serviceArea: 'Worldwide (Remote Delivery)',
+      availabilitySchedule: 'Monday - Friday, 8am - 6pm EST',
+      images: ['https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80'],
+      status: 'approved',
+      createdAt: '2026-02-01T09:00:00.000Z',
+    },
+    {
+      _id: 'srv-002',
+      businessId: biz1Id,
+      title: 'Corporate Cybersecurity & Penetration Testing Audit',
+      description: 'Comprehensive vulnerability assessment, SOC 2 compliance readiness audit, and employee phishing simulation training.',
+      category: 'Security',
+      pricingType: 'fixed',
+      price: 1800.0,
+      serviceArea: 'Worldwide (Remote)',
+      availabilitySchedule: 'Full-time Booking by Appointment',
+      images: ['https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80'],
+      status: 'approved',
+      createdAt: '2026-02-03T11:30:00.000Z',
+    },
+  ];
+
+  // 5. Courses (100% Free)
+  const courses = [
+    {
+      _id: 'course-001',
+      instructorId: teacherId,
+      instructorName: 'Prof. David Vance',
+      title: 'Full-Stack Modern Web Engineering: React, Node & TypeScript',
+      slug: 'fullstack-modern-web-engineering',
+      description: 'Master enterprise-grade web development from scratch. Build scalable microservices, secure JWT authentication, and responsive modern frontend interfaces.',
+      category: 'Software Engineering',
+      level: 'intermediate',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+      modules: [
+        {
+          title: 'Module 1: Modern TypeScript Architecture',
+          order: 1,
+          lessons: [
+            { title: 'Type Safety & Generics in Enterprise Apps', duration: '28 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+            { title: 'Design Patterns & Dependency Injection', duration: '35 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+          ],
+        },
+        {
+          title: 'Module 2: High Performance REST & GraphQL Backend',
+          order: 2,
+          lessons: [
+            { title: 'Express Routing & Robust RBAC Middleware', duration: '40 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+            { title: 'Database Indexing & Caching Strategies', duration: '32 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+          ],
+        },
+      ],
+      isFree: true,
+      status: 'published',
+      enrolledStudentsCount: 245,
+      rating: 4.9,
+      createdAt: '2026-01-20T10:00:00.000Z',
+    },
+    {
+      _id: 'course-002',
+      instructorId: teacherId,
+      instructorName: 'Prof. David Vance',
+      title: 'Financial Strategy & Capital Raising for SaaS Founders',
+      slug: 'financial-strategy-for-founders',
+      description: 'Learn unit economics, CAC vs LTV optimization, cap table modeling, runway budgeting, and pitching seed/Series-A venture capitalists.',
+      category: 'Business & Finance',
+      level: 'beginner',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
+      modules: [
+        {
+          title: 'Module 1: SaaS Financial Metrics & KPIs',
+          order: 1,
+          lessons: [
+            { title: 'Understanding MRR, ARR, Net Revenue Retention', duration: '25 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+            { title: 'Cash Flow Forecasting & Runway Survival', duration: '30 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+          ],
+        },
+      ],
+      isFree: true,
+      status: 'published',
+      enrolledStudentsCount: 180,
+      rating: 4.8,
+      createdAt: '2026-01-25T14:00:00.000Z',
+    },
+    {
+      _id: 'course-003',
+      instructorId: teacherId,
+      instructorName: 'Prof. David Vance',
+      title: 'Data Science & Machine Learning with Python',
+      slug: 'data-science-machine-learning-python',
+      description: 'From NumPy and Pandas data wrangling to building neural networks with PyTorch and deploying predictive machine learning models.',
+      category: 'Data Science',
+      level: 'advanced',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
+      modules: [
+        {
+          title: 'Module 1: Exploratory Data Analysis & Statistics',
+          order: 1,
+          lessons: [
+            { title: 'Feature Engineering & Data Cleansing', duration: '35 min', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+          ],
+        },
+      ],
+      isFree: true,
+      status: 'published',
+      enrolledStudentsCount: 310,
+      rating: 5.0,
+      createdAt: '2026-02-01T08:00:00.000Z',
+    },
+  ];
+
+  // 6. Live Classes (100% Free for students)
+  const liveClasses = [
+    {
+      _id: 'live-001',
+      instructorId: teacherId,
+      instructorName: 'Prof. David Vance',
+      title: 'Live Workshop: Building High-Throughput Microservices in Node.js',
+      subject: 'Computer Science',
+      description: 'Interactive live coding masterclass covering event loops, cluster mode, Redis pub/sub message brokers, and load balancing.',
+      scheduledDate: '2026-11-25',
+      startTime: '18:00 EST',
+      durationMinutes: 90,
+      studentCapacity: 250,
+      enrolledCount: 88,
+      meetingId: 'BH-LIVE-NODE99',
+      status: 'scheduled',
+      createdAt: '2026-11-15T12:00:00.000Z',
+    },
+    {
+      _id: 'live-002',
+      instructorId: teacherId,
+      instructorName: 'Prof. David Vance',
+      title: 'Live Q&A: SaaS Pricing Strategies & Unit Economics',
+      subject: 'Business Management',
+      description: 'Bring your pitch decks and financial spreadsheets. Open office hours with live reviews of pricing models and customer retention tactics.',
+      scheduledDate: '2026-11-28',
+      startTime: '15:00 EST',
+      durationMinutes: 60,
+      studentCapacity: 150,
+      enrolledCount: 64,
+      meetingId: 'BH-LIVE-SAAS88',
+      status: 'scheduled',
+      createdAt: '2026-11-16T14:00:00.000Z',
+    },
+  ];
+
+  // 7. Study Materials
+  const materials = [
+    {
+      _id: 'mat-001',
+      authorId: teacherId,
+      authorName: 'Prof. David Vance',
+      title: 'Comprehensive Data Structures & Algorithms Quick Reference',
+      subject: 'Computer Science',
+      topic: 'Algorithms',
+      fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      fileSize: '4.2 MB',
+      fileType: 'PDF',
+      moderationStatus: 'approved',
+      downloadsCount: 142,
+      createdAt: '2026-01-22T08:00:00.000Z',
+    },
+    {
+      _id: 'mat-002',
+      authorId: teacherId,
+      authorName: 'Prof. David Vance',
+      title: 'SaaS Legal Agreements, Terms of Service & Privacy Templates',
+      subject: 'Business Law',
+      topic: 'Contracts',
+      fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      fileSize: '1.8 MB',
+      fileType: 'PDF',
+      moderationStatus: 'approved',
+      downloadsCount: 89,
+      createdAt: '2026-01-26T12:00:00.000Z',
+    },
+  ];
+
+  // 8. Tuition
+  const tuitions = [
+    {
+      _id: 'tui-001',
+      teacherId: teacherId,
+      teacherName: 'Prof. David Vance',
+      subject: 'Advanced Software System Design & Distributed Systems',
+      educationLevel: 'Undergraduate / Professional',
+      description: 'One-on-one intensive weekly mentoring for senior software engineering and system architecture interview prep.',
+      schedule: 'Saturdays & Sundays, 10:00 AM - 12:00 PM',
+      format: 'online',
+      fee: 45.0,
+      status: 'active',
+      createdAt: '2026-01-20T10:00:00.000Z',
+    },
+  ];
+
+  // 9. Teacher Payments
+  const teacherPayments = [
+    {
+      _id: 'pay-t-001',
+      teacherId: teacherId,
+      teacherName: 'Prof. David Vance',
+      liveClassId: 'live-completed-000',
+      classTitle: 'Introduction to Cloud Native Architectures',
+      studentAttendanceCount: 94,
+      amount: 350.0,
+      status: 'paid',
+      approvedBy: 'Sarah Sterling (Admin)',
+      paidAt: '2026-11-01T14:00:00.000Z',
+      transactionRef: 'PAY-STIPEND-9821',
+      notes: 'Excellent session with strong student ratings.',
+      createdAt: '2026-10-30T10:00:00.000Z',
+    },
+    {
+      _id: 'pay-t-002',
+      teacherId: teacherId,
+      teacherName: 'Prof. David Vance',
+      liveClassId: 'live-001',
+      classTitle: 'Live Workshop: Building High-Throughput Microservices',
+      studentAttendanceCount: 88,
+      amount: 400.0,
+      status: 'pending', // Pending approval for Admin payment workflow testing!
+      approvedBy: undefined,
+      notes: 'Eligible completed class awaiting admin stipend review.',
+      createdAt: '2026-11-18T10:00:00.000Z',
+    },
+  ];
+
+  // 10. Jobs
+  const jobs = [
+    {
+      _id: 'job-001',
+      businessId: biz1Id,
+      businessName: 'Apex Global Technologies Ltd',
+      postedBy: businessId,
+      title: 'Senior Full-Stack TypeScript / React Engineer',
+      description: 'We are seeking an experienced Full-Stack Engineer to architect next-generation cloud collaboration tools. You will lead UI engineering and Node.js REST services.',
+      category: 'Software Development',
+      responsibilities: [
+        'Design and implement high-performance React UI components',
+        'Build scalable RESTful API endpoints and WebSocket channels',
+        'Participate in code reviews, automated CI/CD and unit testing',
+      ],
+      requirements: [
+        '4+ years of professional full-stack development experience',
+        'Deep expertise in TypeScript, React, Node.js, and MongoDB/PostgreSQL',
+        'Experience with cloud platforms (AWS, GCP, or Azure)',
+      ],
+      skills: ['TypeScript', 'React', 'Node.js', 'Tailwind CSS', 'MongoDB', 'Docker'],
+      experienceLevel: 'Senior Level',
+      employmentType: 'full-time',
+      location: 'San Francisco, CA / Remote',
+      workMode: 'remote',
+      salaryMin: 120000,
+      salaryMax: 165000,
+      currency: 'USD',
+      deadline: '2026-12-31',
+      status: 'active',
+      applicantsCount: 14,
+      createdAt: '2026-02-01T10:00:00.000Z',
+    },
+    {
+      _id: 'job-002',
+      businessId: biz1Id,
+      businessName: 'Apex Global Technologies Ltd',
+      postedBy: businessId,
+      title: 'Lead Product Growth & Digital Marketing Manager',
+      description: 'Own our global marketing funnel, organic search strategy, technical content marketing, and customer acquisition campaigns.',
+      category: 'Digital Marketing',
+      responsibilities: [
+        'Develop and execute organic growth and multi-channel acquisition funnels',
+        'Optimize conversion rates across landing pages and onboarding flows',
+        'Manage marketing analytics and campaign budget allocations',
+      ],
+      requirements: [
+        '3+ years of experience scaling B2B SaaS or consumer marketplaces',
+        'Analytical mindset with strong knowledge of GA4, SEO, and paid media',
+      ],
+      skills: ['Growth Marketing', 'SEO', 'Data Analytics', 'Content Strategy'],
+      experienceLevel: 'Mid to Senior',
+      employmentType: 'full-time',
+      location: 'Remote',
+      workMode: 'remote',
+      salaryMin: 95000,
+      salaryMax: 130000,
+      currency: 'USD',
+      deadline: '2026-12-15',
+      status: 'active',
+      applicantsCount: 9,
+      createdAt: '2026-02-04T14:00:00.000Z',
+    },
+  ];
+
+  // 11. Sample Enrollments
+  const enrollments = [
+    {
+      _id: 'enr-001',
+      userId: studentId,
+      courseId: 'course-001',
+      courseTitle: 'Full-Stack Modern Web Engineering: React, Node & TypeScript',
+      courseThumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+      progressPercentage: 50,
+      completedLessons: ['Type Safety & Generics in Enterprise Apps'],
+      isCompleted: false,
+      enrolledAt: '2026-02-02T11:00:00.000Z',
+    },
+  ];
+
+  // 12. Sample Orders
+  const orders = [
+    {
+      _id: 'order-001',
+      orderNumber: 'BH-260215-4819',
+      userId: studentId,
+      customerName: 'Alex Chen',
+      customerEmail: 'student@businesshub.com',
+      items: [
+        {
+          productId: 'prod-001',
+          businessId: biz1Id,
+          title: 'Ergonomic Mechanical Keyboard (Wireless Bluetooth)',
+          price: 119.99,
+          quantity: 1,
+          image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80',
+          subtotal: 119.99,
+        },
+      ],
+      shippingAddress: {
+        fullName: 'Alex Chen',
+        address: '742 Evergreen Terrace',
+        city: 'Springfield',
+        state: 'OR',
+        postalCode: '97477',
+        country: 'United States',
+        phone: '+1-555-0103',
+      },
+      subtotal: 119.99,
+      taxAmount: 9.6,
+      shippingFee: 0,
+      totalAmount: 129.59,
+      orderStatus: 'delivered',
+      paymentStatus: 'paid',
+      paymentMethod: 'Credit Card (Stripe)',
+      createdAt: '2026-02-15T14:30:00.000Z',
+      updatedAt: '2026-02-17T18:00:00.000Z',
+    },
+  ];
+
+  // 13. Audit logs
+  const auditLogs = [
+    {
+      _id: 'log-001',
+      actorId: adminId,
+      actorName: 'Sarah Sterling (Admin)',
+      actorRole: 'admin',
+      action: 'APPROVE_BUSINESS',
+      entityType: 'Business',
+      entityId: biz1Id,
+      details: 'Approved Apex Global Technologies Ltd after legal registration verification.',
+      ipAddress: '192.168.1.10',
+      createdAt: '2026-01-22T14:00:00.000Z',
+    },
+    {
+      _id: 'log-002',
+      actorId: adminId,
+      actorName: 'Sarah Sterling (Admin)',
+      actorRole: 'admin',
+      action: 'APPROVE_TEACHER_PAYMENT',
+      entityType: 'TeacherPayment',
+      entityId: 'pay-t-001',
+      details: 'Approved $350 stipend for completed live class.',
+      ipAddress: '192.168.1.10',
+      createdAt: '2026-11-01T14:00:00.000Z',
+    },
+  ];
+
+  // 14. Shared links
+  const sharedLinks = [
+    {
+      _id: 'share-001',
+      creatorId: studentId,
+      targetType: 'product',
+      targetId: 'prod-001',
+      title: 'Ergonomic Mechanical Keyboard',
+      code: 'KB829XQ1',
+      fullUrl: 'http://localhost:3000/share/KB829XQ1',
+      clickCount: 26,
+      createdAt: '2026-02-16T10:00:00.000Z',
+    },
+  ];
+
+  // Populate data store
+  dbStore.collection.users = users;
+  dbStore.collection.businesses = businesses;
+  dbStore.collection.products = products;
+  dbStore.collection.services = services;
+  dbStore.collection.courses = courses;
+  dbStore.collection.liveClasses = liveClasses;
+  dbStore.collection.materials = materials;
+  dbStore.collection.tuitions = tuitions;
+  dbStore.collection.teacherPayments = teacherPayments;
+  dbStore.collection.jobs = jobs;
+  dbStore.collection.enrollments = enrollments;
+  dbStore.collection.orders = orders;
+  dbStore.collection.auditLogs = auditLogs;
+  dbStore.collection.sharedLinks = sharedLinks;
+
+  dbStore.save();
+  console.log('[Seed]: Database initialized with rich production demo data!');
+};
+
+// Execute if run directly
+if (require.main === module) {
+  seedData()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}

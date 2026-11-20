@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: business_hub_mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: business_hub
+
+  # Backend REST API Service
+  api:
+    build:
+      context: ../../api
+      dockerfile: ../infrastructure/docker/Dockerfile.api
+    container_name: business_hub_api
+    restart: always
+    ports:
+      - '5000:5000'
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/business_hub
+      JWT_SECRET: business_hub_super_secure_jwt_secret_key_2026_xyz!
+    depends_on:
+      - mongodb
+
+  # Users Web Application
+  users-website:
+    build:
+      context: ../../users-website
+      dockerfile: ../infrastructure/docker/Dockerfile.users
+    container_name: business_hub_users
+    restart: always
+    ports:
+      - '3000:80'
+    depends_on:
+      - api
+
+  # Admin Web Application
+  admin-website:
+    build:
+      context: ../../admin-website
+      dockerfile: ../infrastructure/docker/Dockerfile.admin
+    container_name: business_hub_admin
+    restart: always
+    ports:
+      - '3001:80'
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
