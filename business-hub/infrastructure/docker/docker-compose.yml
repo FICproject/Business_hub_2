@@ -14,11 +14,11 @@ services:
       MONGO_INITDB_DATABASE: business_hub
 
   # Backend REST API Service
-  api:
+  backend:
     build:
-      context: ../../api
-      dockerfile: ../infrastructure/docker/Dockerfile.api
-    container_name: business_hub_api
+      context: ../../backend
+      dockerfile: ../infrastructure/docker/Dockerfile.backend
+    container_name: business_hub_backend
     restart: always
     ports:
       - '5000:5000'
@@ -40,7 +40,7 @@ services:
     ports:
       - '3000:80'
     depends_on:
-      - api
+      - backend
 
   # Admin Web Application
   admin-website:
@@ -52,7 +52,7 @@ services:
     ports:
       - '3001:80'
     depends_on:
-      - api
+      - backend
 
 volumes:
   mongo_data:

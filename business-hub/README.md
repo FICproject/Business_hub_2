@@ -21,7 +21,7 @@
 ```
 Business_Hub_2/
 ├── business-hub/
-│   ├── api/                    # ONE Common Unified Node.js / Express / TypeScript Backend
+│   ├── backend/                # ONE Common Unified Node.js / Express / TypeScript Backend
 │   │   ├── src/
 │   │   │   ├── config/         # Environment, ports, database connectors
 │   │   │   ├── middleware/     # JWT Auth, RBAC, 18+ Age Validation, Audit Logger, Uploads
@@ -127,9 +127,9 @@ The database comes pre-seeded with realistic demonstration accounts:
 
 ## ⚡ Quick Start Guide
 
-### Step 1: Start the Backend API
+### Step 1: Start the Backend
 ```bash
-cd business-hub/api
+cd business-hub/backend
 npm install
 npm run dev
 ```

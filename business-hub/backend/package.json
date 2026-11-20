@@ -1,7 +1,7 @@
 {
-  "name": "business-hub-api",
+  "name": "business-hub-backend",
   "version": "1.0.0",
-  "description": "Business Hub Common Unified REST API",
+  "description": "Business Hub Common Unified Backend REST API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
