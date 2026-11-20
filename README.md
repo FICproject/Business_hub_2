@@ -115,7 +115,7 @@ cd user-website
 npm install
 npm run dev
 ```
-*User website runs at `http://localhost:3000`.*
+*Users website runs at `http://localhost:3000`.*
 
 ### Step 3: Start the Admin Website
 ```bash
