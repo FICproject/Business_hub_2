@@ -8,8 +8,7 @@
     "users-website",
     "admin-website",
     "user-mobile",
-    "admin-mobile",
-    "packages/*"
+    "admin-mobile"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:users\" \"npm run dev:admin\"",

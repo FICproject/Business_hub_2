@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // JSON database file persistence for zero-config reliability
-const DB_FILE = path.resolve(__dirname, '../../data_store.json');
+const DB_FILE = path.resolve(__dirname, '../data/data_store.json');
 
 export interface MemoryStore {
   users: any[];

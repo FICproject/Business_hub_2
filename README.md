@@ -49,8 +49,6 @@ Business_Hub_2/
 │   └── package.json
 │
 ├── docs/                   # PRD.md, API-DOCUMENTATION.md, DATABASE-SCHEMA.md
-├── packages/               # Shared packages (types, utils, validation, config)
-├── infrastructure/docker/  # Dockerfiles & docker-compose.yml
 ├── package.json            # Root workspace configuration
 └── README.md
 ```
