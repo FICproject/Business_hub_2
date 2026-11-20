@@ -20,63 +20,39 @@
 
 ```
 Business_Hub_2/
-├── business-hub/
-│   ├── backend/                # ONE Common Unified Node.js / Express / TypeScript Backend
-│   │   ├── src/
-│   │   │   ├── config/         # Environment, ports, database connectors
-│   │   │   ├── middleware/     # JWT Auth, RBAC, 18+ Age Validation, Audit Logger, Uploads
-│   │   │   ├── modules/
-│   │   │   │   ├── auth/       # Registration, Login, OTP verification, Password Reset
-│   │   │   │   ├── users/      # User management, role assignment, suspensions
-│   │   │   │   ├── business/   # Enterprise verification, legal doc filings
-│   │   │   │   ├── marketplace/# Products, Services, Cart, Orders, Idempotent Payments
-│   │   │   │   ├── education/  # Free courses, WebRTC live classes, Materials, Tuition
-│   │   │   │   ├── jobs/       # Career vacancies & applicant tracking
-│   │   │   │   ├── sharing/    # Privacy-preserving shareable links & click metrics
-│   │   │   │   ├── admin/      # Aggregate KPIs, audit logs, platform toggles
-│   │   │   │   └── notifications/
-│   │   │   ├── services/       # Persistent JSON DB storage engine (fallback for zero-config run)
-│   │   │   ├── utils/          # Database seeder with realistic test data
-│   │   │   ├── app.ts          # Express application & route mounts
-│   │   │   └── server.ts       # Server bootstrap on port 5000
-│   │   └── package.json
-│   │
-│   ├── users-website/          # React Users Website (Vite + React + TS + Tailwind + Redux)
-│   │   ├── src/
-│   │   │   ├── components/     # Navbar, Footer, ShareModal, Video Player, Chat Box
-│   │   │   ├── layouts/        # PublicLayout, DashboardLayout
-│   │   │   ├── pages/          # Landing, Marketplace, Education, Jobs, Dashboards
-│   │   │   ├── routes/         # AppRoutes
-│   │   │   ├── services/       # Axios API client
-│   │   │   └── store/          # Redux Toolkit (Auth, Cart, Notifications)
-│   │   └── package.json
-│   │
-│   ├── admin-website/          # React Admin Control Center (Vite + React + Recharts + Redux)
-│   │   ├── src/
-│   │   │   ├── layouts/        # AdminLayout
-│   │   │   ├── pages/          # Metrics, Users, Approvals, Orders, Payments, Audit Logs
-│   │   │   ├── routes/         # ProtectedAdminRoute
-│   │   │   └── store/
-│   │   └── package.json
-│   │
-│   ├── admin-mobile/           # React Native / Expo Admin Mobile App
-│   ├── users-mobile/           # React Native / Expo Users Mobile App
-│   │
-│   ├── packages/
-│   │   ├── shared-types/       # TypeScript interfaces shared across web & backend
-│   │   ├── shared-utils/       # Date formatting, currency, 18+ age calculators
-│   │   ├── shared-validation/  # Form schemas & input validators
-│   │   └── config/             # Constants, statuses, roles
-│   │
-│   ├── docs/
-│   │   ├── PRD.md
-│   │   ├── API-DOCUMENTATION.md
-│   │   └── DATABASE-SCHEMA.md
-│   │
-│   ├── infrastructure/docker/  # Dockerfiles & docker-compose.yml
-│   ├── .env.example
-│   ├── package.json
-│   └── README.md
+├── admin-website/          # React Admin Control Center (Vite + React + Recharts + Redux)
+├── admin-mobile/           # React Native / Expo Admin Mobile App
+├── users-website/          # React Users Website (Vite + React + TS + Tailwind + Redux)
+├── user-mobile/            # React Native / Expo Users Mobile App
+├── backend/                # ONE Common Unified Node.js / Express / TypeScript Backend
+│   ├── src/
+│   │   ├── config/         # Environment, ports, database connectors
+│   │   ├── middleware/     # JWT Auth, RBAC, 18+ Age Validation, Audit Logger, Uploads
+│   │   ├── modules/
+│   │   │   ├── auth/       # Registration, Login, OTP verification, Password Reset
+│   │   │   ├── users/      # User management, role assignment, suspensions
+│   │   │   ├── business/   # Enterprise verification, legal doc filings
+│   │   │   ├── marketplace/# Products, Services, Cart, Orders, Idempotent Payments
+│   │   │   ├── education/  # Free courses, WebRTC live classes, Materials, Tuition
+│   │   │   ├── jobs/       # Career vacancies & applicant tracking
+│   │   │   ├── sharing/    # Privacy-preserving shareable links & click metrics
+│   │   │   ├── admin/      # Aggregate KPIs, audit logs, platform toggles
+│   │   │   └── notifications/
+│   │   ├── services/       # Persistent JSON DB storage engine (fallback for zero-config run)
+│   │   ├── utils/          # Database seeder with realistic test data
+│   │   ├── app.ts          # Express application & route mounts
+│   │   └── server.ts       # Server bootstrap on port 5000
+│   ├── tests/              # Automated unit and integration test suite
+│   ├── .env                # Local development environment configuration
+│   ├── .env.example        # Environment variable template
+│   ├── .gitignore          # Backend ignore rules
+│   └── package.json
+│
+├── docs/                   # PRD.md, API-DOCUMENTATION.md, DATABASE-SCHEMA.md
+├── packages/               # Shared packages (types, utils, validation, config)
+├── infrastructure/docker/  # Dockerfiles & docker-compose.yml
+├── package.json            # Root workspace configuration
+└── README.md
 ```
 
 ---
@@ -129,7 +105,7 @@ The database comes pre-seeded with realistic demonstration accounts:
 
 ### Step 1: Start the Backend
 ```bash
-cd business-hub/backend
+cd backend
 npm install
 npm run dev
 ```
@@ -137,7 +113,7 @@ npm run dev
 
 ### Step 2: Start the Users Website
 ```bash
-cd business-hub/users-website
+cd users-website
 npm install
 npm run dev
 ```
@@ -145,7 +121,7 @@ npm run dev
 
 ### Step 3: Start the Admin Website
 ```bash
-cd business-hub/admin-website
+cd admin-website
 npm install
 npm run dev
 ```
@@ -155,7 +131,7 @@ npm run dev
 
 ## 🐳 Docker Deployment
 ```bash
-cd business-hub/infrastructure/docker
+cd infrastructure/docker
 docker-compose up --build
 ```
 This spins up MongoDB, Node.js API, Users Website, and Admin Website in isolated containers.
