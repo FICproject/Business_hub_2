@@ -26,9 +26,13 @@
     }
   ],
   "settings": {
+    "terminal.integrated.env.windows": {
+      "PATH": "C:\\Program Files\\nodejs;C:\\Users\\dhanu\\AppData\\Local\\Programs\\nodejs;${env:PATH}"
+    },
     "files.exclude": {
       "**/.git": true,
       "**/.DS_Store": true
     }
   }
 }
+
