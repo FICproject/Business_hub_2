@@ -29,10 +29,16 @@
     "terminal.integrated.env.windows": {
       "PATH": "C:\\Program Files\\nodejs;C:\\Users\\dhanu\\AppData\\Local\\Programs\\nodejs;${env:PATH}"
     },
+    "terminal.integrated.profiles.windows": {
+      "PowerShell": {
+        "source": "PowerShell",
+        "args": ["-ExecutionPolicy", "Bypass"]
+      }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "files.exclude": {
       "**/.git": true,
       "**/.DS_Store": true
     }
   }
 }
-
