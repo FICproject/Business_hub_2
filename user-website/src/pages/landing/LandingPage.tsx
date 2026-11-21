@@ -142,12 +142,12 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Graphic (Equal 50% Width and Proportional Height) */}
-          <div className="relative flex justify-center items-center select-none">
-            <div className="relative w-full max-w-[440px] flex justify-center items-end">
+          {/* Right Column: Hero Graphic (Fitted to Exact Red Box Frame) */}
+          <div className="relative flex justify-center lg:justify-end items-center select-none">
+            <div className="relative w-full max-w-[360px] h-[340px] flex justify-center items-end">
               {/* 3D Flowing Golden Ribbon Behind Model */}
               <svg
-                className="absolute -bottom-6 -right-6 w-[380px] h-[300px] pointer-events-none -z-10 drop-shadow-xl"
+                className="absolute -bottom-2 -right-4 w-[320px] h-[250px] pointer-events-none -z-10 drop-shadow-xl"
                 viewBox="0 0 400 300"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -174,11 +174,11 @@ export const LandingPage: React.FC = () => {
                 </defs>
               </svg>
 
-              {/* Model Cutout Sized to Equal Vertical Height */}
+              {/* Model Cutout Sized Exactly to 340px to Fit Within Box */}
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="w-full h-auto max-h-[440px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
+                className="w-full h-full max-h-[340px] max-w-[360px] object-contain object-bottom drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
               />
             </div>
           </div>
