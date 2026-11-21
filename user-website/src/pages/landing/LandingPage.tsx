@@ -178,53 +178,9 @@ export const LandingPage: React.FC = () => {
                 <img
                   src={heroModel}
                   alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                  className="w-full h-auto max-h-[500px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
+                  className="w-full h-auto max-h-[520px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
                 />
               </div>
-
-              {/* Floating Badge 1: Marketplace (Top Left) */}
-              <Link
-                to="/marketplace"
-                className="absolute -top-3 left-2 sm:-left-4 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
-                  <ShoppingBag className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A255C] mt-1 tracking-tight">Marketplace</span>
-              </Link>
-
-              {/* Floating Badge 2: Education (Mid Left) */}
-              <Link
-                to="/education"
-                className="absolute top-[42%] -left-3 sm:-left-8 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#0A255C] text-white flex items-center justify-center group-hover:bg-[#FFB800] group-hover:text-slate-950 transition-colors shadow-sm">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A255C] mt-1 tracking-tight">Education</span>
-              </Link>
-
-              {/* Floating Badge 3: Jobs (Top Right) */}
-              <Link
-                to="/jobs"
-                className="absolute top-8 -right-2 sm:-right-6 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#B45309] text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A255C] mt-1 tracking-tight">Jobs</span>
-              </Link>
-
-              {/* Floating Badge 4: Referrals (Center Right) */}
-              <a
-                href="#referrals"
-                className="absolute bottom-16 -right-2 sm:-right-6 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Share2 className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A255C] mt-1 tracking-tight">Referrals</span>
-              </a>
             </div>
           </div>
         </div>
