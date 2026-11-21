@@ -4,25 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: {
-          900: '#0B132B',
-          800: '#0F172A',
-          700: '#1C2541',
-          600: '#2A365B',
+        admin: {
+          sidebar: '#14142B',
+          sidebarHover: '#1E1E38',
+          sidebarBorder: '#23233E',
+          activeBlue: '#4F46E5',
+          activeBg: '#4F46E5',
+          bodyBg: '#F4F6FC',
+          cardBg: '#FFFFFF',
         },
-        teal: {
-          500: '#0D9488',
-          600: '#0F766E',
-          400: '#14B8A6',
-          300: '#2DD4BF',
-        },
-        softblue: {
-          50: '#F0F7FF',
-          100: '#E0EFFF',
-          400: '#38BDF8',
-          500: '#0EA5E9',
-          600: '#0284C7',
-        },
+      },
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'card-soft': '0 4px 20px -2px rgba(50, 50, 93, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
       },
     },
   },
