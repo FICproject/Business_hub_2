@@ -69,27 +69,10 @@ export const LandingPage: React.FC = () => {
               <span>All-in-One Platform</span>
             </div>
 
-            {/* Main Headline with Exact Yellow Accent and Brush Underline */}
+            {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-[66px] font-black text-[#0A255C] tracking-tight leading-[1.08]">
               Your Complete <br />
-              <span className="relative inline-block text-[#D97706]">
-                Business
-                {/* Thick Painterly Golden Yellow Brush Stroke Underline */}
-                <svg
-                  className="absolute -bottom-2.5 left-0 w-full h-4.5 text-[#FFB800] pointer-events-none"
-                  viewBox="0 0 260 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 11C50 4 135 2 254 9C220 14 145 16 6 15C42 12 120 7.5 240 11.5"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>{' '}
+              <span className="text-[#D97706]">Business</span>{' '}
               <span className="text-[#0A255C]">Hub</span>
             </h1>
 
