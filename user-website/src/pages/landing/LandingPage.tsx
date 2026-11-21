@@ -48,9 +48,9 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="bg-white text-[#0A255C] overflow-hidden font-sans">
       {/* =========================================================================
-          1. HERO SECTION (Exact Match to Reference Image 2)
+          1. HERO SECTION (Balanced Equal Length Layout)
       ========================================================================== */}
-      <section className="relative pt-6 sm:pt-10 pb-12 lg:pb-16 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto overflow-visible">
+      <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-12 max-w-[1320px] mx-auto overflow-visible">
         {/* Sky-Blue Soft Atmospheric Gradient Backdrop */}
         <div className="absolute top-0 right-0 w-3/5 h-full bg-gradient-to-bl from-[#EDF4FE] via-[#F4F9FF]/70 to-transparent pointer-events-none -z-20 rounded-bl-[140px]" />
         
@@ -61,30 +61,31 @@ export const LandingPage: React.FC = () => {
         />
         <div className="absolute -top-10 left-0 w-96 h-96 bg-gradient-to-br from-amber-300/15 via-amber-100/10 to-transparent rounded-full blur-3xl pointer-events-none -z-20" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
+        {/* 50 / 50 Equal Split Grid with Centered Vertical Alignment */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center">
           {/* Left Column: Heading, Subheading, CTAs & Social Proof */}
-          <div className="lg:col-span-7 space-y-6 lg:pr-6 z-10">
+          <div className="space-y-6 z-10 flex flex-col justify-center">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FDE68A] text-[#92400E] text-xs font-bold tracking-wide shadow-sm">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FDE68A] text-[#92400E] text-xs font-bold tracking-wide shadow-sm w-fit">
               <Star className="w-3.5 h-3.5 fill-[#FFB800] text-[#FFB800]" />
               <span>All-in-One Platform</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[66px] font-black text-[#0A255C] tracking-tight leading-[1.08]">
+            <h1 className="text-4xl sm:text-5xl lg:text-[60px] font-black text-[#0A255C] tracking-tight leading-[1.08]">
               Your Complete <br />
               <span className="text-[#D97706]">Business</span>{' '}
               <span className="text-[#0A255C]">Hub</span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-lg text-slate-600 font-medium max-w-xl leading-relaxed pt-1">
+            <p className="text-base sm:text-lg text-slate-600 font-medium max-w-lg leading-relaxed">
               Shop, Learn, Find Jobs and Grow Your Career <br className="hidden sm:inline" />
               — All in One Platform
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+            <div className="flex flex-wrap items-center gap-3.5 pt-1">
               <Link
                 to="/register"
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#0A255C] hover:bg-[#071B42] text-white font-bold text-sm shadow-xl shadow-slate-900/20 hover:scale-105 transition-all"
@@ -107,7 +108,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Social Proof Row */}
-            <div className="flex items-center gap-3.5 pt-3">
+            <div className="flex items-center gap-3.5 pt-2">
               <div className="flex -space-x-2.5 overflow-hidden">
                 <img
                   className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover shadow-sm"
@@ -141,12 +142,12 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Graphic with 4 Floating 3D Badges & Golden Swoosh */}
-          <div className="lg:col-span-5 relative flex justify-center lg:justify-end select-none">
-            <div className="relative w-full max-w-[480px]">
+          {/* Right Column: Hero Graphic (Equal 50% Width and Proportional Height) */}
+          <div className="relative flex justify-center items-center select-none">
+            <div className="relative w-full max-w-[440px] flex justify-center items-end">
               {/* 3D Flowing Golden Ribbon Behind Model */}
               <svg
-                className="absolute -bottom-8 -right-8 w-[420px] h-[340px] pointer-events-none -z-10 drop-shadow-xl"
+                className="absolute -bottom-6 -right-6 w-[380px] h-[300px] pointer-events-none -z-10 drop-shadow-xl"
                 viewBox="0 0 400 300"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -173,14 +174,12 @@ export const LandingPage: React.FC = () => {
                 </defs>
               </svg>
 
-              {/* Seamless Hero Container with Exact Cutout Model */}
-              <div className="relative mx-auto flex items-end justify-center pt-4">
-                <img
-                  src={heroModel}
-                  alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                  className="w-full h-auto max-h-[520px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
-                />
-              </div>
+              {/* Model Cutout Sized to Equal Vertical Height */}
+              <img
+                src={heroModel}
+                alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
+                className="w-full h-auto max-h-[440px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
+              />
             </div>
           </div>
         </div>
