@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { marketplaceApi, educationApi, jobsApi } from '../../services/api';
 import { IProduct, ICourse, ILiveClass, IJob } from '../../types';
+import heroModel from '../../assets/hero-model.png';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -172,14 +173,13 @@ export const LandingPage: React.FC = () => {
                 </defs>
               </svg>
 
-              {/* Seamless Hero Container with Smiling Professional Model */}
-              <div className="relative mx-auto rounded-[32px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-slate-900/15 border-4 border-white aspect-[4/5] bg-slate-50 transition-all hover:shadow-3xl">
+              {/* Seamless Hero Container with Exact Cutout Model */}
+              <div className="relative mx-auto flex items-end justify-center pt-4">
                 <img
-                  src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80"
+                  src={heroModel}
                   alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                  className="w-full h-full object-cover object-top scale-105 hover:scale-110 transition-transform duration-700"
+                  className="w-full h-auto max-h-[500px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none" />
               </div>
 
               {/* Floating Badge 1: Marketplace (Top Left) */}
