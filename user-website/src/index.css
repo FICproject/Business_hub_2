@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white;
+    @apply bg-white text-[#0A1128] antialiased selection:bg-amber-400 selection:text-slate-950;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 }
