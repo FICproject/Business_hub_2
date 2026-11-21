@@ -66,11 +66,11 @@ export const Navbar: React.FC = () => {
         {/* Brand Logo - Stylized 3D Gold B + Bold Dark Text */}
         <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-md shadow-amber-500/25 group-hover:scale-105 transition-transform">
-            <span className="font-black text-2xl tracking-tighter text-[#0A1128] font-sans">B</span>
+            <span className="font-black text-2xl tracking-tighter text-[#0A255C] font-sans">B</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-xl tracking-tight text-[#0A1128] leading-none">Business</span>
-            <span className="font-extrabold text-xl tracking-tight text-[#0A1128] leading-tight">Hub</span>
+            <span className="font-extrabold text-xl tracking-tight text-[#0A255C] leading-none">Business</span>
+            <span className="font-extrabold text-xl tracking-tight text-[#0A255C] leading-tight">Hub</span>
           </div>
         </Link>
 
@@ -81,8 +81,8 @@ export const Navbar: React.FC = () => {
             to="/"
             className={`px-5 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${
               location.pathname === '/'
-                ? 'bg-[#0A1128] text-white'
-                : 'text-slate-700 hover:text-[#0A1128] hover:bg-slate-100'
+                ? 'bg-[#0A255C] text-white'
+                : 'text-slate-700 hover:text-[#0A255C] hover:bg-slate-100'
             }`}
           >
             Home
@@ -91,7 +91,7 @@ export const Navbar: React.FC = () => {
           {/* Marketplace with Dropdown Chevron */}
           <Link
             to="/marketplace"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
           >
             <span>Marketplace</span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
@@ -100,7 +100,7 @@ export const Navbar: React.FC = () => {
           {/* Education with Dropdown Chevron */}
           <Link
             to="/education"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
           >
             <span>Education</span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
@@ -109,7 +109,7 @@ export const Navbar: React.FC = () => {
           {/* Jobs with Dropdown Chevron */}
           <Link
             to="/jobs"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
           >
             <span>Jobs</span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
@@ -118,7 +118,7 @@ export const Navbar: React.FC = () => {
           {/* Referrals */}
           <a
             href="#referrals"
-            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
           >
             Referrals
           </a>
@@ -126,7 +126,7 @@ export const Navbar: React.FC = () => {
           {/* About */}
           <a
             href="#about"
-            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
           >
             About
           </a>
@@ -147,7 +147,7 @@ export const Navbar: React.FC = () => {
           </form>
 
           {/* Notification Bell matching image with Red '2' Counter Badge */}
-          <div className="relative p-2 rounded-full text-slate-600 hover:text-[#0A1128] hover:bg-slate-100 transition-colors cursor-pointer">
+          <div className="relative p-2 rounded-full text-slate-600 hover:text-[#0A255C] hover:bg-slate-100 transition-colors cursor-pointer">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-sm">
               {unreadCount > 0 ? unreadCount : 2}
@@ -157,7 +157,7 @@ export const Navbar: React.FC = () => {
           {/* Cart Icon */}
           <Link
             to="/cart"
-            className="relative p-2 rounded-full text-slate-600 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
+            className="relative p-2 rounded-full text-slate-600 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
             title="Shopping Cart"
           >
             <ShoppingBag className="w-5 h-5" />
@@ -255,14 +255,14 @@ export const Navbar: React.FC = () => {
               {/* Login Button with Pill Outline */}
               <Link
                 to="/login"
-                className="px-5 py-2 rounded-full text-xs font-bold text-[#0A1128] border border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition-all shadow-sm"
+                className="px-5 py-2 rounded-full text-xs font-bold text-[#0A255C] border border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition-all shadow-sm"
               >
                 Login
               </Link>
               {/* Sign Up Button with Solid Midnight Navy */}
               <Link
                 to="/register"
-                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-[#0A1128] hover:bg-slate-800 transition-all shadow-md hover:shadow-lg"
+                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-[#0A255C] hover:bg-[#071B42] transition-all shadow-md hover:shadow-lg"
               >
                 Sign Up
               </Link>
@@ -297,7 +297,7 @@ export const Navbar: React.FC = () => {
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-semibold bg-[#0A1128] text-white"
+              className="px-3 py-2 rounded-xl text-sm font-semibold bg-[#0A255C] text-white"
             >
               Home
             </Link>
