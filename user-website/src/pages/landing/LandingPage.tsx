@@ -148,7 +148,7 @@ export const LandingPage: React.FC = () => {
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="w-full h-auto max-h-[520px] object-contain drop-shadow-2xl hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
+                className="w-full h-auto max-h-[520px] object-contain hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
               />
             </div>
           </div>
