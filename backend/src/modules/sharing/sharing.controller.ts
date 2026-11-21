@@ -84,3 +84,20 @@ export const getMySharedLinks = async (req: AuthenticatedRequest, res: Response)
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getAllSharedLinks = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const links = [...dbStore.collection.sharedLinks].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const totalClicks = links.reduce((sum, l) => sum + (l.clickCount || 0), 0);
+    return res.json({
+      success: true,
+      totalLinks: links.length,
+      totalClicks,
+      data: links,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

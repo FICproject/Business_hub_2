@@ -43,6 +43,16 @@ export const LandingPage: React.FC = () => {
     jobsApi.getJobs()
       .then((res) => setJobs(res.data.data.slice(0, 3)))
       .catch((err) => console.log('Jobs fetch notice:', err.message));
+
+    if (window.location.hash) {
+      const id = window.location.hash.replace('#', '');
+      const elem = document.getElementById(id);
+      if (elem) {
+        setTimeout(() => {
+          elem.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
+      }
+    }
   }, []);
 
   return (
@@ -168,7 +178,26 @@ export const LandingPage: React.FC = () => {
               </div>
             </Link>
 
-            {/* 2. Education */}
+            {/* 2. Business */}
+            <Link
+              to="/dashboard/business"
+              className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group"
+            >
+              <div className="flex items-center gap-3 pl-2 sm:pl-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FFB800] text-slate-950 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
+                  <Crown className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Business</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Grow & Sell</p>
+                </div>
+              </div>
+              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </Link>
+
+            {/* 3. Student */}
             <Link
               to="/education"
               className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group"
@@ -178,8 +207,8 @@ export const LandingPage: React.FC = () => {
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Education</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">Learn & Grow</p>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Student</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Free Learning</p>
                 </div>
               </div>
               <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
@@ -187,62 +216,46 @@ export const LandingPage: React.FC = () => {
               </div>
             </Link>
 
-            {/* 3. Jobs */}
+            {/* 4. Teacher */}
             <Link
-              to="/jobs"
+              to="/dashboard/teacher"
               className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group"
             >
               <div className="flex items-center gap-3 pl-2 sm:pl-3">
-                <div className="w-10 h-10 rounded-xl bg-[#0A255C] text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Jobs</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">Find Opportunities</p>
-                </div>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
-                <ArrowRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
-            {/* 4. Referrals */}
-            <a
-              href="#referrals"
-              className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group"
-            >
-              <div className="flex items-center gap-3 pl-2 sm:pl-3">
-                <div className="w-10 h-10 rounded-xl bg-[#0A255C] text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Referrals</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">Share & Connect</p>
-                </div>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
-                <ArrowRight className="w-3.5 h-3.5" />
-              </div>
-            </a>
-
-            {/* 5. For Business */}
-            <Link
-              to="/dashboard/business"
-              className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group col-span-2 md:col-span-1"
-            >
-              <div className="flex items-center gap-3 pl-2 sm:pl-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FFB800] text-slate-950 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Crown className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">For Business</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">Grow Your Business</p>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">Teacher</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Teach & Live Classes</p>
                 </div>
               </div>
               <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </Link>
+
+            {/* 5. All Services */}
+            <button
+              onClick={() => {
+                const elem = document.getElementById('explore-services');
+                elem?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center justify-between p-2.5 sm:p-3 rounded-full hover:bg-slate-50 transition-colors group col-span-2 md:col-span-1 text-left"
+            >
+              <div className="flex items-center gap-3 pl-2 sm:pl-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-[#0A255C] leading-tight">All Services</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Explore Everything</p>
+                </div>
+              </div>
+              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-[#0A255C] group-hover:text-white transition-colors mr-1">
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </button>
           </div>
         </div>
       </section>
@@ -666,6 +679,164 @@ export const LandingPage: React.FC = () => {
           >
             Explore Catalog to Share
           </Link>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          8. ABOUT BUSINESS HUB SECTION
+      ========================================================================== */}
+      <section id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto scroll-mt-24">
+        <div className="bg-gradient-to-br from-slate-50 via-white to-amber-50/40 rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.04)]">
+          {/* Header */}
+          <div className="max-w-3xl mx-auto text-center space-y-4 mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FDE68A] text-[#92400E] text-xs font-bold tracking-wide shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#FFB800]" />
+              <span>About Business Hub</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A255C] tracking-tight leading-tight">
+              One Unified Platform For <br className="hidden sm:inline" />
+              <span className="text-[#D97706]">Commerce</span>,{' '}
+              <span className="text-[#0A255C]">Education</span> & Careers
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+              Business Hub was created to unite key digital needs into one reliable, ethical ecosystem. We empower businesses with zero-fee storefronts, offer students 100% free certified learning, provide teachers with interactive virtual classrooms, and connect job seekers with verified employers — backed by clean, transparent link sharing.
+            </p>
+          </div>
+
+          {/* 4 Pillars Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* Pillar 1: Marketplace */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                  <ShoppingBag className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">Verified Marketplace</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Direct trade between verified sellers and customers. Zero counterfeit risks, transparent pricing, and instant checkout.
+                </p>
+              </div>
+              <Link
+                to="/marketplace"
+                className="pt-4 mt-4 border-t border-slate-50 flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700"
+              >
+                <span>Browse Products</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Pillar 2: For Business */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+                  <Crown className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">Empowering Businesses</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Comprehensive dashboard for inventory management, customer order tracking, sales analytics, and hiring top talent.
+                </p>
+              </div>
+              <Link
+                to="/dashboard/business"
+                className="pt-4 mt-4 border-t border-slate-50 flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700"
+              >
+                <span>Start Selling</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Pillar 3: Students & Free Learning */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                  <GraduationCap className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">100% Free For Students</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  No hidden subscription traps or paid paywalls. Every lecture, study material, and tuition class is completely free.
+                </p>
+              </div>
+              <Link
+                to="/education"
+                className="pt-4 mt-4 border-t border-slate-50 flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700"
+              >
+                <span>Start Learning</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Pillar 4: Teachers & Mentors */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">Teacher Community</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Host live interactive video classrooms, manage enrolled students, evaluate assignments, and shape the next generation.
+                </p>
+              </div>
+              <Link
+                to="/dashboard/teacher"
+                className="pt-4 mt-4 border-t border-slate-50 flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700"
+              >
+                <span>Teach With Us</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Bottom Statement & Trust Indicators */}
+          <div className="bg-[#0A255C] text-white rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+            <div className="space-y-1 text-center sm:text-left">
+              <h4 className="text-lg sm:text-xl font-bold text-white">Join 50,000+ businesses, students and teachers</h4>
+              <p className="text-xs sm:text-sm text-slate-300">
+                Create a free account in under 60 seconds and access all features instantly.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Link
+                to="/register"
+                className="px-6 py-3 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-xs shadow-md transition-all"
+              >
+                Get Started Free
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          9. HELP & SUPPORT / CONTACT ANCHOR SECTION
+      ========================================================================== */}
+      <section id="contact" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto scroll-mt-24">
+        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="space-y-3 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold">
+              <span>24/7 Help &amp; Support</span>
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Need assistance with your account or orders?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              Our dedicated support team is available around the clock to assist businesses with verification, help students navigate free courses, and resolve marketplace order inquiries.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-shrink-0">
+            <a
+              href="mailto:support@businesshub.com"
+              className="px-6 py-3.5 rounded-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs text-center transition-all shadow-md"
+            >
+              Email support@businesshub.com
+            </a>
+            <Link
+              to="/terms"
+              className="px-6 py-3.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all"
+            >
+              Read Terms &amp; Policies
+            </Link>
+          </div>
         </div>
       </section>
     </div>

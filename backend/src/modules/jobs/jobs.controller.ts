@@ -216,3 +216,36 @@ export const updateApplicationStatus = async (req: AuthenticatedRequest, res: Re
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const updateJobStatus = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // 'active' | 'closed'
+    const job = dbStore.collection.jobs.find((j) => j._id === id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Job not found.' });
+    }
+    job.status = status;
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'UPDATE_JOB_STATUS', 'Job', id, `Updated job status to ${status}`);
+    return res.json({ success: true, message: `Job marked as ${status}.`, job });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteJob = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const index = dbStore.collection.jobs.findIndex((j) => j._id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Job not found.' });
+    }
+    const [removed] = dbStore.collection.jobs.splice(index, 1);
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, 'admin', 'DELETE_JOB', 'Job', id, `Deleted job "${removed?.title}"`);
+    return res.json({ success: true, message: 'Job deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

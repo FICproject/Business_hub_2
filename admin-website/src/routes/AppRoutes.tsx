@@ -12,6 +12,9 @@ import { AdminTeacherPaymentsPage } from '../pages/AdminTeacherPaymentsPage';
 import { AdminAuditLogsPage } from '../pages/AdminAuditLogsPage';
 import { AdminSettingsPage } from '../pages/AdminSettingsPage';
 import { AdminLoginPage } from '../pages/AdminLoginPage';
+import { AdminEducationPage } from '../pages/AdminEducationPage';
+import { AdminJobsPage } from '../pages/AdminJobsPage';
+import { AdminReferralsPage } from '../pages/AdminReferralsPage';
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.adminAuth);
@@ -39,7 +42,10 @@ export const AppRoutes: React.FC = () => {
         <Route path="businesses" element={<AdminBusinessesPage />} />
         <Route path="marketplace" element={<AdminMarketplacePage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="education" element={<AdminEducationPage />} />
         <Route path="teacher-payments" element={<AdminTeacherPaymentsPage />} />
+        <Route path="jobs" element={<AdminJobsPage />} />
+        <Route path="referrals" element={<AdminReferralsPage />} />
         <Route path="audit-logs" element={<AdminAuditLogsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

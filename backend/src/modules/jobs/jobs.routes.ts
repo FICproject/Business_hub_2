@@ -7,9 +7,12 @@ import {
   getMyApplications,
   getBusinessApplications,
   updateApplicationStatus,
+  updateJobStatus,
+  deleteJob,
 } from './jobs.controller';
 import {
   authenticateToken,
+  requireRoles,
   requireApprovedBusiness,
 } from '../../middleware/auth.middleware';
 
@@ -18,6 +21,8 @@ const router = Router();
 router.get('/', getJobs);
 router.get('/:id', getJobById);
 router.post('/', authenticateToken, requireApprovedBusiness, createJob);
+router.put('/:id/status', authenticateToken, requireRoles('admin', 'businessman'), updateJobStatus);
+router.delete('/:id', authenticateToken, requireRoles('admin'), deleteJob);
 router.post('/:id/apply', authenticateToken, applyForJob);
 router.get('/applications/my', authenticateToken, getMyApplications);
 router.get('/applications/business', authenticateToken, getBusinessApplications);

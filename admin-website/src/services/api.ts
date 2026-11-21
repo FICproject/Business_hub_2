@@ -49,6 +49,19 @@ export const adminApi = {
 
   // Jobs
   getJobs: () => api.get('/jobs'),
+  deleteJob: (id: string) => api.delete(`/jobs/${id}`),
+  updateJobStatus: (id: string, status: string) => api.put(`/jobs/${id}/status`, { status }),
+
+  // Education & Moderation
+  getCourses: () => api.get('/education/courses'),
+  deleteCourse: (id: string) => api.delete(`/education/courses/${id}`),
+  getLiveClasses: () => api.get('/education/live-classes'),
+  deleteLiveClass: (id: string) => api.delete(`/education/live-classes/${id}`),
+  getMaterials: () => api.get('/education/materials'),
+  deleteMaterial: (id: string) => api.delete(`/education/materials/${id}`),
+
+  // Referrals & Sharing
+  getAllSharedLinks: () => api.get('/sharing/admin/all'),
 
   // Direct login
   login: (data: any) => api.post('/auth/login', data),

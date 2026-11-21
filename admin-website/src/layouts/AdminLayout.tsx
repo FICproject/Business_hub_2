@@ -16,6 +16,8 @@ import {
   FileText,
   Briefcase,
   AlertCircle,
+  GraduationCap,
+  Share2,
 } from 'lucide-react';
 import { RootState, adminLogout } from '../store';
 
@@ -38,7 +40,10 @@ export const AdminLayout: React.FC = () => {
     { label: 'Business Approvals', path: '/businesses', icon: Building },
     { label: 'Marketplace', path: '/marketplace', icon: Store },
     { label: 'Orders & Fulfillment', path: '/orders', icon: ShoppingBag },
+    { label: 'Education Moderation', path: '/education', icon: GraduationCap },
     { label: 'Teacher Payments', path: '/teacher-payments', icon: DollarSign },
+    { label: 'Jobs & Careers', path: '/jobs', icon: Briefcase },
+    { label: 'Referrals & Sharing', path: '/referrals', icon: Share2 },
     { label: 'Security & Audit Logs', path: '/audit-logs', icon: ShieldCheck },
     { label: 'Platform Settings', path: '/settings', icon: Settings },
   ];

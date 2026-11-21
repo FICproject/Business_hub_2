@@ -16,6 +16,9 @@ import {
   getTeacherPayments,
   approveTeacherPayment,
   markTeacherPaymentPaid,
+  deleteCourse,
+  deleteLiveClass,
+  deleteStudyMaterial,
 } from './education.controller';
 import {
   authenticateToken,
@@ -50,5 +53,10 @@ router.post('/tuitions', authenticateToken, requireApprovedTeacher, createTuitio
 router.get('/teacher-payments', authenticateToken, getTeacherPayments);
 router.post('/teacher-payments/approve', authenticateToken, requireRoles('admin'), approveTeacherPayment);
 router.put('/teacher-payments/:id/pay', authenticateToken, requireRoles('admin'), markTeacherPaymentPaid);
+
+// Admin Moderation
+router.delete('/courses/:id', authenticateToken, requireRoles('admin'), deleteCourse);
+router.delete('/live-classes/:id', authenticateToken, requireRoles('admin'), deleteLiveClass);
+router.delete('/materials/:id', authenticateToken, requireRoles('admin'), deleteStudyMaterial);
 
 export default router;

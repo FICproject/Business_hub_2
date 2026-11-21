@@ -404,3 +404,52 @@ export const markTeacherPaymentPaid = async (req: AuthenticatedRequest, res: Res
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// 6. ADMIN MODERATION ACTIONS
+export const deleteCourse = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const index = dbStore.collection.courses.findIndex((c) => c._id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+    const [removed] = dbStore.collection.courses.splice(index, 1);
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, 'admin', 'DELETE_COURSE', 'Course', id, `Deleted course "${removed?.title}"`);
+    return res.json({ success: true, message: 'Course deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteLiveClass = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const index = dbStore.collection.liveClasses.findIndex((c) => c._id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Live class not found.' });
+    }
+    const [removed] = dbStore.collection.liveClasses.splice(index, 1);
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, 'admin', 'CANCEL_LIVE_CLASS', 'LiveClass', id, `Cancelled live class "${removed?.title}"`);
+    return res.json({ success: true, message: 'Live class cancelled and removed.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteStudyMaterial = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const index = dbStore.collection.materials.findIndex((m) => m._id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Study material not found.' });
+    }
+    const [removed] = dbStore.collection.materials.splice(index, 1);
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, 'admin', 'DELETE_STUDY_MATERIAL', 'StudyMaterial', id, `Deleted note "${removed?.title}"`);
+    return res.json({ success: true, message: 'Study material deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

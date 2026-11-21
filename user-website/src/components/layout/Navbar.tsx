@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -15,6 +15,11 @@ import {
   ChevronDown,
   ShoppingBag,
   Share2,
+  Video,
+  Layers,
+  ChevronRight,
+  Info,
+  BookOpen,
 } from 'lucide-react';
 import { RootState, logout, setActiveRole } from '../../store';
 import { UserRole } from '../../types';
@@ -22,7 +27,14 @@ import { UserRole } from '../../types';
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [allMenuOpen, setAllMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeNav, setActiveNav] = useState<string>('home');
+
+  const allMenuRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { user, isAuthenticated, activeRole } = useSelector((state: RootState) => state.auth);
   const { itemCount } = useSelector((state: RootState) => state.cart);
@@ -31,6 +43,37 @@ export const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#about') {
+      setActiveNav('about');
+    } else if (location.hash === '#referrals' || location.hash === '#explore-services') {
+      setActiveNav('all');
+    } else if (location.pathname.startsWith('/marketplace')) {
+      setActiveNav('marketplace');
+    } else if (location.pathname.includes('/business')) {
+      setActiveNav('business');
+    } else if (location.pathname.includes('/student') || location.pathname.startsWith('/education')) {
+      setActiveNav('student');
+    } else if (location.pathname.includes('/teacher')) {
+      setActiveNav('teacher');
+    } else if (location.pathname === '/' && !location.hash) {
+      setActiveNav('home');
+    }
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (allMenuRef.current && !allMenuRef.current.contains(event.target as Node)) {
+        setAllMenuOpen(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -42,7 +85,33 @@ export const Navbar: React.FC = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/marketplace?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
     }
+  };
+
+  const handleAnchorClick = (e: React.MouseEvent, hash: string) => {
+    e.preventDefault();
+    setAllMenuOpen(false);
+    setMobileMenuOpen(false);
+    if (hash === 'about') setActiveNav('about');
+    if (hash === 'explore-services' || hash === 'referrals') setActiveNav('all');
+    if (location.pathname === '/') {
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${hash}`);
+    }
+  };
+
+  const getNavClass = (key: string) => {
+    const isActive = activeNav === key;
+    return `px-4 xl:px-5 py-2 rounded-full text-xs transition-all cursor-pointer ${
+      isActive
+        ? 'bg-[#0A255C] text-white shadow-md font-bold'
+        : 'text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 font-semibold'
+    }`;
   };
 
   const getDashboardPath = (role: UserRole | null) => {
@@ -74,79 +143,248 @@ export const Navbar: React.FC = () => {
           </div>
         </Link>
 
-        {/* Center Navigation Links matching reference image */}
-        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 text-sm font-semibold">
-          {/* Home Active Pill (Solid Midnight Navy with White Text) */}
+        {/* Center Navigation Links: Home, Marketplace, Business, Student, Teacher, All, About */}
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold">
+          {/* 1. Home */}
           <Link
             to="/"
-            className={`px-5 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${
-              location.pathname === '/'
-                ? 'bg-[#0A255C] text-white'
-                : 'text-slate-700 hover:text-[#0A255C] hover:bg-slate-100'
-            }`}
+            onClick={() => {
+              setActiveNav('home');
+              if (location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.history.pushState(null, '', '/');
+              }
+            }}
+            className={getNavClass('home')}
           >
             Home
           </Link>
 
-          {/* Marketplace with Dropdown Chevron */}
+          {/* 2. Marketplace */}
           <Link
             to="/marketplace"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
+            onClick={() => setActiveNav('marketplace')}
+            className={getNavClass('marketplace')}
           >
-            <span>Marketplace</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            Marketplace
           </Link>
 
-          {/* Education with Dropdown Chevron */}
+          {/* 3. Business */}
           <Link
-            to="/education"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
+            to="/business"
+            onClick={() => setActiveNav('business')}
+            className={getNavClass('business')}
           >
-            <span>Education</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            Business
           </Link>
 
-          {/* Jobs with Dropdown Chevron */}
+          {/* 4. Student */}
           <Link
-            to="/jobs"
-            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
+            to={isAuthenticated ? '/dashboard/student' : '/education'}
+            onClick={() => setActiveNav('student')}
+            className={getNavClass('student')}
           >
-            <span>Jobs</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            Student
           </Link>
 
-          {/* Referrals */}
-          <a
-            href="#referrals"
-            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
+          {/* 5. Teacher */}
+          <Link
+            to="/teacher"
+            onClick={() => setActiveNav('teacher')}
+            className={getNavClass('teacher')}
           >
-            Referrals
-          </a>
+            Teacher
+          </Link>
 
-          {/* About */}
-          <a
-            href="#about"
-            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 transition-colors"
+          {/* 6. All Dropdown */}
+          <div className="relative" ref={allMenuRef}>
+            <button
+              onClick={() => {
+                setActiveNav('all');
+                setAllMenuOpen(!allMenuOpen);
+              }}
+              className={`flex items-center gap-1 ${getNavClass('all')}`}
+            >
+              <span>All</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  activeNav === 'all' ? 'text-white' : 'text-slate-500'
+                } ${allMenuOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {/* "All" Dropdown Menu */}
+            {allMenuOpen && (
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="px-3 py-2 border-b border-slate-100 mb-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    All Categories & Portals
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Link
+                    to="/marketplace"
+                    onClick={() => {
+                      setActiveNav('marketplace');
+                      setAllMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-blue-50/70 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <ShoppingBag className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-800 group-hover:text-blue-700">Marketplace</p>
+                      <p className="text-[11px] text-slate-500">Shop, deals & order items</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/education"
+                    onClick={() => {
+                      setActiveNav('student');
+                      setAllMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-teal-50/70 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <GraduationCap className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-800 group-hover:text-teal-800">100% Free Education</p>
+                      <p className="text-[11px] text-slate-500">Free courses, materials & tuition</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/education/live-classes"
+                    onClick={() => {
+                      setActiveNav('teacher');
+                      setAllMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-cyan-50/70 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Video className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-800 group-hover:text-cyan-800">Live Classes</p>
+                      <p className="text-[11px] text-slate-500">Interactive live streaming rooms</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/jobs"
+                    onClick={() => {
+                      setActiveNav('all');
+                      setAllMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-indigo-50/70 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Briefcase className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-800">Jobs & Careers</p>
+                      <p className="text-[11px] text-slate-500">Apply to verified vacancies</p>
+                    </div>
+                  </Link>
+
+                  <button
+                    onClick={(e) => {
+                      setActiveNav('all');
+                      handleAnchorClick(e, 'referrals');
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-50/70 transition-colors group text-left"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Share2 className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-800 group-hover:text-amber-800">Referrals & Clean Sharing</p>
+                      <p className="text-[11px] text-slate-500">Share catalog & view analytics</p>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="pt-2 mt-2 border-t border-slate-100">
+                  <button
+                    onClick={(e) => {
+                      setActiveNav('all');
+                      handleAnchorClick(e, 'explore-services');
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-[#0A255C] hover:text-white text-xs font-bold text-[#0A255C] transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <span>View All Services on Homepage</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 7. About */}
+          <button
+            onClick={(e) => {
+              setActiveNav('about');
+              handleAnchorClick(e, 'about');
+            }}
+            className={getNavClass('about')}
           >
             About
-          </a>
+          </button>
         </nav>
 
-        {/* Right Actions: Pill Search Bar, Notifications, Auth Buttons */}
-        <div className="flex items-center gap-3 sm:gap-3.5 flex-shrink-0">
-          {/* Pill Search Bar matching reference image */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:flex items-center relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search anything..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 w-44 lg:w-56 rounded-full bg-slate-50 hover:bg-slate-100/90 focus:bg-white text-xs text-slate-800 placeholder-slate-400 border border-slate-200/90 focus:border-amber-400 focus:outline-none transition-all shadow-inner"
-            />
-          </form>
+        {/* Right Actions: Search Icon Button, Notifications, Cart, Auth */}
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+          {/* Search Symbol Button (Clean Icon matching Bell & Cart) */}
+          <div className="relative" ref={searchContainerRef}>
+            {!searchOpen ? (
+              <button
+                onClick={() => {
+                  setSearchOpen(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 50);
+                }}
+                className="relative p-2 rounded-full text-slate-600 hover:text-[#0A255C] hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Search"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            ) : (
+              <form
+                onSubmit={handleSearchSubmit}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-50 flex items-center animate-in fade-in zoom-in-95 duration-200"
+              >
+                <div className="relative flex items-center">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search anything..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setSearchOpen(false);
+                    }}
+                    className="pl-9 pr-9 py-2 w-56 sm:w-64 md:w-72 rounded-full bg-white text-xs text-slate-800 placeholder-slate-400 border border-slate-300 focus:border-amber-400 focus:outline-none transition-all shadow-xl ring-2 ring-slate-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    }}
+                    className="absolute right-2.5 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
 
-          {/* Notification Bell matching image with Red '2' Counter Badge */}
+          {/* Notification Bell with Badge */}
           <div className="relative p-2 rounded-full text-slate-600 hover:text-[#0A255C] hover:bg-slate-100 transition-colors cursor-pointer">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-sm">
@@ -198,7 +436,9 @@ export const Navbar: React.FC = () => {
 
                   {user.roles && user.roles.length > 1 && (
                     <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-[11px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Switch Active Role</p>
+                      <p className="text-[11px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">
+                        Switch Active Role
+                      </p>
                       <div className="flex flex-wrap gap-1.5">
                         {user.roles.map((r) => (
                           <button
@@ -296,46 +536,92 @@ export const Navbar: React.FC = () => {
           <div className="flex flex-col space-y-1">
             <Link
               to="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-semibold bg-[#0A255C] text-white"
+              onClick={() => {
+                setActiveNav('home');
+                setMobileMenuOpen(false);
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                activeNav === 'home' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
               Home
             </Link>
             <Link
               to="/marketplace"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+              onClick={() => {
+                setActiveNav('marketplace');
+                setMobileMenuOpen(false);
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all ${
+                activeNav === 'marketplace' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              Marketplace
+              <span>Marketplace</span>
+              <ShoppingBag className="w-4 h-4" />
             </Link>
             <Link
-              to="/education"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+              to="/business"
+              onClick={() => {
+                setActiveNav('business');
+                setMobileMenuOpen(false);
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all ${
+                activeNav === 'business' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              Education
+              <span>Business</span>
+              <Store className="w-4 h-4" />
             </Link>
             <Link
-              to="/jobs"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+              to={isAuthenticated ? '/dashboard/student' : '/education'}
+              onClick={() => {
+                setActiveNav('student');
+                setMobileMenuOpen(false);
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all ${
+                activeNav === 'student' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              Jobs
+              <span>Student</span>
+              <GraduationCap className="w-4 h-4" />
             </Link>
-            <a
-              href="#referrals"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+            <Link
+              to="/teacher"
+              onClick={() => {
+                setActiveNav('teacher');
+                setMobileMenuOpen(false);
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all ${
+                activeNav === 'teacher' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              Referrals
-            </a>
-            <a
-              href="#about"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+              <span>Teacher</span>
+              <BookOpen className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={(e) => {
+                setActiveNav('all');
+                handleAnchorClick(e, 'explore-services');
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-all ${
+                activeNav === 'all' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              About
-            </a>
+              <span>All Services</span>
+              <Layers className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                setActiveNav('about');
+                handleAnchorClick(e, 'about');
+              }}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left flex items-center justify-between transition-all ${
+                activeNav === 'about' ? 'bg-[#0A255C] text-white font-bold' : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <span>About</span>
+              <Info className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

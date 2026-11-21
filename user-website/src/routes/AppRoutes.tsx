@@ -20,6 +20,10 @@ import { TuitionPage } from '../pages/education/TuitionPage';
 import { JobsPage } from '../pages/jobs/JobsPage';
 import { JobDetailPage } from '../pages/jobs/JobDetailPage';
 import { ShareRedirectPage } from '../pages/sharing/ShareRedirectPage';
+import { TermsPage } from '../pages/legal/TermsPage';
+import { PrivacyPolicyPage } from '../pages/legal/PrivacyPolicyPage';
+import { BusinessDetailsPage } from '../pages/business/BusinessDetailsPage';
+import { TeacherDetailsPage } from '../pages/teacher/TeacherDetailsPage';
 
 // Dashboards
 import { StudentDashboardPage } from '../pages/student/StudentDashboardPage';
@@ -47,6 +51,14 @@ export const AppRoutes: React.FC = () => {
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:id" element={<JobDetailPage />} />
         <Route path="/share/:code" element={<ShareRedirectPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+
+        {/* Direct Navigation Pages */}
+        <Route path="/business" element={<BusinessDetailsPage />} />
+        <Route path="/student" element={<Navigate to="/education" replace />} />
+        <Route path="/teacher" element={<TeacherDetailsPage />} />
+        <Route path="/about" element={<Navigate to="/#about" replace />} />
       </Route>
 
       {/* Role-Based Dashboards */}
