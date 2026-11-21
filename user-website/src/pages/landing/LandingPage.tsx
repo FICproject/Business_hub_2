@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { marketplaceApi, educationApi, jobsApi } from '../../services/api';
 import { IProduct, ICourse, ILiveClass, IJob } from '../../types';
-import heroModel from '../../assets/hero-model.png';
+import heroModel from '../../assets/hero-model.jpg';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -142,43 +142,13 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Graphic (Substantially Increased Size) */}
-          <div className="relative flex-1 w-full flex justify-center items-center select-none min-h-[440px] sm:min-h-[500px] lg:min-h-[540px]">
-            <div className="relative w-full max-w-[600px] lg:max-w-[660px] h-[440px] sm:h-[500px] lg:h-[540px] flex justify-center items-center mx-auto">
-              {/* 3D Flowing Golden Ribbon Centered Behind Model */}
-              <svg
-                className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[460px] sm:w-[540px] lg:w-[580px] h-[320px] sm:h-[380px] lg:h-[410px] pointer-events-none -z-10 drop-shadow-xl"
-                viewBox="0 0 400 300"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M10 240C90 280 220 270 320 200C390 150 370 70 395 10"
-                  stroke="url(#exactGoldGradient)"
-                  strokeWidth="38"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M40 255C110 290 220 285 305 220"
-                  stroke="#D97706"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                  opacity="0.6"
-                />
-                <defs>
-                  <linearGradient id="exactGoldGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#D97706" />
-                    <stop offset="45%" stopColor="#FFB800" />
-                    <stop offset="100%" stopColor="#FFAE00" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Model Cutout Increased Size */}
+          {/* Right Column: Exact User Image (Uncropped, Full Resolution) */}
+          <div className="relative flex-1 w-full flex justify-center items-center select-none">
+            <div className="relative w-full max-w-[560px] lg:max-w-[620px] flex justify-center items-center mx-auto">
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="max-h-[440px] sm:max-h-[500px] lg:max-h-[540px] w-auto max-w-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none mx-auto"
+                className="w-full h-auto max-h-[520px] object-contain drop-shadow-2xl hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
               />
             </div>
           </div>
