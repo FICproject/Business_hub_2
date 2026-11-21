@@ -62,65 +62,63 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-        {/* Brand Logo - Stylized Gold B + Navy Text */}
-        <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-            <span className="font-black text-2xl tracking-tighter text-slate-950 font-sans">B</span>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        {/* Brand Logo - Stylized 3D Gold B + Bold Dark Text */}
+        <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-md shadow-amber-500/25 group-hover:scale-105 transition-transform">
+            <span className="font-black text-2xl tracking-tighter text-[#0A1128] font-sans">B</span>
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">Business</span>
-            </div>
-            <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">Hub</span>
+            <span className="font-extrabold text-xl tracking-tight text-[#0A1128] leading-none">Business</span>
+            <span className="font-extrabold text-xl tracking-tight text-[#0A1128] leading-tight">Hub</span>
           </div>
         </Link>
 
-        {/* Center Navigation Links matching target design */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-medium">
-          {/* Home Active Pill */}
+        {/* Center Navigation Links matching reference image */}
+        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 text-sm font-semibold">
+          {/* Home Active Pill (Solid Midnight Navy with White Text) */}
           <Link
             to="/"
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-5 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${
               location.pathname === '/'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                ? 'bg-[#0A1128] text-white'
+                : 'text-slate-700 hover:text-[#0A1128] hover:bg-slate-100'
             }`}
           >
             Home
           </Link>
 
-          {/* Marketplace with Dropdown icon */}
+          {/* Marketplace with Dropdown Chevron */}
           <Link
             to="/marketplace"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
           >
             <span>Marketplace</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
           </Link>
 
-          {/* Education with Dropdown icon */}
+          {/* Education with Dropdown Chevron */}
           <Link
             to="/education"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
           >
             <span>Education</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
           </Link>
 
-          {/* Jobs with Dropdown icon */}
+          {/* Jobs with Dropdown Chevron */}
           <Link
             to="/jobs"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
           >
             <span>Jobs</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
           </Link>
 
           {/* Referrals */}
           <a
             href="#referrals"
-            className="px-3 py-1.5 rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
           >
             Referrals
           </a>
@@ -128,15 +126,15 @@ export const Navbar: React.FC = () => {
           {/* About */}
           <a
             href="#about"
-            className="px-3 py-1.5 rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+            className="px-3.5 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
           >
             About
           </a>
         </nav>
 
-        {/* Right Actions: Search Bar, Notifications, Auth */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
-          {/* Search Bar matching target design */}
+        {/* Right Actions: Pill Search Bar, Notifications, Auth Buttons */}
+        <div className="flex items-center gap-3 sm:gap-3.5 flex-shrink-0">
+          {/* Pill Search Bar matching reference image */}
           <form onSubmit={handleSearchSubmit} className="hidden md:flex items-center relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
             <input
@@ -144,14 +142,22 @@ export const Navbar: React.FC = () => {
               placeholder="Search anything..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 w-48 lg:w-56 rounded-full bg-slate-100 hover:bg-slate-100/80 focus:bg-white text-xs text-slate-800 placeholder-slate-400 border border-transparent focus:border-amber-400 focus:outline-none transition-all shadow-inner"
+              className="pl-9 pr-4 py-2 w-44 lg:w-56 rounded-full bg-slate-50 hover:bg-slate-100/90 focus:bg-white text-xs text-slate-800 placeholder-slate-400 border border-slate-200/90 focus:border-amber-400 focus:outline-none transition-all shadow-inner"
             />
           </form>
+
+          {/* Notification Bell matching image with Red '2' Counter Badge */}
+          <div className="relative p-2 rounded-full text-slate-600 hover:text-[#0A1128] hover:bg-slate-100 transition-colors cursor-pointer">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center shadow-sm">
+              {unreadCount > 0 ? unreadCount : 2}
+            </span>
+          </div>
 
           {/* Cart Icon */}
           <Link
             to="/cart"
-            className="relative p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            className="relative p-2 rounded-full text-slate-600 hover:text-[#0A1128] hover:bg-slate-100 transition-colors"
             title="Shopping Cart"
           >
             <ShoppingBag className="w-5 h-5" />
@@ -162,21 +168,12 @@ export const Navbar: React.FC = () => {
             )}
           </Link>
 
-          {/* Notification Bell matching Image 1 with red badge '2' */}
-          <div className="relative p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-              {unreadCount > 0 ? unreadCount : 2}
-            </span>
-          </div>
-
           {/* Auth State */}
           {isAuthenticated && user ? (
             <div className="relative">
-              {/* Profile Avatar */}
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 transition-all text-left"
+                className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-full border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 transition-all text-left"
               >
                 <img
                   src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}`}
@@ -189,7 +186,6 @@ export const Navbar: React.FC = () => {
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
-              {/* Profile Dropdown */}
               {profileDropdownOpen && (
                 <div
                   className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2"
@@ -255,16 +251,18 @@ export const Navbar: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              {/* Login Button with Pill Outline */}
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-full text-xs font-bold text-slate-800 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm"
+                className="px-5 py-2 rounded-full text-xs font-bold text-[#0A1128] border border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition-all shadow-sm"
               >
                 Login
               </Link>
+              {/* Sign Up Button with Solid Midnight Navy */}
               <Link
                 to="/register"
-                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-sm hover:shadow"
+                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-[#0A1128] hover:bg-slate-800 transition-all shadow-md hover:shadow-lg"
               >
                 Sign Up
               </Link>
@@ -299,7 +297,7 @@ export const Navbar: React.FC = () => {
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white"
+              className="px-3 py-2 rounded-xl text-sm font-semibold bg-[#0A1128] text-white"
             >
               Home
             </Link>
