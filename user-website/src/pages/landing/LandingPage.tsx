@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { marketplaceApi, educationApi, jobsApi } from '../../services/api';
 import { IProduct, ICourse, ILiveClass, IJob } from '../../types';
-import heroModel from '../../assets/hero-model.jpg';
+import heroModel from '../../assets/hero-model.png';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
