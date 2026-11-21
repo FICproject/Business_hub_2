@@ -142,12 +142,12 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Graphic (Fitted Directly Into Marked Space) */}
-          <div className="relative flex-1 w-full flex justify-center items-center select-none min-h-[360px]">
-            <div className="relative w-full max-w-[500px] h-[370px] flex justify-center items-center mx-auto">
+          {/* Right Column: Hero Graphic (Substantially Increased Size) */}
+          <div className="relative flex-1 w-full flex justify-center items-center select-none min-h-[440px] sm:min-h-[500px] lg:min-h-[540px]">
+            <div className="relative w-full max-w-[600px] lg:max-w-[660px] h-[440px] sm:h-[500px] lg:h-[540px] flex justify-center items-center mx-auto">
               {/* 3D Flowing Golden Ribbon Centered Behind Model */}
               <svg
-                className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[380px] h-[280px] pointer-events-none -z-10 drop-shadow-xl"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[460px] sm:w-[540px] lg:w-[580px] h-[320px] sm:h-[380px] lg:h-[410px] pointer-events-none -z-10 drop-shadow-xl"
                 viewBox="0 0 400 300"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -174,11 +174,11 @@ export const LandingPage: React.FC = () => {
                 </defs>
               </svg>
 
-              {/* Model Cutout Sized and Centered in Marked Place */}
+              {/* Model Cutout Increased Size */}
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="max-h-[370px] w-auto max-w-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none mx-auto"
+                className="max-h-[440px] sm:max-h-[500px] lg:max-h-[540px] w-auto max-w-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none mx-auto"
               />
             </div>
           </div>
