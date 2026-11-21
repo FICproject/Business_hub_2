@@ -47,11 +47,17 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="bg-white text-[#0A1128] overflow-hidden font-sans">
       {/* =========================================================================
-          1. HERO SECTION (Exact Colors, Backdrop, Model & Badges)
+          1. HERO SECTION (Exact Match to Reference Image 2)
       ========================================================================== */}
       <section className="relative pt-6 sm:pt-10 pb-12 lg:pb-16 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto overflow-visible">
         {/* Sky-Blue Soft Atmospheric Gradient Backdrop */}
         <div className="absolute top-0 right-0 w-3/5 h-full bg-gradient-to-bl from-[#EDF4FE] via-[#F4F9FF]/70 to-transparent pointer-events-none -z-20 rounded-bl-[140px]" />
+        
+        {/* Soft Modern Glass Building Texture in Background */}
+        <div
+          className="absolute top-0 right-0 w-1/2 h-[85%] bg-cover bg-center opacity-10 mix-blend-multiply pointer-events-none -z-10 rounded-bl-[140px]"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80')` }}
+        />
         <div className="absolute -top-10 left-0 w-96 h-96 bg-gradient-to-br from-amber-300/15 via-amber-100/10 to-transparent rounded-full blur-3xl pointer-events-none -z-20" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
@@ -66,7 +72,7 @@ export const LandingPage: React.FC = () => {
             {/* Main Headline with Exact Yellow Accent and Brush Underline */}
             <h1 className="text-4xl sm:text-5xl lg:text-[66px] font-black text-[#0A1128] tracking-tight leading-[1.08]">
               Your Complete <br />
-              <span className="relative inline-block text-[#E69A00]">
+              <span className="relative inline-block text-[#D97706]">
                 Business
                 {/* Thick Painterly Golden Yellow Brush Stroke Underline */}
                 <svg
@@ -151,91 +157,39 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Model with 4 Floating Badges & 3D Golden Ribbon */}
+          {/* Right Column: Hero Graphic from Design Reference (Exact Woman in Yellow Top + Badges + Golden Swoosh) */}
           <div className="lg:col-span-5 relative flex justify-center lg:justify-end select-none">
-            <div className="relative w-full max-w-[460px]">
-              {/* 3D Flowing Golden Ribbon Behind Model */}
-              <svg
-                className="absolute -bottom-8 -right-8 w-[420px] h-[340px] pointer-events-none -z-10 drop-shadow-xl"
-                viewBox="0 0 400 300"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M10 240C90 280 220 270 320 200C390 150 370 70 395 10"
-                  stroke="url(#exactGoldGradient)"
-                  strokeWidth="38"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M40 255C110 290 220 285 305 220"
-                  stroke="#D97706"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                  opacity="0.6"
-                />
-                <defs>
-                  <linearGradient id="exactGoldGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#D97706" />
-                    <stop offset="45%" stopColor="#FFB800" />
-                    <stop offset="100%" stopColor="#FFAE00" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Model Image with Soft Rounded Corners */}
-              <div className="relative mx-auto rounded-[36px] overflow-hidden shadow-2xl shadow-slate-900/10 border-4 border-white aspect-[4/5] max-h-[500px]">
+            <div className="relative w-full max-w-[520px]">
+              {/* Seamless Hero Container with Exact Reference Artwork */}
+              <div className="relative mx-auto rounded-[32px] sm:rounded-[36px] overflow-hidden shadow-2xl shadow-slate-900/15 border-4 border-white bg-slate-50 transition-all hover:shadow-3xl">
                 <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
-                  alt="Business Hub Creator"
-                  className="w-full h-full object-cover object-top hover:scale-102 transition-transform duration-700"
+                  src="/images/hero-model-exact.jpg"
+                  alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
+                  className="w-full h-auto object-cover scale-[1.02] hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none" />
+
+                {/* Interactive Clickable Hotspots for Badges */}
+                <Link
+                  to="/marketplace"
+                  className="absolute top-2 left-4 w-28 h-20 rounded-2xl hover:bg-blue-500/10 transition-colors z-20 cursor-pointer"
+                  title="Explore Marketplace"
+                />
+                <Link
+                  to="/education"
+                  className="absolute top-[40%] left-2 w-28 h-20 rounded-2xl hover:bg-indigo-500/10 transition-colors z-20 cursor-pointer"
+                  title="Explore Education"
+                />
+                <Link
+                  to="/jobs"
+                  className="absolute top-4 right-4 w-24 h-20 rounded-2xl hover:bg-amber-500/10 transition-colors z-20 cursor-pointer"
+                  title="Explore Jobs"
+                />
+                <a
+                  href="#referrals"
+                  className="absolute bottom-8 right-4 w-24 h-20 rounded-2xl hover:bg-blue-500/10 transition-colors z-20 cursor-pointer"
+                  title="Explore Referrals"
+                />
               </div>
-
-              {/* Floating Badge 1: Marketplace (Top Left) */}
-              <Link
-                to="/marketplace"
-                className="absolute -top-3 left-4 sm:-left-4 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <ShoppingBag className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A1128] mt-1 tracking-tight">Marketplace</span>
-              </Link>
-
-              {/* Floating Badge 2: Education (Mid Left) */}
-              <Link
-                to="/education"
-                className="absolute top-[42%] -left-4 sm:-left-8 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#0A1128] text-white flex items-center justify-center group-hover:bg-[#FFB800] group-hover:text-slate-950 transition-colors">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A1128] mt-1 tracking-tight">Education</span>
-              </Link>
-
-              {/* Floating Badge 3: Jobs (Top Right) */}
-              <Link
-                to="/jobs"
-                className="absolute top-8 -right-3 sm:-right-6 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#B45309] text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A1128] mt-1 tracking-tight">Jobs</span>
-              </Link>
-
-              {/* Floating Badge 4: Referrals (Center Right) */}
-              <a
-                href="#referrals"
-                className="absolute bottom-20 -right-3 sm:-right-6 bg-white/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.12)] border border-slate-100 flex flex-col items-center hover:scale-105 transition-all group z-20 cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Share2 className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-extrabold text-[#0A1128] mt-1 tracking-tight">Referrals</span>
-              </a>
             </div>
           </div>
         </div>
@@ -396,8 +350,12 @@ export const LandingPage: React.FC = () => {
           <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* 1. Marketplace Card (Soft Coral Pink #FFE8EC) */}
             <div className="bg-[#FFE8EC] rounded-3xl p-6 border border-[#FFD2D9] flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-              <div className="w-24 h-24 mb-4 flex items-center justify-center text-5xl transform group-hover:scale-110 transition-transform">
-                🛍️
+              <div className="w-28 h-24 mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                <img
+                  src="/images/service-marketplace.jpg"
+                  alt="Marketplace 3D Shopping Bags"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
               <h3 className="text-lg font-extrabold text-[#0A1128] mb-1">Marketplace</h3>
               <p className="text-xs text-slate-600 font-medium mb-5 min-h-[32px]">
@@ -414,8 +372,12 @@ export const LandingPage: React.FC = () => {
 
             {/* 2. Education Card (Soft Pastel Sky Blue #EBF3FE) */}
             <div className="bg-[#EBF3FE] rounded-3xl p-6 border border-[#D2E5FD] flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-              <div className="w-24 h-24 mb-4 flex items-center justify-center text-5xl transform group-hover:scale-110 transition-transform">
-                🎓
+              <div className="w-28 h-24 mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                <img
+                  src="/images/service-education.jpg"
+                  alt="Education 3D Books and Cap"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
               <h3 className="text-lg font-extrabold text-[#0A1128] mb-1">Education</h3>
               <p className="text-xs text-slate-600 font-medium mb-5 min-h-[32px]">
@@ -432,8 +394,12 @@ export const LandingPage: React.FC = () => {
 
             {/* 3. Jobs Card (Soft Pastel Lavender #F3EFFF) */}
             <div className="bg-[#F3EFFF] rounded-3xl p-6 border border-[#E3DAFF] flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-              <div className="w-24 h-24 mb-4 flex items-center justify-center text-5xl transform group-hover:scale-110 transition-transform">
-                💼
+              <div className="w-28 h-24 mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                <img
+                  src="/images/service-jobs.jpg"
+                  alt="Jobs 3D Leather Briefcase"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
               <h3 className="text-lg font-extrabold text-[#0A1128] mb-1">Jobs</h3>
               <p className="text-xs text-slate-600 font-medium mb-5 min-h-[32px]">
@@ -450,8 +416,12 @@ export const LandingPage: React.FC = () => {
 
             {/* 4. Referrals Card (Soft Pastel Mint #E8FAF0) */}
             <div className="bg-[#E8FAF0] rounded-3xl p-6 border border-[#D0F5E0] flex flex-col items-center text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-              <div className="w-24 h-24 mb-4 flex items-center justify-center text-5xl transform group-hover:scale-110 transition-transform">
-                📢
+              <div className="w-28 h-24 mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                <img
+                  src="/images/service-referrals.jpg"
+                  alt="Referrals 3D Megaphone"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
               <h3 className="text-lg font-extrabold text-[#0A1128] mb-1">Referrals</h3>
               <p className="text-xs text-slate-600 font-medium mb-5 min-h-[32px]">
@@ -597,7 +567,7 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow flex items-center gap-4">
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+              src="/images/testimonial-priya.jpg"
               alt="Priya S."
               className="w-14 h-14 rounded-full object-cover ring-2 ring-amber-100 flex-shrink-0"
             />
@@ -616,7 +586,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow flex items-center gap-4">
             <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
+              src="/images/testimonial-rahul.jpg"
               alt="Rahul K."
               className="w-14 h-14 rounded-full object-cover ring-2 ring-amber-100 flex-shrink-0"
             />
@@ -635,7 +605,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow flex items-center gap-4">
             <img
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"
+              src="/images/testimonial-anitha.jpg"
               alt="Anitha M."
               className="w-14 h-14 rounded-full object-cover ring-2 ring-amber-100 flex-shrink-0"
             />
@@ -659,12 +629,22 @@ export const LandingPage: React.FC = () => {
       ========================================================================== */}
       <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto">
         <div className="relative rounded-3xl bg-gradient-to-r from-[#071128] via-[#0F2052] to-[#20175E] text-white p-8 sm:p-10 shadow-2xl overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Subtle City Skyline Silhouette Silhouette Backdrop */}
+          <div
+            className="absolute inset-0 bg-cover bg-bottom opacity-20 pointer-events-none mix-blend-screen"
+            style={{ backgroundImage: `url('/images/cta-skyline-banner.jpg')` }}
+          />
+
           <div className="flex items-center gap-5 relative z-10">
-            <div className="w-16 h-16 rounded-2xl bg-amber-400/20 text-3xl flex items-center justify-center flex-shrink-0 shadow-inner">
-              🚀
+            <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-lg border border-indigo-400/30">
+              <img
+                src="/images/cta-rocket.jpg"
+                alt="Rocket Launch"
+                className="w-full h-full object-cover scale-110"
+              />
             </div>
             <div>
-              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-black text-[#FFB800] tracking-tight">
                 Start Your Journey Today!
               </h3>
               <p className="text-xs sm:text-sm text-slate-200 font-medium mt-1">
