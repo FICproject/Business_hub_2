@@ -48,23 +48,13 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="bg-white text-[#0A255C] overflow-hidden font-sans">
       {/* =========================================================================
-          1. HERO SECTION (Balanced Equal Length Layout)
+          1. HERO SECTION (Balanced Equal 50/50 Layout - Pure White Background)
       ========================================================================== */}
-      <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-12 max-w-[1320px] mx-auto overflow-visible">
-        {/* Sky-Blue Soft Atmospheric Gradient Backdrop */}
-        <div className="absolute top-0 right-0 w-3/5 h-full bg-gradient-to-bl from-[#EDF4FE] via-[#F4F9FF]/70 to-transparent pointer-events-none -z-20 rounded-bl-[140px]" />
-        
-        {/* Soft Modern Glass Building Texture in Background */}
-        <div
-          className="absolute top-0 right-0 w-1/2 h-[85%] bg-cover bg-center opacity-10 mix-blend-multiply pointer-events-none -z-10 rounded-bl-[140px]"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80')` }}
-        />
-        <div className="absolute -top-10 left-0 w-96 h-96 bg-gradient-to-br from-amber-300/15 via-amber-100/10 to-transparent rounded-full blur-3xl pointer-events-none -z-20" />
-
-        {/* Flexible Row Layout: Left Text + Right Fitted Graphic */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
+      <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-12 max-w-[1320px] mx-auto overflow-visible bg-white">
+        {/* Equal 50 / 50 Grid with Centered Vertical Alignment */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Column: Heading, Subheading, CTAs & Social Proof */}
-          <div className="space-y-5 lg:space-y-6 z-10 flex flex-col justify-center w-full lg:w-[460px] shrink-0">
+          <div className="space-y-5 lg:space-y-6 z-10 flex flex-col justify-center">
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FDE68A] text-[#92400E] text-xs font-bold tracking-wide shadow-sm w-fit">
               <Star className="w-3.5 h-3.5 fill-[#FFB800] text-[#FFB800]" />
@@ -142,13 +132,13 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Exact User Image (Uncropped, Full Resolution) */}
-          <div className="relative flex-1 w-full flex justify-center items-center select-none">
-            <div className="relative w-full max-w-[560px] lg:max-w-[620px] flex justify-center items-center mx-auto">
+          {/* Right Column: Equal Sized Hero Image (Uncropped, Balanced) */}
+          <div className="flex justify-center items-center select-none w-full">
+            <div className="relative w-full max-w-[460px] flex justify-center items-center mx-auto">
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="w-full h-auto max-h-[520px] object-contain hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
+                className="w-full h-auto max-h-[440px] object-contain hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
               />
             </div>
           </div>
