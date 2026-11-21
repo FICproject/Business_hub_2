@@ -61,10 +61,10 @@ export const LandingPage: React.FC = () => {
         />
         <div className="absolute -top-10 left-0 w-96 h-96 bg-gradient-to-br from-amber-300/15 via-amber-100/10 to-transparent rounded-full blur-3xl pointer-events-none -z-20" />
 
-        {/* 50 / 50 Equal Split Grid with Centered Vertical Alignment */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center">
+        {/* Flexible Row Layout: Left Text + Right Fitted Graphic */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
           {/* Left Column: Heading, Subheading, CTAs & Social Proof */}
-          <div className="space-y-6 z-10 flex flex-col justify-center">
+          <div className="space-y-5 lg:space-y-6 z-10 flex flex-col justify-center w-full lg:w-[460px] shrink-0">
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FDE68A] text-[#92400E] text-xs font-bold tracking-wide shadow-sm w-fit">
               <Star className="w-3.5 h-3.5 fill-[#FFB800] text-[#FFB800]" />
@@ -72,7 +72,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[60px] font-black text-[#0A255C] tracking-tight leading-[1.08]">
+            <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-[#0A255C] tracking-tight leading-[1.08]">
               Your Complete <br />
               <span className="text-[#D97706]">Business</span>{' '}
               <span className="text-[#0A255C]">Hub</span>
@@ -142,12 +142,12 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Graphic (Centered Exactly in Frame) */}
-          <div className="relative flex justify-center items-center select-none w-full">
-            <div className="relative w-full max-w-[420px] h-[360px] flex justify-center items-center mx-auto">
+          {/* Right Column: Hero Graphic (Fitted Directly Into Marked Space) */}
+          <div className="relative flex-1 w-full flex justify-center items-center select-none min-h-[360px]">
+            <div className="relative w-full max-w-[500px] h-[370px] flex justify-center items-center mx-auto">
               {/* 3D Flowing Golden Ribbon Centered Behind Model */}
               <svg
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[360px] h-[270px] pointer-events-none -z-10 drop-shadow-xl"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[380px] h-[280px] pointer-events-none -z-10 drop-shadow-xl"
                 viewBox="0 0 400 300"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -174,11 +174,11 @@ export const LandingPage: React.FC = () => {
                 </defs>
               </svg>
 
-              {/* Model Cutout Centered Perfectly */}
+              {/* Model Cutout Sized and Centered in Marked Place */}
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="max-h-[360px] max-w-full w-auto h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none mx-auto"
+                className="max-h-[370px] w-auto max-w-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 pointer-events-none mx-auto"
               />
             </div>
           </div>
