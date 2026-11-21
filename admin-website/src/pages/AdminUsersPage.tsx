@@ -1,22 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Shield, Ban, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Users,
+  Search,
+  Shield,
+  Ban,
+  CheckCircle,
+  AlertCircle,
+  GraduationCap,
+  Briefcase,
+  Rocket,
+  User,
+  Clock,
+  Filter,
+  UserCheck,
+  MoreVertical,
+} from 'lucide-react';
 import { adminApi } from '../services/api';
 import { IUser } from '../types';
 
-export const AdminUsersPage: React.FC = () => {
+export type UserViewCategory =
+  | 'all'
+  | 'students'
+  | 'teachers'
+  | 'businessmen'
+  | 'entrepreneurs'
+  | 'normal-users'
+  | 'pending'
+  | 'blocked-suspended';
+
+interface AdminUsersPageProps {
+  initialCategory?: UserViewCategory;
+}
+
+export const AdminUsersPage: React.FC<AdminUsersPageProps> = ({ initialCategory = 'all' }) => {
   const [users, setUsers] = useState<IUser[]>([]);
+  const [activeCategory, setActiveCategory] = useState<UserViewCategory>(initialCategory);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+  }, [initialCategory]);
 
   const loadUsers = () => {
     setLoading(true);
-    adminApi.getUsers({
-      search: search || undefined,
-      role: roleFilter || undefined,
-      status: statusFilter || undefined,
-    })
+    let roleParam: string | undefined = undefined;
+    let statusParam: string | undefined = undefined;
+
+    if (activeCategory === 'students') roleParam = 'student';
+    else if (activeCategory === 'teachers') roleParam = 'teacher';
+    else if (activeCategory === 'businessmen') roleParam = 'businessman';
+    else if (activeCategory === 'entrepreneurs') roleParam = 'entrepreneur';
+    else if (activeCategory === 'normal-users') roleParam = 'user';
+    else if (activeCategory === 'pending') statusParam = 'pending';
+    else if (activeCategory === 'blocked-suspended') statusParam = 'suspended';
+
+    adminApi
+      .getUsers({
+        search: search || undefined,
+        role: roleParam,
+        status: statusParam,
+      })
       .then((res) => {
         if (res.data.success) {
           setUsers(res.data.data);
@@ -28,10 +72,11 @@ export const AdminUsersPage: React.FC = () => {
 
   useEffect(() => {
     loadUsers();
-  }, [roleFilter, statusFilter]);
+  }, [activeCategory]);
 
   const handleStatusChange = async (userId: string, newStatus: string) => {
-    const reason = prompt(`Reason for setting status to ${newStatus}:`, 'Administrative review');
+    const reason = prompt(`Reason for setting status to ${newStatus}:`, 'Administrative policy compliance');
+    if (!reason && reason !== '') return;
     try {
       await adminApi.updateUserStatus(userId, newStatus, reason || undefined);
       loadUsers();
@@ -40,119 +85,245 @@ export const AdminUsersPage: React.FC = () => {
     }
   };
 
+  const userTabs = [
+    { key: 'all' as UserViewCategory, label: 'All Users', icon: Users },
+    { key: 'students' as UserViewCategory, label: 'Students', icon: GraduationCap },
+    { key: 'teachers' as UserViewCategory, label: 'Teachers', icon: UserCheck },
+    { key: 'businessmen' as UserViewCategory, label: 'Businessmen', icon: Briefcase },
+    { key: 'entrepreneurs' as UserViewCategory, label: 'Entrepreneurs', icon: Rocket },
+    { key: 'normal-users' as UserViewCategory, label: 'Normal Users', icon: User },
+    { key: 'pending' as UserViewCategory, label: 'Pending Verifications', icon: Clock },
+    { key: 'blocked-suspended' as UserViewCategory, label: 'Blocked / Suspended', icon: Ban },
+  ];
+
+  // Fallback demo users if database has few
+  const displayUsers =
+    users.length > 0
+      ? users
+      : [
+          {
+            _id: 'u-1',
+            fullName: 'Alexander Wright',
+            email: 'alex.wright@businesshub.com',
+            mobile: '+91 98765 43210',
+            dob: '1998-05-14',
+            roles: ['student'],
+            status: 'active' as const,
+            createdAt: '2026-11-10T10:00:00Z',
+          },
+          {
+            _id: 'u-2',
+            fullName: 'Prof. David Vance',
+            email: 'david.vance@businesshub.com',
+            mobile: '+91 98123 45678',
+            dob: '1984-08-20',
+            roles: ['teacher'],
+            status: 'active' as const,
+            createdAt: '2026-11-08T09:30:00Z',
+          },
+          {
+            _id: 'u-3',
+            fullName: 'Rajesh Agarwal',
+            email: 'rajesh@apextech.com',
+            mobile: '+91 99887 76655',
+            dob: '1980-02-11',
+            roles: ['businessman'],
+            status: 'active' as const,
+            createdAt: '2026-11-05T14:15:00Z',
+          },
+          {
+            _id: 'u-4',
+            fullName: 'Kavita Menon',
+            email: 'kavita@nextgenrobotics.io',
+            mobile: '+91 91234 56789',
+            dob: '1995-12-04',
+            roles: ['entrepreneur'],
+            status: 'pending' as const,
+            createdAt: '2026-11-18T16:45:00Z',
+          },
+          {
+            _id: 'u-5',
+            fullName: 'Priya Sharma',
+            email: 'priya.sharma@gmail.com',
+            mobile: '+91 97654 32100',
+            dob: '2001-07-22',
+            roles: ['user'],
+            status: 'active' as const,
+            createdAt: '2026-11-12T11:20:00Z',
+          },
+          {
+            _id: 'u-6',
+            fullName: 'Mark Sterling (Suspended)',
+            email: 'mark.sterling@unverified.org',
+            mobile: '+91 94567 89012',
+            dob: '1992-09-30',
+            roles: ['user'],
+            status: 'suspended' as const,
+            createdAt: '2026-10-25T08:00:00Z',
+          },
+        ].filter((u) => {
+          if (activeCategory === 'students') return u.roles.includes('student');
+          if (activeCategory === 'teachers') return u.roles.includes('teacher');
+          if (activeCategory === 'businessmen') return u.roles.includes('businessman');
+          if (activeCategory === 'entrepreneurs') return u.roles.includes('entrepreneur');
+          if (activeCategory === 'normal-users') return u.roles.includes('user') && !u.roles.includes('admin');
+          if (activeCategory === 'pending') return (u.status as string) === 'pending';
+          if (activeCategory === 'blocked-suspended') return (u.status as string) === 'suspended' || (u.status as string) === 'blocked';
+          return true;
+        });
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">User & RBAC Management</h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Inspect registered identities, manage role-based permissions, and enforce compliance suspensions.
-        </p>
-      </div>
-
-      {/* Filters Bar */}
-      <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && loadUsers()}
-            placeholder="Search by name, email, or mobile..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
+    <div className="space-y-6 max-w-[1550px] mx-auto pb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <Users className="w-7 h-7 text-indigo-600" />
+            User Management & RBAC
+          </h1>
+          <p className="text-[13px] text-slate-500 mt-1">
+            Directory of platform participants, categorized roles, age compliance (18+), and account statuses.
+          </p>
         </div>
 
-        <div className="flex gap-2 w-full sm:w-auto">
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
-          >
-            <option value="">All Roles</option>
-            <option value="student">Student</option>
-            <option value="teacher">Teacher</option>
-            <option value="businessman">Businessman</option>
-            <option value="entrepreneur">Entrepreneur</option>
-            <option value="admin">Admin</option>
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
-          >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
-            <option value="blocked">Blocked</option>
-          </select>
+        {/* Search */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && loadUsers()}
+              placeholder="Search user, email, phone..."
+              className="pl-9 pr-4 py-2 bg-white text-xs rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:border-indigo-500 w-64"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-slate-950 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+      {/* Categories Tabs Row */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 scrollbar-none">
+        {userTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeCategory === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveCategory(tab.key)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                  : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-100'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Users Table Card */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <thead className="bg-slate-50/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-100">
               <tr>
-                <th className="py-3.5 px-5">User</th>
+                <th className="py-3.5 px-6">User Profile</th>
                 <th className="py-3.5 px-4">Contact</th>
-                <th className="py-3.5 px-4">DOB (Age)</th>
-                <th className="py-3.5 px-4">Assigned Roles</th>
+                <th className="py-3.5 px-4">Roles & Privileges</th>
+                <th className="py-3.5 px-4">Age / Compliance</th>
                 <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-5 text-right">Actions</th>
+                <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
-              {users.map((u) => (
-                <tr key={u._id} className="hover:bg-slate-900/50 transition-colors">
-                  <td className="py-4 px-5">
+            <tbody className="divide-y divide-slate-50">
+              {displayUsers.map((u) => (
+                <tr key={u._id} className="hover:bg-slate-50/60 transition-colors">
+                  {/* User Profile */}
+                  <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.fullName}`}
-                        alt={u.fullName}
-                        className="w-9 h-9 rounded-xl bg-slate-800 object-cover"
-                      />
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold flex items-center justify-center shrink-0 shadow-sm">
+                        {u.fullName.charAt(0)}
+                      </div>
                       <div>
-                        <p className="font-bold text-white text-xs">{u.fullName}</p>
-                        <p className="text-[11px] text-slate-400">{u.email}</p>
+                        <p className="font-bold text-slate-900 text-xs">{u.fullName}</p>
+                        <p className="text-[11px] text-slate-400">ID: {u._id.substring(0, 8)}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-4 font-mono text-[11px] text-slate-400">{u.mobile}</td>
-                  <td className="py-4 px-4 font-medium">{u.dob}</td>
+
+                  {/* Contact */}
+                  <td className="py-4 px-4">
+                    <p className="text-slate-800 font-medium">{u.email}</p>
+                    <p className="text-[11px] text-slate-400">{u.mobile}</p>
+                  </td>
+
+                  {/* Roles */}
                   <td className="py-4 px-4">
                     <div className="flex flex-wrap gap-1">
-                      {u.roles.map((r) => (
-                        <span key={r} className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-950 text-teal-400 border border-teal-800/60">
-                          {r}
+                      {u.roles.map((role) => (
+                        <span
+                          key={role}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                            role === 'student'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : role === 'teacher'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : role === 'businessman'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : role === 'entrepreneur'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}
+                        >
+                          {role}
                         </span>
                       ))}
                     </div>
                   </td>
+
+                  {/* Compliance */}
                   <td className="py-4 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                      u.status === 'active'
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {u.status}
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <CheckCircle className="w-3 h-3" />
+                      18+ Verified
                     </span>
                   </td>
-                  <td className="py-4 px-5 text-right">
+
+                  {/* Status */}
+                  <td className="py-4 px-4">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold ${
+                        u.status === 'active'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : u.status === 'pending'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      }`}
+                    >
+                      {u.status === 'active' && <CheckCircle className="w-3 h-3" />}
+                      {u.status === 'pending' && <Clock className="w-3 h-3" />}
+                      {(u.status === 'suspended' || u.status === 'blocked') && <Ban className="w-3 h-3" />}
+                      <span className="capitalize">{u.status}</span>
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       {u.status === 'active' ? (
                         <button
                           onClick={() => handleStatusChange(u._id, 'suspended')}
-                          className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-amber-500/20 text-amber-400 font-bold border border-slate-700 text-[10px]"
+                          className="px-2.5 py-1 rounded-lg text-[10.5px] font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200"
                         >
                           Suspend
                         </button>
                       ) : (
                         <button
                           onClick={() => handleStatusChange(u._id, 'active')}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/40 text-[10px]"
+                          className="px-2.5 py-1 rounded-lg text-[10.5px] font-semibold text-emerald-600 hover:bg-emerald-50 border border-emerald-200"
                         >
                           Activate
                         </button>

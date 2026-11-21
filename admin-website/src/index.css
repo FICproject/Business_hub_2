@@ -4,23 +4,31 @@
 
 @layer base {
   body {
-    @apply bg-slate-900 text-slate-100 antialiased selection:bg-teal-500 selection:text-white;
+    background-color: #F4F6FC;
+    color: #1E293B;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
 }
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #94a3b8;
+}
+
+/* Cosmic purple gradient for hero banner matching the exact screenshot */
+.cosmic-banner-gradient {
+  background: linear-gradient(108deg, #18093E 0%, #260A5B 32%, #421183 68%, #6B21A8 100%);
 }
