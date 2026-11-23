@@ -249,7 +249,7 @@ export const DashboardLayout = () => {
           </div>
 
           {/* User Role Card */}
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <div className="flex items-center gap-3">
               <img
                 src={
@@ -257,12 +257,12 @@ export const DashboardLayout = () => {
                   `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`
                 }
                 alt="Avatar"
-                className="w-9 h-9 rounded-xl object-cover bg-slate-800 border border-white/10"
+                className="w-10 h-10 rounded-xl object-cover bg-slate-800 border border-white/10"
               />
               <div className="overflow-hidden min-w-0">
-                <p className="font-bold text-xs text-white truncate">{user?.fullName}</p>
+                <p className="font-bold text-sm text-white truncate">{user?.fullName}</p>
                 <span
-                  className={`inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border ${roleBadge} mt-0.5`}
+                  className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase border ${roleBadge} mt-0.5`}
                 >
                   {roleTitle}
                 </span>
@@ -272,7 +272,7 @@ export const DashboardLayout = () => {
             {/* Multi-role switcher */}
             {user?.roles && user.roles.length > 1 && (
               <div className="pt-2 border-t border-white/10">
-                <label className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
+                <label className="text-[11px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
                   Switch Active Portal:
                 </label>
                 <div className="flex flex-wrap gap-1">
@@ -286,10 +286,10 @@ export const DashboardLayout = () => {
                         else if (r === 'normal' || r === 'user') navigate('/dashboard/user');
                         else navigate('/dashboard/student');
                       }}
-                      className={`px-2 py-0.5 rounded text-[11px] font-semibold capitalize transition-all ${
+                      className={`px-2.5 py-1 rounded text-xs font-semibold capitalize transition-all ${
                         activeRole === r
                           ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
-                          : 'bg-slate-900 text-slate-400 hover:text-white'
+                          : 'bg-slate-900 text-slate-300 hover:text-white'
                       }`}
                     >
                       {r}
@@ -301,8 +301,8 @@ export const DashboardLayout = () => {
           </div>
         </div>
 
-        {/* Navigation Links (Compact, fitted, static and non-scrolling) */}
-        <nav className="px-3 lg:px-4 flex-grow overflow-y-auto no-scrollbar space-y-0.5 py-1">
+        {/* Navigation Links (Larger font, comfortable spacing) */}
+        <nav className="px-3 lg:px-4 flex-grow overflow-y-auto no-scrollbar space-y-1 py-1.5">
           {currentNav.map((item: any, idx) => {
             const targetUrl = item.tab
               ? item.tab === 'overview'
@@ -318,13 +318,13 @@ export const DashboardLayout = () => {
                 key={`${item.label}-${idx}`}
                 to={targetUrl}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isTabActive
                     ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon className="w-4 h-4 flex-shrink-0" />
+                <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="truncate">{item.label}</span>
               </Link>
             );
@@ -336,9 +336,9 @@ export const DashboardLayout = () => {
           <button
             type="button"
             onClick={() => setLogoutModalOpen(true)}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5" />
             <span>Sign Out</span>
           </button>
         </div>
