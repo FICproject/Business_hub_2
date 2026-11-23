@@ -137,18 +137,22 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const identifier = req.body.email || req.body.mobile || req.body.loginId || req.body.identifier;
+    const { password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    if (!identifier || !password) {
+      return res.status(400).json({ success: false, message: 'Email or Mobile number and password are required.' });
     }
 
+    const cleanId = String(identifier).trim();
     const user = dbStore.collection.users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
+      (u) =>
+        (u.email && u.email.toLowerCase() === cleanId.toLowerCase()) ||
+        (u.mobile && u.mobile.trim() === cleanId)
     );
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials. No matching account found.' });
     }
 
     if (user.status === 'blocked' || user.status === 'suspended') {
@@ -157,13 +161,19 @@ export const login = async (req: Request, res: Response) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials. Incorrect password.' });
     }
 
     const token = jwt.sign(
       { id: user._id, email: user.email, roles: user.roles },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn as any }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      config.jwtSecret,
+      { expiresIn: '7d' }
     );
 
     const { password: _, ...userWithoutPassword } = user;
@@ -174,6 +184,7 @@ export const login = async (req: Request, res: Response) => {
       success: true,
       message: 'Login successful.',
       token,
+      refreshToken,
       user: userWithoutPassword,
     });
   } catch (error: any) {

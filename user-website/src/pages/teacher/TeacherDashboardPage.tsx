@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
   GraduationCap,
@@ -11,19 +12,37 @@ import {
   Clock,
   Sparkles,
   Calendar,
+  Check,
+  Award,
+  Download,
+  AlertCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { educationApi } from '../../services/api';
 import { RootState } from '../../store';
 import { ICourse, ILiveClass, ITeacherPayment, IStudyMaterial } from '../../types';
+import { StatCard } from '../../components/dashboard/StatCard';
+import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
 
 export const TeacherDashboardPage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get('tab') || 'overview';
+
+  const handleTabChange = (newTab: string) => {
+    if (newTab === 'overview') {
+      searchParams.delete('tab');
+      setSearchParams(searchParams);
+    } else {
+      setSearchParams({ tab: newTab });
+    }
+  };
 
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [liveClasses, setLiveClasses] = useState<ILiveClass[]>([]);
   const [payments, setPayments] = useState<ITeacherPayment[]>([]);
   const [materials, setMaterials] = useState<IStudyMaterial[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'classes' | 'materials' | 'earnings'>('overview');
 
   // Course Modal
   const [createCourseOpen, setCreateCourseOpen] = useState(false);
@@ -62,6 +81,15 @@ export const TeacherDashboardPage: React.FC = () => {
     loadData();
   }, []);
 
+  // Sync tab navigation with modals if applicable
+  useEffect(() => {
+    if (activeTab === 'create-course') {
+      setCreateCourseOpen(true);
+    } else if (activeTab === 'schedule-class') {
+      setScheduleClassOpen(true);
+    }
+  }, [activeTab]);
+
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -82,6 +110,7 @@ export const TeacherDashboardPage: React.FC = () => {
       setCTitle('');
       setCDesc('');
       loadData();
+      handleTabChange('courses');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error creating course');
     }
@@ -103,6 +132,7 @@ export const TeacherDashboardPage: React.FC = () => {
       setLTitle('');
       setLDesc('');
       loadData();
+      handleTabChange('live-classes');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error scheduling class');
     }
@@ -119,20 +149,21 @@ export const TeacherDashboardPage: React.FC = () => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-teal-700 via-teal-800 to-navy-900 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="space-y-1">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-teal-300 bg-teal-950/60 px-2.5 py-0.5 rounded-md">
-            Teacher & Instructor Workspace
+      <div className="bg-gradient-to-r from-navy-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 z-10">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
+            <Sparkles className="w-3.5 h-3.5" />
+            Teacher & Faculty Workspace • Zero Paywalls for Students
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold">{user?.fullName}</h1>
-          <p className="text-xs sm:text-sm text-teal-100">
-            Publish free masterclasses, manage virtual live sessions, and track administrative compensation stipends.
+          <p className="text-xs sm:text-sm text-teal-100 max-w-xl">
+            Publish free masterclasses, manage virtual live sessions, and track administrative compensation stipends verified by administrators.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5 z-10">
           <button
             onClick={() => setCreateCourseOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-white text-navy-900 font-bold text-xs shadow-md hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl bg-white text-navy-950 font-bold text-xs shadow-md hover:bg-slate-50 transition-colors flex items-center gap-1.5"
           >
             <PlusCircle className="w-4 h-4 text-teal-600" /> Create Course
           </button>
@@ -145,45 +176,65 @@ export const TeacherDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Dynamic Profile Completion */}
+      <ProfileCompletion user={user} compact />
+
+      {/* KPI Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Total Courses</span>
-          <p className="text-2xl font-extrabold text-navy-900">{courses.length}</p>
-          <p className="text-[11px] font-semibold text-teal-600">Free Published</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Live Classes</span>
-          <p className="text-2xl font-extrabold text-navy-900">{liveClasses.length}</p>
-          <p className="text-[11px] font-semibold text-slate-500">Interactive Sessions</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Approved Paid</span>
-          <p className="text-2xl font-extrabold text-emerald-600">${totalPaid.toFixed(2)}</p>
-          <p className="text-[11px] font-semibold text-slate-500">Settled to Bank</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Pending Stipends</span>
-          <p className="text-2xl font-extrabold text-amber-600">${pendingStipends.toFixed(2)}</p>
-          <p className="text-[11px] font-semibold text-amber-600">Under Admin Review</p>
-        </div>
+        <StatCard
+          label="Total Courses"
+          value={courses.length}
+          subtext="Published & Free"
+          icon={GraduationCap}
+          badge="100% Free"
+          badgeColor="teal"
+          onClick={() => handleTabChange('courses')}
+        />
+        <StatCard
+          label="Live Classes"
+          value={liveClasses.length}
+          subtext="Interactive Sessions"
+          icon={Video}
+          badge="Scheduled"
+          badgeColor="amber"
+          onClick={() => handleTabChange('live-classes')}
+        />
+        <StatCard
+          label="Approved Paid"
+          value={`$${totalPaid.toFixed(2)}`}
+          subtext="Admin Audited"
+          icon={DollarSign}
+          badge="Settled"
+          badgeColor="emerald"
+          onClick={() => handleTabChange('stipends')}
+        />
+        <StatCard
+          label="Pending Stipends"
+          value={`$${pendingStipends.toFixed(2)}`}
+          subtext="Under Admin Review"
+          icon={Clock}
+          badge="Pending Audit"
+          badgeColor="rose"
+          onClick={() => handleTabChange('stipends')}
+        />
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
         {[
           { id: 'overview', label: 'Overview' },
           { id: 'courses', label: `Published Courses (${courses.length})` },
-          { id: 'classes', label: `Live Classes (${liveClasses.length})` },
-          { id: 'materials', label: `Notes (${materials.length})` },
-          { id: 'earnings', label: `Compensation History (${payments.length})` },
+          { id: 'live-classes', label: `Live Classes (${liveClasses.length})` },
+          { id: 'materials', label: `Study Notes (${materials.length})` },
+          { id: 'attendance', label: 'Attendance Records' },
+          { id: 'stipends', label: `Stipends & Payouts (${payments.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2 rounded-xl transition-colors ${
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
               activeTab === tab.id
-                ? 'bg-teal-600 text-white shadow-sm'
+                ? 'bg-navy-900 text-white shadow-md'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
@@ -192,11 +243,11 @@ export const TeacherDashboardPage: React.FC = () => {
         ))}
       </div>
 
-      {/* 1. COURSES */}
+      {/* 1. OVERVIEW & COURSES */}
       {(activeTab === 'overview' || activeTab === 'courses') && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-lg text-navy-900">Your Free Courseware</h3>
+            <h3 className="font-extrabold text-lg text-navy-900">Your Published Courseware</h3>
             <button
               onClick={() => setCreateCourseOpen(true)}
               className="text-xs font-bold text-teal-600 hover:underline flex items-center gap-1"
@@ -208,7 +259,7 @@ export const TeacherDashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {courses.map((c) => (
               <div key={c._id} className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3">
-                <img src={c.thumbnailUrl} alt={c.title} className="w-full h-36 rounded-2xl object-cover" />
+                <img src={c.thumbnailUrl} alt={c.title} className="w-full h-36 rounded-2xl object-cover bg-slate-100" />
                 <span className="text-[10px] font-bold uppercase bg-teal-50 text-teal-700 px-2.5 py-0.5 rounded-md">
                   {c.category} • {c.level}
                 </span>
@@ -223,11 +274,94 @@ export const TeacherDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* 2. COMPENSATION & PAYMENTS */}
-      {(activeTab === 'overview' || activeTab === 'earnings') && (
-        <div className="space-y-4 pt-4">
+      {/* 2. LIVE CLASSES */}
+      {activeTab === 'live-classes' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-lg text-navy-900">Live Virtual Classrooms</h3>
+            <button
+              onClick={() => setScheduleClassOpen(true)}
+              className="text-xs font-bold text-teal-600 hover:underline flex items-center gap-1"
+            >
+              <Clock className="w-3.5 h-3.5" /> Schedule New Session
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {liveClasses.map((lc) => (
+              <div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-3">
+                <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                  Virtual Room
+                </span>
+                <h4 className="font-extrabold text-sm text-navy-950">{lc.title}</h4>
+                <p className="text-xs text-slate-500">{lc.subject}</p>
+                <p className="text-[11px] text-slate-400">
+                  {lc.scheduledDate} at {lc.startTime}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => alert(`Starting live broadcast for: ${lc.title}`)}
+                  className="w-full py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs"
+                >
+                  Start Stream as Host
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. STUDY MATERIALS */}
+      {activeTab === 'materials' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-lg text-navy-900">Course Materials & Notes</h3>
+            <button
+              onClick={() => alert('Material upload form opened.')}
+              className="text-xs font-bold text-teal-600 hover:underline"
+            >
+              + Upload Material
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {materials.map((m) => (
+              <div key={m._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-2">
+                <FileText className="w-8 h-8 text-teal-600" />
+                <h4 className="font-extrabold text-sm text-navy-950">{m.title}</h4>
+                <p className="text-xs text-slate-400">Uploaded for students</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 4. ATTENDANCE */}
+      {activeTab === 'attendance' && (
+        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+          <h3 className="font-extrabold text-lg text-navy-900">Live Classroom Attendance Roster</h3>
+          <p className="text-xs text-slate-500">Student session participation verified for administrative stipend calculations.</p>
+          <div className="divide-y divide-slate-100">
+            {liveClasses.map((lc) => (
+              <div key={lc._id} className="py-3 flex items-center justify-between text-xs">
+                <div>
+                  <p className="font-bold text-navy-900">{lc.title}</p>
+                  <p className="text-slate-400">{lc.scheduledDate} • {lc.studentCapacity} Max Seats</p>
+                </div>
+                <span className="font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">
+                  85 Verified Attendees
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. STIPEND MANAGEMENT */}
+      {activeTab === 'stipends' && (
+        <div className="space-y-4">
           <div>
-            <h3 className="font-extrabold text-lg text-navy-900">Teacher Compensation & Payouts</h3>
+            <h3 className="font-extrabold text-lg text-navy-900">Teacher Stipend Approvals & Audits</h3>
             <p className="text-xs text-slate-500">
               Students attend for free. Admin reviews eligible completed classes and issues stipends with duplicate protection.
             </p>
@@ -322,7 +456,10 @@ export const TeacherDashboardPage: React.FC = () => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setCreateCourseOpen(false)}
+                  onClick={() => {
+                    setCreateCourseOpen(false);
+                    if (activeTab === 'create-course') handleTabChange('courses');
+                  }}
                   className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs"
                 >
                   Cancel
@@ -363,6 +500,7 @@ export const TeacherDashboardPage: React.FC = () => {
                   required
                   value={lSubject}
                   onChange={(e) => setLSubject(e.target.value)}
+                  placeholder="e.g. Computer Science"
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
@@ -374,7 +512,7 @@ export const TeacherDashboardPage: React.FC = () => {
                     required
                     value={lDate}
                     onChange={(e) => setLDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                   />
                 </div>
                 <div>
@@ -384,25 +522,28 @@ export const TeacherDashboardPage: React.FC = () => {
                     required
                     value={lTime}
                     onChange={(e) => setLTime(e.target.value)}
-                    placeholder="18:00 EST"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                    placeholder="19:00 EST"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Overview</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Class Description</label>
                 <textarea
                   rows={2}
                   value={lDesc}
                   onChange={(e) => setLDesc(e.target.value)}
-                  placeholder="Topics covered..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs"
+                  placeholder="Briefly state topics covered in this live session..."
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
                 ></textarea>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setScheduleClassOpen(false)}
+                  onClick={() => {
+                    setScheduleClassOpen(false);
+                    if (activeTab === 'schedule-class') handleTabChange('live-classes');
+                  }}
                   className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs"
                 >
                   Cancel
@@ -411,7 +552,7 @@ export const TeacherDashboardPage: React.FC = () => {
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md"
                 >
-                  Schedule Class
+                  Schedule Session
                 </button>
               </div>
             </form>

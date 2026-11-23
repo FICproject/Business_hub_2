@@ -7,8 +7,9 @@ import { setCredentials } from '../../store';
 import { UserRole } from '../../types';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -21,18 +22,20 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await authApi.login({ email, password });
+      const res = await authApi.login({ email: identifier, mobile: identifier, password });
       if (res.data.success) {
         dispatch(setCredentials({ user: res.data.user, token: res.data.token }));
 
         // Redirection based on role
-        const roles: UserRole[] = res.data.user.roles;
+        const roles: UserRole[] = res.data.user.roles || [];
         if (roles.includes('admin')) {
           navigate('/dashboard/admin');
         } else if (roles.includes('teacher')) {
           navigate('/dashboard/teacher');
         } else if (roles.includes('businessman') || roles.includes('entrepreneur')) {
           navigate('/dashboard/business');
+        } else if (roles.includes('normal') || roles.includes('user')) {
+          navigate('/dashboard/user');
         } else {
           navigate('/dashboard/student');
         }
@@ -44,8 +47,8 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
+  const handleQuickLogin = (demoLogin: string, demoPass: string) => {
+    setIdentifier(demoLogin);
     setPassword(demoPass);
   };
 
@@ -69,15 +72,15 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email or Mobile Number</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@businesshub.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="name@businesshub.com or +1 555-0199"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
@@ -103,6 +106,19 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Remember Me */}
+          <div className="flex items-center justify-between text-xs">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-slate-600 font-medium">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4"
+              />
+              <span>Remember me</span>
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -118,13 +134,13 @@ export const LoginPage: React.FC = () => {
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
             One-Click Test Accounts:
           </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             <button
               type="button"
-              onClick={() => handleQuickLogin('admin@businesshub.com', 'admin12345')}
+              onClick={() => handleQuickLogin('student@businesshub.com', 'student12345')}
               className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate"
             >
-              👑 Admin
+              📚 Student
             </button>
             <button
               type="button"
@@ -142,10 +158,17 @@ export const LoginPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => handleQuickLogin('student@businesshub.com', 'student12345')}
+              onClick={() => handleQuickLogin('user@businesshub.com', 'user12345')}
               className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate"
             >
-              📚 Student
+              👤 Normal User
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('admin@businesshub.com', 'admin12345')}
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate col-span-2 sm:col-span-1"
+            >
+              👑 Admin
             </button>
           </div>
         </div>

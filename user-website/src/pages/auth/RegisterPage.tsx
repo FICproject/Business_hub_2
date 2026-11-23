@@ -103,6 +103,8 @@ export const RegisterPage: React.FC = () => {
       navigate('/dashboard/teacher');
     } else if (selectedRole === 'businessman' || selectedRole === 'entrepreneur') {
       navigate('/dashboard/business');
+    } else if (selectedRole === 'normal' || selectedRole === 'user') {
+      navigate('/dashboard/user');
     } else {
       navigate('/dashboard/student');
     }

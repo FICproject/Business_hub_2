@@ -21,17 +21,26 @@ import {
   CheckCircle,
   Menu,
   X,
-  ChevronDown,
-  Layers,
+  Search,
+  Bookmark,
+  Calendar,
   Users as UsersIcon,
+  Award,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import { RootState, logout, setActiveRole, setNotifications } from '../store';
 import { notificationsApi } from '../services/api';
 import { UserRole } from '../types';
+import { ConfirmationModal } from '../components/dashboard/ConfirmationModal';
+import { GlobalSearchModal } from '../components/dashboard/GlobalSearchModal';
 
 export const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   const { user, isAuthenticated, activeRole } = useSelector((state: RootState) => state.auth);
   const { notifications, unreadCount } = useSelector((state: RootState) => state.notifications);
@@ -46,19 +55,22 @@ export const DashboardLayout: React.FC = () => {
       return;
     }
 
-    // Load user notifications
-    notificationsApi.getMyNotifications()
+    notificationsApi
+      .getMyNotifications()
       .then((res) => {
-        dispatch(setNotifications({
-          notifications: res.data.data,
-          unreadCount: res.data.unreadCount,
-        }));
+        dispatch(
+          setNotifications({
+            notifications: res.data.data,
+            unreadCount: res.data.unreadCount,
+          })
+        );
       })
       .catch((err) => console.log('Notifications load notice:', err.message));
   }, [isAuthenticated]);
 
-  const handleLogout = () => {
+  const handleLogoutConfirm = () => {
     dispatch(logout());
+    setLogoutModalOpen(false);
     navigate('/');
   };
 
@@ -66,80 +78,140 @@ export const DashboardLayout: React.FC = () => {
     try {
       await notificationsApi.markAllAsRead();
       const res = await notificationsApi.getMyNotifications();
-      dispatch(setNotifications({
-        notifications: res.data.data,
-        unreadCount: res.data.unreadCount,
-      }));
+      dispatch(
+        setNotifications({
+          notifications: res.data.data,
+          unreadCount: res.data.unreadCount,
+        })
+      );
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Student Navigation Items
+  // 1. STUDENT NAVIGATION
   const studentNav = [
-    { label: 'Overview', path: '/dashboard/student', icon: LayoutDashboard },
-    { label: 'My Courses', path: '/dashboard/student/courses', icon: GraduationCap },
-    { label: 'Live Classes', path: '/education/live-classes', icon: Video },
-    { label: 'Study Materials', path: '/education/materials', icon: FileText },
-    { label: 'Tuition', path: '/education/tuition', icon: UsersIcon },
-    { label: 'Explore Jobs', path: '/jobs', icon: Briefcase },
-    { label: 'My Applications', path: '/dashboard/student/applications', icon: CheckCircle },
-    { label: 'Marketplace', path: '/marketplace', icon: Store },
-    { label: 'My Cart', path: '/cart', icon: ShoppingBag },
-    { label: 'My Orders', path: '/dashboard/student/orders', icon: Clock },
-    { label: 'Shared Links', path: '/dashboard/student/shared-links', icon: Share2 },
+    { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+    { label: 'My Courses', tab: 'courses', icon: GraduationCap },
+    { label: 'Browse Courses', tab: 'browse', icon: Layers },
+    { label: 'Live Classes', tab: 'live-classes', icon: Video },
+    { label: 'Study Materials', tab: 'materials', icon: FileText },
+    { label: 'My Certificates', tab: 'certificates', icon: Award },
+    { label: 'Job Opportunities', tab: 'jobs', icon: Briefcase },
+    { label: 'My Applications', tab: 'applications', icon: CheckCircle },
+    { label: 'Community', tab: 'community', icon: UsersIcon },
+    { label: 'Events', tab: 'events', icon: Calendar },
+    { label: 'Saved Items', tab: 'saved', icon: Bookmark },
+    { label: 'My Profile', path: '/dashboard/profile', icon: User },
+    { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
   ];
 
-  // Teacher Navigation Items
+  // 2. TEACHER NAVIGATION
   const teacherNav = [
-    { label: 'Dashboard', path: '/dashboard/teacher', icon: LayoutDashboard },
-    { label: 'My Courses', path: '/dashboard/teacher/courses', icon: GraduationCap },
-    { label: 'Create Course', path: '/dashboard/teacher/create-course', icon: PlusCircle },
-    { label: 'Live Classes', path: '/dashboard/teacher/live-classes', icon: Video },
-    { label: 'Schedule Class', path: '/dashboard/teacher/schedule-class', icon: Clock },
-    { label: 'Study Materials', path: '/dashboard/teacher/materials', icon: FileText },
-    { label: 'Tuition Management', path: '/dashboard/teacher/tuitions', icon: UsersIcon },
-    { label: 'Attendance', path: '/dashboard/teacher/attendance', icon: CheckCircle },
-    { label: 'My Earnings', path: '/dashboard/teacher/earnings', icon: DollarSign },
+    { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+    { label: 'My Courses', tab: 'courses', icon: GraduationCap },
+    { label: 'Create Course', tab: 'create-course', icon: PlusCircle },
+    { label: 'Live Class Management', tab: 'live-classes', icon: Video },
+    { label: 'Schedule Classes', tab: 'schedule-class', icon: Clock },
+    { label: 'Study Materials', tab: 'materials', icon: FileText },
+    { label: 'Attendance', tab: 'attendance', icon: CheckCircle },
+    { label: 'Stipend Management', tab: 'stipends', icon: DollarSign },
+    { label: 'Community', tab: 'community', icon: UsersIcon },
+    { label: 'Events', tab: 'events', icon: Calendar },
+    { label: 'My Profile', path: '/dashboard/profile', icon: User },
+    { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
   ];
 
-  // Business Navigation Items
+  // 3. BUSINESSMAN / ENTREPRENEUR NAVIGATION
   const businessNav = [
-    { label: 'Dashboard', path: '/dashboard/business', icon: LayoutDashboard },
-    { label: 'Business Profile', path: '/dashboard/business/profile', icon: User },
-    { label: 'Verification Status', path: '/dashboard/business/verification', icon: ShieldCheck },
-    { label: 'My Products', path: '/dashboard/business/products', icon: Store },
-    { label: 'Add Product', path: '/dashboard/business/add-product', icon: PlusCircle },
-    { label: 'My Services', path: '/dashboard/business/services', icon: Layers },
-    { label: 'Orders & Sales', path: '/dashboard/business/orders', icon: ShoppingBag },
-    { label: 'Job Management', path: '/dashboard/business/jobs', icon: Briefcase },
+    { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+    { label: 'Business Profile', tab: 'profile', icon: User },
+    { label: 'Verification Status', tab: 'verification', icon: ShieldCheck },
+    { label: 'My Store', tab: 'store', icon: Store },
+    { label: 'Products', tab: 'products', icon: Store },
+    { label: 'Add Product', tab: 'add-product', icon: PlusCircle },
+    { label: 'Services', tab: 'services', icon: Layers },
+    { label: 'Orders & Tracking', tab: 'orders', icon: ShoppingBag },
+    { label: 'Job Postings', tab: 'jobs', icon: Briefcase },
+    { label: 'Share Links', tab: 'sharing', icon: Share2 },
+    { label: 'My Profile', path: '/dashboard/profile', icon: User },
+    { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
+  ];
+
+  // 4. NORMAL USER NAVIGATION
+  const normalUserNav = [
+    { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+    { label: 'My Profile', path: '/dashboard/profile', icon: User },
+    { label: 'Marketplace', tab: 'marketplace', icon: Store },
+    { label: 'My Cart', tab: 'cart', icon: ShoppingBag },
+    { label: 'My Orders', tab: 'orders', icon: Clock },
+    { label: 'Wishlist & Saved', tab: 'saved', icon: Bookmark },
+    { label: 'My Applications', tab: 'applications', icon: CheckCircle },
+    { label: 'My Learning', tab: 'learning', icon: GraduationCap },
+    { label: 'Shared Links', tab: 'sharing', icon: Share2 },
+    { label: 'Community', tab: 'community', icon: UsersIcon },
+    { label: 'Events', tab: 'events', icon: Calendar },
+    { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
   ];
 
   let currentNav = studentNav;
+  let roleTitle = 'Student Portal';
+  let roleBadge = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+  let baseRolePath = '/dashboard/student';
+
   if (activeRole === 'teacher') {
     currentNav = teacherNav;
+    roleTitle = 'Teacher Workspace';
+    roleBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    baseRolePath = '/dashboard/teacher';
   } else if (activeRole === 'businessman' || activeRole === 'entrepreneur') {
     currentNav = businessNav;
+    roleTitle = 'Business Enterprise';
+    roleBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    baseRolePath = '/dashboard/business';
+  } else if (activeRole === 'normal' || activeRole === 'user') {
+    currentNav = normalUserNav;
+    roleTitle = 'Member Dashboard';
+    roleBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+    baseRolePath = '/dashboard/user';
   }
 
+  // Active Tab handling from URL search params
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab') || 'overview';
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
       {/* Mobile Top Bar */}
-      <div className="md:hidden bg-navy-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <button onClick={() => setSidebarOpen(true)} className="p-1 rounded-lg hover:bg-slate-800">
-            <Menu className="w-6 h-6" />
-          </button>
-          <span className="font-extrabold text-lg text-white">Business<span className="text-teal-400">Hub</span></span>
-        </div>
+      <div className="md:hidden bg-navy-950 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-            className="relative p-2 text-slate-300 hover:text-white"
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-300"
           >
-            <Bell className="w-5 h-5" />
+            <Menu className="w-5 h-5" />
+          </button>
+          <Link to="/" className="flex items-center gap-1.5">
+            <span className="font-extrabold text-base tracking-tight text-white">
+              Business<span className="text-amber-400">Hub</span>
+            </span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+            className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800"
+          >
+            <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-teal-500 text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-amber-500 text-[9px] font-extrabold flex items-center justify-center text-navy-950">
                 {unreadCount}
               </span>
             )}
@@ -149,39 +221,47 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed md:sticky top-0 inset-y-0 left-0 z-50 w-72 bg-navy-900 text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed md:sticky top-0 inset-y-0 left-0 z-50 w-72 bg-navy-950 text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } border-r border-slate-800`}
+        } border-r border-slate-800/80`}
       >
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-80px)]">
+        <div className="p-5 space-y-5 overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-thin">
           {/* Logo & Close button */}
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-teal-500 flex items-center justify-center text-white">
-                <Store className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-navy-950 shadow-md shadow-amber-500/20">
+                <Store className="w-5 h-5" />
               </div>
               <div>
-                <span className="font-extrabold text-xl text-white">Business</span>
-                <span className="font-extrabold text-xl text-teal-400">Hub</span>
+                <span className="font-extrabold text-lg text-white">Business</span>
+                <span className="font-extrabold text-lg text-amber-400">Hub</span>
               </div>
             </Link>
-            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-white p-1"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* User Role Card */}
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <div className="flex items-center gap-3">
               <img
-                src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`}
+                src={
+                  user?.avatarUrl ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`
+                }
                 alt="Avatar"
-                className="w-10 h-10 rounded-xl object-cover bg-slate-800"
+                className="w-10 h-10 rounded-xl object-cover bg-slate-800 border border-white/10"
               />
-              <div className="overflow-hidden">
+              <div className="overflow-hidden min-w-0">
                 <p className="font-bold text-xs text-white truncate">{user?.fullName}</p>
-                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-teal-500/20 text-teal-400 mt-0.5">
-                  {activeRole || user?.roles[0]}
+                <span
+                  className={`inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border ${roleBadge} mt-0.5`}
+                >
+                  {roleTitle}
                 </span>
               </div>
             </div>
@@ -190,7 +270,7 @@ export const DashboardLayout: React.FC = () => {
             {user?.roles && user.roles.length > 1 && (
               <div className="pt-2 border-t border-white/10">
                 <label className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
-                  Active View
+                  Switch Active Portal:
                 </label>
                 <div className="flex flex-wrap gap-1">
                   {user.roles.map((r) => (
@@ -200,10 +280,13 @@ export const DashboardLayout: React.FC = () => {
                         dispatch(setActiveRole(r as UserRole));
                         if (r === 'teacher') navigate('/dashboard/teacher');
                         else if (r === 'businessman' || r === 'entrepreneur') navigate('/dashboard/business');
+                        else if (r === 'normal' || r === 'user') navigate('/dashboard/user');
                         else navigate('/dashboard/student');
                       }}
-                      className={`px-2 py-0.5 rounded text-[11px] font-semibold capitalize ${
-                        activeRole === r ? 'bg-teal-500 text-navy-950 font-bold' : 'bg-slate-800 text-slate-400'
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold capitalize transition-all ${
+                        activeRole === r
+                          ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
+                          : 'bg-slate-900 text-slate-400 hover:text-white'
                       }`}
                     >
                       {r}
@@ -216,32 +299,40 @@ export const DashboardLayout: React.FC = () => {
 
           {/* Navigation Links */}
           <nav className="space-y-1">
-            {currentNav.map((item) => {
-              const isActive = location.pathname === item.path;
+            {currentNav.map((item: any, idx) => {
+              const targetUrl = item.tab
+                ? (item.tab === 'overview' ? baseRolePath : `${baseRolePath}?tab=${item.tab}`)
+                : item.path;
+
+              const isTabActive = item.tab
+                ? location.pathname === baseRolePath && currentTab === item.tab
+                : location.pathname.startsWith(item.path);
+
               const Icon = item.icon;
               return (
                 <Link
-                  key={item.label}
-                  to={item.path}
+                  key={`${item.label}-${idx}`}
+                  to={targetUrl}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-                    isActive
-                      ? 'bg-teal-600 text-white shadow-md shadow-teal-600/30 font-bold'
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    isTabActive
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800">
+        {/* Sidebar Footer Logout */}
+        <div className="p-4 border-t border-slate-800/80">
           <button
-            onClick={handleLogout}
+            type="button"
+            onClick={() => setLogoutModalOpen(true)}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <LogOut className="w-4 h-4" />
@@ -253,16 +344,26 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col min-w-0">
         {/* Desktop Header */}
-        <header className="hidden md:flex h-20 bg-white border-b border-slate-200/80 px-8 items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-teal-600 bg-teal-50 px-3 py-1 rounded-md">
-              {activeRole?.toUpperCase()} PORTAL
+        <header className="hidden md:flex h-20 bg-white border-b border-slate-200/80 px-8 items-center justify-between sticky top-0 z-30 shadow-sm">
+          {/* Left: Active Portal Badge */}
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-navy-900 bg-slate-100 px-3.5 py-1.5 rounded-xl border border-slate-200">
+              {roleTitle}
             </span>
-            <span className="text-xs text-slate-400 font-semibold">• Business Hub 2.0</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Notifications Trigger */}
+          {/* Right: Search Icon, Notifications, Profile Dropdown */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Only Search Icon Button */}
+            <button
+              onClick={() => setSearchModalOpen(true)}
+              className="p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-navy-900 transition-colors"
+              title="Search items, courses, jobs (⌘K)"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* Smart Notification Trigger */}
             <div className="relative">
               <button
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
@@ -271,7 +372,7 @@ export const DashboardLayout: React.FC = () => {
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-teal-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                  <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-amber-500 text-navy-950 text-[10px] font-extrabold flex items-center justify-center shadow-sm">
                     {unreadCount}
                   </span>
                 )}
@@ -279,11 +380,17 @@ export const DashboardLayout: React.FC = () => {
 
               {/* Notifications Dropdown */}
               {notifDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 space-y-3 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <h4 className="font-extrabold text-xs uppercase tracking-wider text-navy-900">Notifications</h4>
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-200 p-5 z-50 space-y-3 animate-in fade-in zoom-in-95">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-extrabold text-xs uppercase tracking-wider text-navy-950 flex items-center gap-2">
+                      <Bell className="w-3.5 h-3.5 text-amber-500" />
+                      Smart Notifications
+                    </h4>
                     {unreadCount > 0 && (
-                      <button onClick={handleMarkAllRead} className="text-[11px] font-bold text-teal-600 hover:underline">
+                      <button
+                        onClick={handleMarkAllRead}
+                        className="text-[11px] font-bold text-teal-600 hover:underline"
+                      >
                         Mark all read
                       </button>
                     )}
@@ -291,12 +398,15 @@ export const DashboardLayout: React.FC = () => {
 
                   <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto space-y-1">
                     {notifications.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-4 text-center">No notifications yet.</p>
+                      <p className="text-xs text-slate-400 py-6 text-center">No notifications yet.</p>
                     ) : (
                       notifications.slice(0, 5).map((n) => (
-                        <div key={n._id} className="py-2.5 text-left">
+                        <div key={n._id} className="py-2.5 text-left space-y-0.5">
                           <p className="text-xs font-bold text-slate-900">{n.title}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{n.message}</p>
+                          <p className="text-[11px] text-slate-500 leading-snug">{n.message}</p>
+                          <span className="text-[9px] text-slate-400">
+                            {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
                       ))
                     )}
@@ -305,20 +415,92 @@ export const DashboardLayout: React.FC = () => {
               )}
             </div>
 
-            <Link
-              to="/marketplace"
-              className="px-4 py-2 rounded-xl text-xs font-bold text-navy-900 hover:bg-slate-100 transition-colors"
-            >
-              Public Marketplace
-            </Link>
+            {/* Profile Avatar & Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center gap-2.5 p-1.5 rounded-2xl hover:bg-slate-100 transition-colors"
+              >
+                <img
+                  src={
+                    user?.avatarUrl ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`
+                  }
+                  alt={user?.fullName}
+                  className="w-9 h-9 rounded-xl object-cover bg-slate-200 border border-slate-200"
+                />
+                <div className="text-left hidden lg:block">
+                  <p className="text-xs font-extrabold text-navy-950 leading-tight">{user?.fullName}</p>
+                  <p className="text-[10px] text-slate-400 capitalize">{activeRole || user?.roles[0]}</p>
+                </div>
+              </button>
+
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 space-y-1 animate-in fade-in zoom-in-95">
+                  <Link
+                    to="/dashboard/profile"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  >
+                    <User className="w-4 h-4 text-slate-400" />
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/dashboard/saved"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  >
+                    <Bookmark className="w-4 h-4 text-slate-400" />
+                    Saved Items
+                  </Link>
+                  <Link
+                    to="/marketplace"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  >
+                    <Store className="w-4 h-4 text-slate-400" />
+                    Marketplace
+                  </Link>
+                  <div className="pt-1 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        setLogoutModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Dashboard Page Body */}
         <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          {/* Child Page Content */}
           <Outlet />
         </main>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={logoutModalOpen}
+        title="Sign Out of Business Hub"
+        message="Are you sure you want to end your current session? You can sign back in anytime to continue your progress."
+        confirmLabel="Sign Out"
+        cancelLabel="Stay Logged In"
+        isDestructive={true}
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setLogoutModalOpen(false)}
+      />
     </div>
   );
 };

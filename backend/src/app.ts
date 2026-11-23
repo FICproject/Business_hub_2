@@ -68,6 +68,10 @@ app.use('/api/sharing', sharingRoutes);
 app.use('/api/shared-links', sharingRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/search', (req, res, next) => {
+  req.url = `/search${req.url === '/' ? '' : req.url}`;
+  usersRoutes(req, res, next);
+});
 
 // Direct REST aliases matching PRD specifications
 app.use('/api/products', (req, res, next) => {

@@ -103,4 +103,15 @@ export const notificationsApi = {
   markAllAsRead: () => api.put('/notifications/read-all'),
 };
 
+// Users & Profile Services
+export const usersApi = {
+  getProfile: () => api.get('/auth/me'),
+  updateProfile: (data: any) => api.put('/users/profile', data),
+  changePassword: (data: any) => api.post('/users/change-password', data),
+  getSavedItems: () => api.get('/users/saved-items'),
+  addSavedItem: (data: any) => api.post('/users/saved-items', data),
+  removeSavedItem: (id: string) => api.delete(`/users/saved-items/${id}`),
+  globalSearch: (params: { q: string; category?: string }) => api.get('/users/search', { params }),
+};
+
 export default api;

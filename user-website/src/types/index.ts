@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'student' | 'teacher' | 'businessman' | 'entrepreneur' | 'normal';
+export type UserRole = 'admin' | 'student' | 'teacher' | 'businessman' | 'entrepreneur' | 'normal' | 'user';
 
 export interface IUser {
   _id: string;
@@ -8,11 +8,32 @@ export interface IUser {
   dob: string;
   roles: UserRole[];
   avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  education?: string;
+  professionalDetails?: string;
+  privacySettings?: {
+    hideContact?: boolean;
+    publicProfile?: boolean;
+  };
   isEmailVerified: boolean;
   isMobileVerified: boolean;
   status: 'active' | 'suspended' | 'blocked';
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ISavedItem {
+  _id: string;
+  userId: string;
+  targetId: string;
+  targetType: 'product' | 'service' | 'course' | 'job' | 'event' | 'community';
+  title: string;
+  category: string;
+  image?: string;
+  price?: number | null;
+  url?: string;
+  createdAt: string;
 }
 
 export interface IBusiness {

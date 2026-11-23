@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { marketplaceApi, educationApi, jobsApi } from '../../services/api';
 import { IProduct, ICourse, ILiveClass, IJob } from '../../types';
-import heroModel from '../../assets/hero-model.png';
+import heroModel from '../../assets/hero-model.jpg';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -142,13 +142,32 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Equal Sized Hero Image (Uncropped, Balanced) */}
-          <div className="flex justify-center items-center select-none w-full">
-            <div className="relative w-full max-w-[460px] flex justify-center items-center mx-auto">
+          {/* Right Column: Hero Image Covering Full Area with Soft Border Blur */}
+          <div className="flex justify-center items-center select-none w-full h-full">
+            <div className="relative w-full h-[440px] sm:h-[500px] lg:h-[540px] flex justify-center items-center mx-auto overflow-hidden rounded-3xl">
+              {/* Main Photo covering the right hero space */}
               <img
                 src={heroModel}
                 alt="Business Hub Platform - Shop, Learn, Find Jobs and Grow"
-                className="w-full h-auto max-h-[440px] object-contain hover:scale-[1.02] transition-transform duration-500 pointer-events-none mx-auto"
+                className="w-full h-full object-cover object-top sm:object-center pointer-events-none hover:scale-[1.02] transition-transform duration-700"
+                style={{
+                  WebkitMaskImage: 'radial-gradient(ellipse 92% 90% at 50% 50%, black 65%, transparent 100%)',
+                  maskImage: 'radial-gradient(ellipse 92% 90% at 50% 50%, black 65%, transparent 100%)',
+                }}
+              />
+
+              {/* Edge Blur & Vignette Blend Layers */}
+              <div
+                className="absolute inset-0 pointer-events-none rounded-3xl"
+                style={{
+                  boxShadow: 'inset 0 0 50px 30px #ffffff',
+                }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none rounded-3xl"
+                style={{
+                  background: 'radial-gradient(ellipse at center, transparent 65%, #ffffff 98%)',
+                }}
               />
             </div>
           </div>
@@ -766,21 +785,21 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Pillar 4: Teachers & Mentors */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div id="community" className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between scroll-mt-24">
               <div>
                 <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">Teacher Community</h3>
+                <h3 className="text-base font-extrabold text-[#0A255C] mb-2">Teacher &amp; Student Community</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Host live interactive video classrooms, manage enrolled students, evaluate assignments, and shape the next generation.
+                  Host live interactive video classrooms, join collaborative study groups, and connect with peers and mentors across the platform.
                 </p>
               </div>
               <Link
-                to="/dashboard/teacher"
+                to="/community"
                 className="pt-4 mt-4 border-t border-slate-50 flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700"
               >
-                <span>Teach With Us</span>
+                <span>Join Community</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

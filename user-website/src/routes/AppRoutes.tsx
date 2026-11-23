@@ -24,11 +24,16 @@ import { TermsPage } from '../pages/legal/TermsPage';
 import { PrivacyPolicyPage } from '../pages/legal/PrivacyPolicyPage';
 import { BusinessDetailsPage } from '../pages/business/BusinessDetailsPage';
 import { TeacherDetailsPage } from '../pages/teacher/TeacherDetailsPage';
+import { CommunityPage } from '../pages/community/CommunityPage';
+import { EventsPage } from '../pages/events/EventsPage';
 
 // Dashboards
 import { StudentDashboardPage } from '../pages/student/StudentDashboardPage';
 import { TeacherDashboardPage } from '../pages/teacher/TeacherDashboardPage';
 import { BusinessDashboardPage } from '../pages/business/BusinessDashboardPage';
+import { NormalUserDashboardPage } from '../pages/user/NormalUserDashboardPage';
+import { ProfilePage } from '../pages/profile/ProfilePage';
+import { SavedItemsView } from '../components/dashboard/SavedItemsView';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -56,9 +61,12 @@ export const AppRoutes: React.FC = () => {
 
         {/* Direct Navigation Pages */}
         <Route path="/business" element={<BusinessDetailsPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/student" element={<Navigate to="/education" replace />} />
         <Route path="/teacher" element={<TeacherDetailsPage />} />
         <Route path="/about" element={<Navigate to="/#about" replace />} />
+        <Route path="/contact" element={<Navigate to="/#contact" replace />} />
       </Route>
 
       {/* Role-Based Dashboards */}
@@ -67,6 +75,9 @@ export const AppRoutes: React.FC = () => {
         <Route path="student/*" element={<StudentDashboardPage />} />
         <Route path="teacher/*" element={<TeacherDashboardPage />} />
         <Route path="business/*" element={<BusinessDashboardPage />} />
+        <Route path="user/*" element={<NormalUserDashboardPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="saved" element={<SavedItemsView />} />
         <Route path="admin" element={<Navigate to="http://localhost:3001" replace />} />
       </Route>
 

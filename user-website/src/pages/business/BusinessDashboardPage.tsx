@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
   Store,
@@ -14,6 +15,7 @@ import {
   FileText,
   DollarSign,
   TrendingUp,
+  Share2,
 } from 'lucide-react';
 import { businessApi, marketplaceApi, jobsApi } from '../../services/api';
 import { RootState } from '../../store';
@@ -21,13 +23,24 @@ import { IBusiness, IProduct, IService, IOrder, IJob } from '../../types';
 
 export const BusinessDashboardPage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get('tab') || 'overview';
+
+  const handleTabChange = (newTab: string) => {
+    if (newTab === 'overview') {
+      searchParams.delete('tab');
+      setSearchParams(searchParams);
+    } else {
+      setSearchParams({ tab: newTab });
+    }
+  };
 
   const [business, setBusiness] = useState<IBusiness | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [services, setServices] = useState<IService[]>([]);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [jobs, setJobs] = useState<IJob[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'products' | 'services' | 'orders' | 'jobs'>('overview');
   const [loading, setLoading] = useState(true);
 
   // Business verification document form
@@ -51,6 +64,12 @@ export const BusinessDashboardPage: React.FC = () => {
   const [jSalaryMin, setJSalaryMin] = useState('90000');
   const [jSalaryMax, setJSalaryMax] = useState('140000');
   const [jDesc, setJDesc] = useState('');
+
+  useEffect(() => {
+    if (activeTab === 'add-product') {
+      setProdModalOpen(true);
+    }
+  }, [activeTab]);
 
   const loadData = () => {
     setLoading(true);
@@ -227,19 +246,21 @@ export const BusinessDashboardPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
         {[
           { id: 'overview', label: 'Overview' },
-          { id: 'profile', label: 'Verification & Legal Docs' },
+          { id: 'verification', label: 'Verification & Legal Docs' },
           { id: 'products', label: `My Products (${products.length})` },
           { id: 'orders', label: `Orders (${orders.length})` },
+          { id: 'jobs', label: `Job Postings (${jobs.length})` },
+          { id: 'services', label: `Services (${services.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2 rounded-xl transition-colors ${
-              activeTab === tab.id
-                ? 'bg-teal-600 text-white shadow-sm'
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
+              activeTab === tab.id || (tab.id === 'verification' && activeTab === 'profile') || (tab.id === 'products' && activeTab === 'store')
+                ? 'bg-navy-900 text-white shadow-md'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
@@ -249,7 +270,7 @@ export const BusinessDashboardPage: React.FC = () => {
       </div>
 
       {/* 1. VERIFICATION & LEGAL DOCS */}
-      {(activeTab === 'overview' || activeTab === 'profile') && (
+      {(activeTab === 'overview' || activeTab === 'profile' || activeTab === 'verification') && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>

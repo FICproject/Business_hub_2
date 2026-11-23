@@ -27,6 +27,7 @@ export interface MemoryStore {
   sharedLinks: any[];
   notifications: any[];
   auditLogs: any[];
+  savedItems: any[];
   platformSettings: any;
 }
 
@@ -52,6 +53,7 @@ const defaultStore: MemoryStore = {
   sharedLinks: [],
   notifications: [],
   auditLogs: [],
+  savedItems: [],
   platformSettings: {
     siteName: 'Business Hub',
     maintenanceMode: false,
@@ -73,7 +75,9 @@ class DataStore {
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!parsed.savedItems) parsed.savedItems = [];
+        return parsed;
       }
     } catch (err) {
       console.warn('Could not read existing data_store.json, initializing fresh store');
