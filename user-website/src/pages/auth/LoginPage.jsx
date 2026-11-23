@@ -106,7 +106,7 @@ export const LoginPage = () => {
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
             One-Click Test Accounts:
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <button type="button" onClick={() => handleQuickLogin('student@businesshub.com', 'student12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
               📚 Student
             </button>
@@ -118,9 +118,6 @@ export const LoginPage = () => {
             </button>
             <button type="button" onClick={() => handleQuickLogin('user@businesshub.com', 'user12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
               👤 Normal User
-            </button>
-            <button type="button" onClick={() => handleQuickLogin('admin@businesshub.com', 'admin12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate col-span-2 sm:col-span-1">
-              👑 Admin
             </button>
           </div>
         </div>
