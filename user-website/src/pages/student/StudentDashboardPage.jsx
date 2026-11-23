@@ -216,21 +216,6 @@ export const StudentDashboardPage = () => {
         },
     ];
     return (<div className="space-y-6 max-w-7xl mx-auto">
-      {/* Back to Overview bar for separate module pages */}
-      {activeTab !== 'overview' && (
-        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-          <button
-            onClick={() => handleTabChange('overview')}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-950 transition-colors"
-          >
-            ← Back to Overview
-          </button>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-            {activeTab.replace('-', ' ')}
-          </span>
-        </div>
-      )}
-
       {/* =========================================================================
             MODULE 1: OVERVIEW DASHBOARD
         ========================================================================= */}
