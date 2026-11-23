@@ -163,14 +163,19 @@ export const DashboardLayout = () => {
         </div>
       </div>
 
-      {/* Sidebar Navigation */}
-      <aside className={`fixed md:sticky top-0 inset-y-0 left-0 z-50 w-72 bg-navy-950 text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-slate-800/80`}>
-        <div className="p-5 space-y-5 overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-thin">
+      {/* Sidebar Navigation - Fixed & Static on Desktop */}
+      <aside
+        className={`fixed top-0 inset-y-0 left-0 z-40 w-64 lg:w-72 h-screen h-[100dvh] bg-navy-950 text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } border-r border-slate-800/80 shadow-lg`}
+      >
+        {/* Top Header: Logo & Profile Card (Fixed, non-scrolling) */}
+        <div className="p-4 lg:p-5 pb-2 flex-shrink-0 space-y-3">
           {/* Logo & Close button */}
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-navy-950 shadow-md shadow-amber-500/20">
-                <Store className="w-5 h-5"/>
+                <Store className="w-5 h-5" />
               </div>
               <div>
                 <span className="font-extrabold text-lg text-white">Business</span>
@@ -178,15 +183,21 @@ export const DashboardLayout = () => {
               </div>
             </Link>
             <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white p-1">
-              <X className="w-5 h-5"/>
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* User Role Card */}
-          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <div className="flex items-center gap-3">
-              <img src={user?.avatarUrl ||
-            `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`} alt="Avatar" className="w-10 h-10 rounded-xl object-cover bg-slate-800 border border-white/10"/>
+              <img
+                src={
+                  user?.avatarUrl ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`
+                }
+                alt="Avatar"
+                className="w-9 h-9 rounded-xl object-cover bg-slate-800 border border-white/10"
+              />
               <div className="overflow-hidden min-w-0">
                 <p className="font-bold text-xs text-white truncate">{user?.fullName}</p>
                 <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border ${roleBadge} mt-0.5`}>
@@ -196,61 +207,82 @@ export const DashboardLayout = () => {
             </div>
 
             {/* Multi-role switcher */}
-            {user?.roles && user.roles.length > 1 && (<div className="pt-2 border-t border-white/10">
+            {user?.roles && user.roles.length > 1 && (
+              <div className="pt-2 border-t border-white/10">
                 <label className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
                   Switch Active Portal:
                 </label>
                 <div className="flex flex-wrap gap-1">
-                  {user.roles.map((r) => (<button key={r} onClick={() => {
-                    dispatch(setActiveRole(r));
-                    if (r === 'teacher')
-                        navigate('/dashboard/teacher');
-                    else if (r === 'businessman' || r === 'entrepreneur')
-                        navigate('/dashboard/business');
-                    else if (r === 'normal' || r === 'user')
-                        navigate('/dashboard/user');
-                    else
-                        navigate('/dashboard/student');
-                }} className={`px-2 py-0.5 rounded text-[11px] font-semibold capitalize transition-all ${activeRole === r
-                    ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
-                    : 'bg-slate-900 text-slate-400 hover:text-white'}`}>
+                  {user.roles.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        dispatch(setActiveRole(r));
+                        if (r === 'teacher') navigate('/dashboard/teacher');
+                        else if (r === 'businessman' || r === 'entrepreneur') navigate('/dashboard/business');
+                        else if (r === 'normal' || r === 'user') navigate('/dashboard/user');
+                        else navigate('/dashboard/student');
+                      }}
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold capitalize transition-all ${
+                        activeRole === r
+                          ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
+                          : 'bg-slate-900 text-slate-400 hover:text-white'
+                      }`}
+                    >
                       {r}
-                    </button>))}
+                    </button>
+                  ))}
                 </div>
-              </div>)}
+              </div>
+            )}
           </div>
-
-          {/* Navigation Links */}
-          <nav className="space-y-1">
-            {currentNav.map((item, idx) => {
-            const targetUrl = item.tab
-                ? (item.tab === 'overview' ? baseRolePath : `${baseRolePath}?tab=${item.tab}`)
-                : item.path;
-            const isTabActive = item.tab
-                ? location.pathname === baseRolePath && currentTab === item.tab
-                : location.pathname.startsWith(item.path);
-            const Icon = item.icon;
-            return (<Link key={`${item.label}-${idx}`} to={targetUrl} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${isTabActive
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-                  <Icon className="w-4 h-4 flex-shrink-0"/>
-                  <span className="truncate">{item.label}</span>
-                </Link>);
-        })}
-          </nav>
         </div>
 
-        {/* Sidebar Footer Logout */}
-        <div className="p-4 border-t border-slate-800/80">
-          <button type="button" onClick={() => setLogoutModalOpen(true)} className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors">
-            <LogOut className="w-4 h-4"/>
+        {/* Navigation Links (Compact, fitted, static and non-scrolling) */}
+        <nav className="px-3 lg:px-4 flex-grow overflow-y-auto no-scrollbar space-y-0.5 py-1">
+          {currentNav.map((item, idx) => {
+            const targetUrl = item.tab
+              ? item.tab === 'overview'
+                ? baseRolePath
+                : `${baseRolePath}?tab=${item.tab}`
+              : item.path;
+            const isTabActive = item.tab
+              ? location.pathname === baseRolePath && currentTab === item.tab
+              : location.pathname.startsWith(item.path);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={`${item.label}-${idx}`}
+                to={targetUrl}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  isTabActive
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Sidebar Footer Logout (Fixed at bottom) */}
+        <div className="p-3 lg:p-4 border-t border-slate-800/80 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setLogoutModalOpen(true)}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-grow flex flex-col min-w-0">
+      {/* Main Content Area - Offset by sidebar width on desktop */}
+      <div className="flex-grow flex flex-col min-w-0 md:ml-64 lg:ml-72 min-h-screen">
         {/* Desktop Header */}
         <header className="hidden md:flex h-20 bg-white border-b border-slate-200/80 px-8 items-center justify-between sticky top-0 z-30 shadow-sm">
           {/* Left: Active Portal Badge */}
