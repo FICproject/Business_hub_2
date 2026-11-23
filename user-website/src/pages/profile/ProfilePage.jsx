@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Mail, Phone, Lock, ShieldCheck, CheckCircle2, AlertCircle, Save, Eye, EyeOff, } from 'lucide-react';
 import { updateUser } from '../../store';
@@ -7,6 +8,17 @@ import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion'
 export const ProfilePage = () => {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+    const [searchParams] = useSearchParams();
+    const tab = searchParams.get('tab');
+
+    useEffect(() => {
+        if (tab === 'settings') {
+            const el = document.getElementById('settings-card');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }, [tab]);
     // Profile Form States
     const [fullName, setFullName] = useState(user?.fullName || '');
     const [mobile, setMobile] = useState(user?.mobile || '');
@@ -246,7 +258,7 @@ export const ProfilePage = () => {
           </div>
 
           {/* Change Password Card */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+          <div id="settings-card" className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-lg font-extrabold text-navy-950">Security & Password</h3>
               <p className="text-xs text-slate-500">Update your account password with at least 6 characters</p>

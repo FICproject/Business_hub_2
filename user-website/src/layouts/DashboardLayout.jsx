@@ -249,9 +249,19 @@ export const DashboardLayout = () => {
                 ? baseRolePath
                 : `${baseRolePath}?tab=${item.tab}`
               : item.path;
-            const isTabActive = item.tab
-              ? location.pathname === baseRolePath && currentTab === item.tab
-              : location.pathname.startsWith(item.path);
+            let isTabActive = false;
+            if (item.tab) {
+              isTabActive = location.pathname === baseRolePath && currentTab === item.tab;
+            } else if (item.path) {
+              const [itemPathname, itemQuery] = item.path.split('?');
+              if (itemQuery) {
+                const itemParams = new URLSearchParams(itemQuery);
+                const itemTab = itemParams.get('tab');
+                isTabActive = location.pathname === itemPathname && searchParams.get('tab') === itemTab;
+              } else {
+                isTabActive = location.pathname === itemPathname && !searchParams.get('tab');
+              }
+            }
             const Icon = item.icon;
             return (
               <Link
