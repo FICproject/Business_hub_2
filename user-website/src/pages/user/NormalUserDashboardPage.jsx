@@ -7,6 +7,8 @@ import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
 import { SavedItemsView } from '../../components/dashboard/SavedItemsView';
 import { JobApplicationsView } from '../../components/dashboard/JobApplicationsView';
+import { CommunityView } from '../../components/dashboard/CommunityView';
+import { EventsView } from '../../components/dashboard/EventsView';
 export const NormalUserDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -356,5 +358,50 @@ export const NormalUserDashboardPage = () => {
                 </div>))}
             </div>)}
         </div>)}
+
+      {/* 7. SHOPPING CART */}
+      {activeTab === 'cart' && (
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-extrabold text-navy-950">My Shopping Cart</h3>
+              <p className="text-xs text-slate-500">Review selected marketplace products and proceed to secure checkout</p>
+            </div>
+            <Link
+              to="/cart"
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+            >
+              <ShoppingBag className="w-4 h-4" /> Open Full Cart View →
+            </Link>
+          </div>
+          <div className="p-8 text-center space-y-3">
+            <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto" />
+            <p className="text-sm font-bold text-navy-950">Ready to complete your purchases?</p>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Your cart items and saved checkout selections are synced. Click below to view items, apply promotional codes, and enter shipping details.
+            </p>
+            <div className="pt-2 flex justify-center gap-3">
+              <Link
+                to="/marketplace"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+              >
+                Continue Shopping
+              </Link>
+              <Link
+                to="/cart"
+                className="px-5 py-2 rounded-xl bg-navy-950 hover:bg-navy-900 text-white font-bold text-xs shadow-md"
+              >
+                Proceed to Cart &amp; Checkout →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. COMMUNITY */}
+      {activeTab === 'community' && <CommunityView role="user" />}
+
+      {/* 9. EVENTS */}
+      {activeTab === 'events' && <EventsView role="user" />}
     </div>);
 };

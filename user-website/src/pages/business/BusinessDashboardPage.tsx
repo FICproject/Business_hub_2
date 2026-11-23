@@ -28,6 +28,8 @@ import {
   Check,
 } from 'lucide-react';
 import { businessApi, marketplaceApi, jobsApi, sharingApi } from '../../services/api';
+import { CommunityView } from '../../components/dashboard/CommunityView';
+import { EventsView } from '../../components/dashboard/EventsView';
 
 export const BusinessDashboardPage = () => {
   const { user } = useSelector((state: any) => state.auth);
@@ -1054,6 +1056,12 @@ export const BusinessDashboardPage = () => {
           )}
         </div>
       )}
+
+      {/* TAB 7: COMMUNITY */}
+      {activeTab === 'community' && <CommunityView role="business" />}
+
+      {/* TAB 8: EVENTS */}
+      {activeTab === 'events' && <EventsView role="business" />}
 
       {/* Add Product Modal */}
       {prodModalOpen && (

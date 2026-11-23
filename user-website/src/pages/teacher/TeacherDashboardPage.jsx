@@ -5,6 +5,8 @@ import { GraduationCap, Video, PlusCircle, FileText, DollarSign, Clock, Sparkles
 import { educationApi } from '../../services/api';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
+import { CommunityView } from '../../components/dashboard/CommunityView';
+import { EventsView } from '../../components/dashboard/EventsView';
 export const TeacherDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -302,6 +304,14 @@ export const TeacherDashboardPage = () => {
               </div>))}
           </div>
         </div>)}
+
+      {/* 6. COMMUNITY */}
+      {activeTab === 'community' && <CommunityView role="teacher" />}
+
+      {/* 7. EVENTS */}
+      {activeTab === 'events' && (
+        <EventsView role="teacher" onSchedule={() => setScheduleClassOpen(true)} />
+      )}
 
       {/* Create Course Modal */}
       {createCourseOpen && (<div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
