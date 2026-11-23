@@ -25,13 +25,13 @@ export const Footer = () => {
 
           {/* Navigation Links */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-slate-400 font-medium">
-            <Link to="/#about" className="hover:text-amber-400 transition-colors">About Us</Link>
+            <Link to="/about" className="hover:text-amber-400 transition-colors">About Us</Link>
             <span className="text-slate-700">|</span>
             <Link to="/privacy-policy" className="hover:text-amber-400 transition-colors">Privacy Policy</Link>
             <span className="text-slate-700">|</span>
             <Link to="/terms" className="hover:text-amber-400 transition-colors">Terms & Conditions</Link>
             <span className="text-slate-700">|</span>
-            <Link to="/#contact" className="hover:text-amber-400 transition-colors">Help & Support</Link>
+            <Link to="/contact" className="hover:text-amber-400 transition-colors">Help & Support</Link>
           </div>
 
           {/* Social Icons */}

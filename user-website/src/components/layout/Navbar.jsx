@@ -25,10 +25,10 @@ export const Navbar = () => {
     const location = useLocation();
     // Active navigation tracking based on pathname and hash
     useEffect(() => {
-        if (location.hash === '#about') {
+        if (location.pathname === '/about' || location.hash === '#about') {
             setActiveNav('about');
         }
-        else if (location.hash === '#contact') {
+        else if (location.pathname === '/contact' || location.hash === '#contact') {
             setActiveNav('contact');
         }
         else if (location.pathname.startsWith('/marketplace') ||
@@ -199,13 +199,12 @@ export const Navbar = () => {
           </Link>
 
           {/* 2. About */}
-          <button type="button" onClick={(e) => {
+          <Link to="/about" onClick={() => {
             setActiveNav('about');
             setExploreOpen(false);
-            handleAnchorClick(e, 'about');
         }} className={getNavClass('about')}>
             About
-          </button>
+          </Link>
 
           {/* 3. Explore Dropdown */}
           <div className="relative" ref={exploreRef}>
@@ -268,13 +267,12 @@ export const Navbar = () => {
           </div>
 
           {/* 4. Contact */}
-          <button type="button" onClick={(e) => {
+          <Link to="/contact" onClick={() => {
             setActiveNav('contact');
             setExploreOpen(false);
-            handleAnchorClick(e, 'contact');
         }} className={getNavClass('contact')}>
             Contact
-          </button>
+          </Link>
         </nav>
 
         {/* =====================================================================
@@ -443,15 +441,15 @@ export const Navbar = () => {
             </Link>
 
             {/* 2. About */}
-            <button type="button" onClick={(e) => {
+            <Link to="/about" onClick={() => {
                 setActiveNav('about');
-                handleAnchorClick(e, 'about');
+                setMobileMenuOpen(false);
             }} className={`px-3.5 py-2.5 rounded-xl text-sm font-semibold text-left flex items-center justify-between transition-all ${activeNav === 'about'
                 ? 'bg-[#0A255C] text-white font-bold shadow-sm'
                 : 'text-slate-700 hover:bg-slate-50'}`}>
               <span>About</span>
               <Info className="w-4 h-4 opacity-70"/>
-            </button>
+            </Link>
 
             {/* 3. Expandable Explore Section */}
             <div className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/50">
@@ -486,15 +484,15 @@ export const Navbar = () => {
             </div>
 
             {/* 4. Contact */}
-            <button type="button" onClick={(e) => {
+            <Link to="/contact" onClick={() => {
                 setActiveNav('contact');
-                handleAnchorClick(e, 'contact');
+                setMobileMenuOpen(false);
             }} className={`px-3.5 py-2.5 rounded-xl text-sm font-semibold text-left flex items-center justify-between transition-all ${activeNav === 'contact'
                 ? 'bg-[#0A255C] text-white font-bold shadow-sm'
                 : 'text-slate-700 hover:bg-slate-50'}`}>
               <span>Contact</span>
               <PhoneCall className="w-4 h-4 opacity-70"/>
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Auth Actions */}

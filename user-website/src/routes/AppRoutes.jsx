@@ -25,6 +25,8 @@ import { BusinessDetailsPage } from '../pages/business/BusinessDetailsPage';
 import { TeacherDetailsPage } from '../pages/teacher/TeacherDetailsPage';
 import { CommunityPage } from '../pages/community/CommunityPage';
 import { EventsPage } from '../pages/events/EventsPage';
+import { AboutPage } from '../pages/about/AboutPage';
+import { ContactPage } from '../pages/contact/ContactPage';
 // Dashboards
 import { StudentDashboardPage } from '../pages/student/StudentDashboardPage';
 import { TeacherDashboardPage } from '../pages/teacher/TeacherDashboardPage';
@@ -61,8 +63,8 @@ export const AppRoutes = () => {
         <Route path="/events" element={<EventsPage />}/>
         <Route path="/student" element={<Navigate to="/education" replace/>}/>
         <Route path="/teacher" element={<TeacherDetailsPage />}/>
-        <Route path="/about" element={<Navigate to="/#about" replace/>}/>
-        <Route path="/contact" element={<Navigate to="/#contact" replace/>}/>
+        <Route path="/about" element={<AboutPage />}/>
+        <Route path="/contact" element={<ContactPage />}/>
       </Route>
 
       {/* Role-Based Dashboards */}
