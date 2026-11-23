@@ -2,13 +2,13 @@
   "name": "business-hub-backend",
   "version": "1.0.0",
   "description": "Business Hub Common Unified Backend REST API",
-  "main": "dist/server.js",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "seed": "tsx src/utils/seed.ts",
-    "test": "tsx tests/index.test.ts"
+    "dev": "tsx watch src/server.js",
+    "build": "node -e \"console.log('Backend build ready')\"",
+    "start": "node src/server.js",
+    "seed": "tsx src/utils/seed.js",
+    "test": "tsx tests/index.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
