@@ -9,6 +9,9 @@ export const TeacherDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'overview';
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [activeTab]);
     const handleTabChange = (newTab) => {
         if (newTab === 'overview') {
             searchParams.delete('tab');
@@ -115,58 +118,89 @@ export const TeacherDashboardPage = () => {
     const pendingStipends = payments
         .filter((p) => p.status === 'pending' || p.status === 'approved')
         .reduce((acc, p) => acc + p.amount, 0);
-    return (<div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-navy-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="space-y-2 z-10">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
-            <Sparkles className="w-3.5 h-3.5"/>
-            Teacher & Faculty Workspace • Zero Paywalls for Students
+    return (<div className="space-y-6 max-w-7xl mx-auto">
+      {/* Back to Overview bar for separate module pages */}
+      {activeTab !== 'overview' && (
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+          <button
+            onClick={() => handleTabChange('overview')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-950 transition-colors"
+          >
+            ← Back to Overview
+          </button>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            {activeTab.replace('-', ' ')}
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold">{user?.fullName}</h1>
-          <p className="text-xs sm:text-sm text-teal-100 max-w-xl">
-            Publish free masterclasses, manage virtual live sessions, and track administrative compensation stipends verified by administrators.
-          </p>
         </div>
-        <div className="flex gap-2.5 z-10">
-          <button onClick={() => setCreateCourseOpen(true)} className="px-4 py-2.5 rounded-xl bg-white text-navy-950 font-bold text-xs shadow-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
-            <PlusCircle className="w-4 h-4 text-teal-600"/> Create Course
-          </button>
-          <button onClick={() => setScheduleClassOpen(true)} className="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-navy-950 font-bold text-xs shadow-md transition-colors flex items-center gap-1.5">
-            <Clock className="w-4 h-4"/> Schedule Class
-          </button>
+      )}
+
+      {/* =========================================================================
+            OVERVIEW DASHBOARD
+        ========================================================================= */}
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-r from-navy-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-2 z-10">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
+                <Sparkles className="w-3.5 h-3.5"/>
+                Teacher & Faculty Workspace • Zero Paywalls for Students
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold">{user?.fullName}</h1>
+              <p className="text-xs sm:text-sm text-teal-100 max-w-xl">
+                Publish free masterclasses, manage virtual live sessions, and track administrative compensation stipends verified by administrators.
+              </p>
+            </div>
+            <div className="flex gap-2.5 z-10">
+              <button onClick={() => setCreateCourseOpen(true)} className="px-4 py-2.5 rounded-xl bg-white text-navy-950 font-bold text-xs shadow-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+                <PlusCircle className="w-4 h-4 text-teal-600"/> Create Course
+              </button>
+              <button onClick={() => setScheduleClassOpen(true)} className="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-navy-950 font-bold text-xs shadow-md transition-colors flex items-center gap-1.5">
+                <Clock className="w-4 h-4"/> Schedule Class
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Profile Completion */}
+          <ProfileCompletion user={user} compact/>
+
+          {/* KPI Stat Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard label="Total Courses" value={courses.length} subtext="Published & Free" icon={GraduationCap} badge="100% Free" badgeColor="teal" onClick={() => handleTabChange('courses')}/>
+            <StatCard label="Live Classes" value={liveClasses.length} subtext="Interactive Sessions" icon={Video} badge="Scheduled" badgeColor="amber" onClick={() => handleTabChange('live-classes')}/>
+            <StatCard label="Approved Paid" value={`$${totalPaid.toFixed(2)}`} subtext="Admin Audited" icon={DollarSign} badge="Settled" badgeColor="emerald" onClick={() => handleTabChange('stipends')}/>
+            <StatCard label="Pending Stipends" value={`$${pendingStipends.toFixed(2)}`} subtext="Under Admin Review" icon={Clock} badge="Pending Audit" badgeColor="rose" onClick={() => handleTabChange('stipends')}/>
+          </div>
+
+          {/* Published Courses Spotlight */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-extrabold text-lg text-navy-900">Your Published Courseware</h3>
+              <button onClick={() => handleTabChange('courses')} className="text-xs font-bold text-teal-600 hover:underline">
+                View all ({courses.length}) →
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {courses.slice(0, 3).map((c) => (
+                <div key={c._id} className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-3">
+                  <img src={c.thumbnailUrl} alt={c.title} className="w-full h-36 rounded-2xl object-cover bg-slate-100"/>
+                  <span className="text-[10px] font-bold uppercase bg-teal-50 text-teal-700 px-2.5 py-0.5 rounded-md">
+                    {c.category} • {c.level}
+                  </span>
+                  <h4 className="font-bold text-sm text-navy-900 line-clamp-2">{c.title}</h4>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+                    <span>{c.enrolledStudentsCount || 100}+ Students</span>
+                    <span className="font-bold text-emerald-600">Published</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Dynamic Profile Completion */}
-      <ProfileCompletion user={user} compact/>
-
-      {/* KPI Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Total Courses" value={courses.length} subtext="Published & Free" icon={GraduationCap} badge="100% Free" badgeColor="teal" onClick={() => handleTabChange('courses')}/>
-        <StatCard label="Live Classes" value={liveClasses.length} subtext="Interactive Sessions" icon={Video} badge="Scheduled" badgeColor="amber" onClick={() => handleTabChange('live-classes')}/>
-        <StatCard label="Approved Paid" value={`$${totalPaid.toFixed(2)}`} subtext="Admin Audited" icon={DollarSign} badge="Settled" badgeColor="emerald" onClick={() => handleTabChange('stipends')}/>
-        <StatCard label="Pending Stipends" value={`$${pendingStipends.toFixed(2)}`} subtext="Under Admin Review" icon={Clock} badge="Pending Audit" badgeColor="rose" onClick={() => handleTabChange('stipends')}/>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
-        {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'courses', label: `Published Courses (${courses.length})` },
-            { id: 'live-classes', label: `Live Classes (${liveClasses.length})` },
-            { id: 'materials', label: `Study Notes (${materials.length})` },
-            { id: 'attendance', label: 'Attendance Records' },
-            { id: 'stipends', label: `Stipends & Payouts (${payments.length})` },
-        ].map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${activeTab === tab.id
-                ? 'bg-navy-900 text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}>
-            {tab.label}
-          </button>))}
-      </div>
-
-      {/* 1. OVERVIEW & COURSES */}
-      {(activeTab === 'overview' || activeTab === 'courses') && (<div className="space-y-6">
+      {/* 1. COURSES MODULE */}
+      {activeTab === 'courses' && (<div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="font-extrabold text-lg text-navy-900">Your Published Courseware</h3>
             <button onClick={() => setCreateCourseOpen(true)} className="text-xs font-bold text-teal-600 hover:underline flex items-center gap-1">

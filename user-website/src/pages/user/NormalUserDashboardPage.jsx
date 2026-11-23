@@ -11,6 +11,9 @@ export const NormalUserDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'overview';
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [activeTab]);
     const handleTabChange = (newTab) => {
         if (newTab === 'overview') {
             searchParams.delete('tab');
@@ -56,64 +59,65 @@ export const NormalUserDashboardPage = () => {
             setLoading(false);
         });
     }, []);
-    return (<div className="space-y-8 max-w-7xl mx-auto">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30">
-            <Sparkles className="w-3.5 h-3.5"/>
-            Personalized Consumer & Member Portal
+    return (<div className="space-y-6 max-w-7xl mx-auto">
+      {/* Back to Overview bar for separate module pages */}
+      {activeTab !== 'overview' && (
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+          <button
+            onClick={() => handleTabChange('overview')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-950 transition-colors"
+          >
+            ← Back to Overview
+          </button>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            {activeTab.replace('-', ' ')}
+          </span>
+        </div>
+      )}
+
+      {/* =========================================================================
+            OVERVIEW DASHBOARD
+        ========================================================================= */}
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* Welcome Banner */}
+          <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-2 z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30">
+                <Sparkles className="w-3.5 h-3.5"/>
+                Personalized Consumer & Member Portal
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Welcome back, {user?.fullName}!
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                Browse multi-vendor goods, access 100% free courses, explore verified job openings, and share privacy-safe links with zero spam.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 z-10">
+              <button onClick={() => handleTabChange('marketplace')} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-navy-950 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5">
+                <Store className="w-4 h-4"/>
+                Explore Store
+              </button>
+              <button onClick={() => handleTabChange('learning')} className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-1.5 border border-white/10">
+                <GraduationCap className="w-4 h-4 text-teal-300"/>
+                Free Learning
+              </button>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Welcome back, {user?.fullName}!
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-            Browse multi-vendor goods, access 100% free courses, explore verified job openings, and share privacy-safe links with zero spam.
-          </p>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 z-10">
-          <button onClick={() => handleTabChange('marketplace')} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-navy-950 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5">
-            <Store className="w-4 h-4"/>
-            Explore Store
-          </button>
-          <button onClick={() => handleTabChange('learning')} className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-1.5 border border-white/10">
-            <GraduationCap className="w-4 h-4 text-teal-300"/>
-            Free Learning
-          </button>
-        </div>
-      </div>
+          {/* Profile Completion Tracker */}
+          <ProfileCompletion user={user} compact/>
 
-      {/* Profile Completion Tracker */}
-      <ProfileCompletion user={user} compact/>
+          {/* Stat Cards Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard label="My Orders" value={orders.length} subtext="Marketplace purchases" icon={ShoppingBag} badge="Verified" badgeColor="emerald" onClick={() => handleTabChange('orders')}/>
+            <StatCard label="Saved Items" value={savedItems.length} subtext="Wishlist & bookmarks" icon={Bookmark} badge="Personal" badgeColor="amber" onClick={() => handleTabChange('saved')}/>
+            <StatCard label="Job Applications" value={applications.length} subtext="Active submissions" icon={Briefcase} badge="Careers" badgeColor="blue" onClick={() => handleTabChange('applications')}/>
+            <StatCard label="Shared Links" value={sharedLinks.length} subtext="Attributed clicks" icon={Share2} badge="Clean Share" badgeColor="teal" onClick={() => handleTabChange('sharing')}/>
+          </div>
 
-      {/* Stat Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="My Orders" value={orders.length} subtext="Marketplace purchases" icon={ShoppingBag} badge="Verified" badgeColor="emerald" onClick={() => handleTabChange('orders')}/>
-        <StatCard label="Saved Items" value={savedItems.length} subtext="Wishlist & bookmarks" icon={Bookmark} badge="Personal" badgeColor="amber" onClick={() => handleTabChange('saved')}/>
-        <StatCard label="Job Applications" value={applications.length} subtext="Active submissions" icon={Briefcase} badge="Careers" badgeColor="blue" onClick={() => handleTabChange('applications')}/>
-        <StatCard label="Shared Links" value={sharedLinks.length} subtext="Attributed clicks" icon={Share2} badge="Clean Share" badgeColor="teal" onClick={() => handleTabChange('sharing')}/>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
-        {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'marketplace', label: `Marketplace (${products.length})` },
-            { id: 'orders', label: `My Orders (${orders.length})` },
-            { id: 'saved', label: `Saved Items & Wishlist (${savedItems.length})` },
-            { id: 'applications', label: `Applications (${applications.length})` },
-            { id: 'learning', label: 'Recommended Courses' },
-            { id: 'sharing', label: `Clean Links (${sharedLinks.length})` },
-        ].map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${activeTab === tab.id
-                ? 'bg-navy-900 text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}>
-            {tab.label}
-          </button>))}
-      </div>
-
-      {/* 1. OVERVIEW TAB */}
-      {activeTab === 'overview' && (<div className="space-y-8">
           {/* Recent Orders Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">

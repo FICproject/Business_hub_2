@@ -18,6 +18,9 @@ export const DashboardLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname, location.search]);
+    useEffect(() => {
         if (!isAuthenticated) {
             navigate('/login');
             return;

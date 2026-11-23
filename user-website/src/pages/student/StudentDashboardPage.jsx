@@ -12,6 +12,9 @@ export const StudentDashboardPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     // Active Tab from URL
     const activeTab = searchParams.get('tab') || 'overview';
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [activeTab]);
     const handleTabChange = (newTab) => {
         if (newTab === 'overview') {
             searchParams.delete('tab');
@@ -212,70 +215,102 @@ export const StudentDashboardPage = () => {
             registered: false,
         },
     ];
-    return (<div className="space-y-8 max-w-7xl mx-auto">
-      {/* 100% Free Education Policy Ribbon */}
-      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
-            <Sparkles className="w-3.5 h-3.5"/>
-            100% Free Learning Guarantee • Zero Tuition Fees Forever
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Welcome back, {user?.fullName}!
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-            Stream live workshops, download lecture materials, earn verified certificates, and apply directly to corporate jobs with verified employers.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5 z-10">
-          <button onClick={() => handleTabChange('browse')} className="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-navy-950 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5">
-            <GraduationCap className="w-4 h-4"/>
-            Browse Masterclasses
+    return (<div className="space-y-6 max-w-7xl mx-auto">
+      {/* Back to Overview bar for separate module pages */}
+      {activeTab !== 'overview' && (
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+          <button
+            onClick={() => handleTabChange('overview')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-950 transition-colors"
+          >
+            ← Back to Overview
           </button>
-          <button onClick={() => handleTabChange('jobs')} className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-1.5 border border-white/10">
-            <Briefcase className="w-4 h-4 text-amber-300"/>
-            Find Career Jobs
-          </button>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            {activeTab.replace('-', ' ')}
+          </span>
         </div>
-      </div>
-
-      {/* Dynamic Profile Completion Tracker */}
-      <ProfileCompletion user={user} compact/>
-
-      {/* Metric Stat Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="My Free Courses" value={enrollments.length} subtext="Active enrollments" icon={GraduationCap} badge="100% Free" badgeColor="teal" onClick={() => handleTabChange('courses')}/>
-        <StatCard label="Live Classes" value={liveClasses.length} subtext="Upcoming scheduled" icon={Video} badge="Interactive" badgeColor="amber" onClick={() => handleTabChange('live-classes')}/>
-        <StatCard label="Job Pipeline" value={applications.length} subtext="Active submissions" icon={Briefcase} badge="Verified" badgeColor="blue" onClick={() => handleTabChange('applications')}/>
-        <StatCard label="Certificates" value={certificates.length} subtext="Verified credentials" icon={Award} badge="Official" badgeColor="emerald" onClick={() => handleTabChange('certificates')}/>
-      </div>
-
-      {/* Internal Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
-        {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'courses', label: `My Courses (${enrollments.length})` },
-            { id: 'browse', label: `Browse Free Courses (${availableCourses.length})` },
-            { id: 'live-classes', label: `Live Classes (${liveClasses.length})` },
-            { id: 'materials', label: `Study Materials (${studyMaterials.length})` },
-            { id: 'certificates', label: `Certificates (${certificates.length})` },
-            { id: 'jobs', label: `Job Opportunities (${availableJobs.length})` },
-            { id: 'applications', label: `Applications (${applications.length})` },
-            { id: 'community', label: 'Community Circles' },
-            { id: 'events', label: 'Events & Workshops' },
-            { id: 'saved', label: `Saved Items (${savedItems.length})` },
-        ].map((tab) => (<button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${activeTab === tab.id
-                ? 'bg-navy-900 text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}>
-            {tab.label}
-          </button>))}
-      </div>
+      )}
 
       {/* =========================================================================
-            MODULE 1: OVERVIEW
+            MODULE 1: OVERVIEW DASHBOARD
         ========================================================================= */}
-      {activeTab === 'overview' && (<div className="space-y-8">
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* 100% Free Education Policy Ribbon */}
+          <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-2 z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                100% Free Learning Guarantee • Zero Tuition Fees Forever
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Welcome back, {user?.fullName}!
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                Stream live workshops, download lecture materials, earn verified certificates, and apply directly to corporate jobs with verified employers.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 z-10">
+              <button
+                onClick={() => handleTabChange('browse')}
+                className="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-navy-950 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5"
+              >
+                <GraduationCap className="w-4 h-4" />
+                Browse Masterclasses
+              </button>
+              <button
+                onClick={() => handleTabChange('jobs')}
+                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-1.5 border border-white/10"
+              >
+                <Briefcase className="w-4 h-4 text-amber-300" />
+                Find Career Jobs
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Profile Completion Tracker */}
+          <ProfileCompletion user={user} compact />
+
+          {/* Metric Stat Cards Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard
+              label="My Free Courses"
+              value={enrollments.length}
+              subtext="Active enrollments"
+              icon={GraduationCap}
+              badge="100% Free"
+              badgeColor="teal"
+              onClick={() => handleTabChange('courses')}
+            />
+            <StatCard
+              label="Live Classes"
+              value={liveClasses.length}
+              subtext="Upcoming scheduled"
+              icon={Video}
+              badge="Interactive"
+              badgeColor="amber"
+              onClick={() => handleTabChange('live-classes')}
+            />
+            <StatCard
+              label="Job Pipeline"
+              value={applications.length}
+              subtext="Active submissions"
+              icon={Briefcase}
+              badge="Verified"
+              badgeColor="blue"
+              onClick={() => handleTabChange('applications')}
+            />
+            <StatCard
+              label="Certificates"
+              value={certificates.length}
+              subtext="Verified credentials"
+              icon={Award}
+              badge="Official"
+              badgeColor="emerald"
+              onClick={() => handleTabChange('certificates')}
+            />
+          </div>
           {/* Active Courses Spotlight */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">

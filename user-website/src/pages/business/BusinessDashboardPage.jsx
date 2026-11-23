@@ -34,6 +34,10 @@ export const BusinessDashboardPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+
   const handleTabChange = (newTab) => {
     if (newTab === 'overview') {
       searchParams.delete('tab');
@@ -308,173 +312,222 @@ export const BusinessDashboardPage = () => {
   const completedOrdersCount = orders.filter((o) => o.orderStatus === 'delivered').length;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12 font-sans">
-      {/* =====================================================================
-          1. BUSINESS HEADER BANNER
-      ====================================================================== */}
-      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2 max-w-2xl">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-0.5 rounded-full">
-              Enterprise Merchant Suite
-            </span>
-            <span
-              className={`text-[11px] font-black uppercase px-3 py-0.5 rounded-full border ${
-                isApproved
-                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                  : verificationStatus === 'rejected'
-                  ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                  : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-              }`}
-            >
-              Status: {verificationStatus.replace('_', ' ').toUpperCase()}
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            {business?.businessName || 'Business Management Portal'}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Manage multi-vendor catalog inventory, fulfill customer purchases, recruit corporate talent, and operate under strict seller privacy protection.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans">
+      {/* Back to Overview bar for separate module pages */}
+      {activeTab !== 'overview' && (
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200">
           <button
-            onClick={() => {
-              if (!isApproved) {
-                alert('Your business must be Approved by Admin before publishing products.');
-              } else {
-                setProdModalOpen(true);
-              }
-            }}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5"
+            onClick={() => handleTabChange('overview')}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-navy-950 transition-colors"
           >
-            <PlusCircle className="w-4 h-4" /> Add Product
+            ← Back to Overview
           </button>
-          <button
-            onClick={() => {
-              if (!isApproved) {
-                alert('Your business must be Approved by Admin before publishing services.');
-              } else {
-                setServiceModalOpen(true);
-              }
-            }}
-            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center gap-1.5"
-          >
-            <Layers className="w-4 h-4 text-teal-400" /> Offer Service
-          </button>
-          <button
-            onClick={() => {
-              if (!isApproved) {
-                alert('Your business must be Approved by Admin before posting jobs.');
-              } else {
-                setJobModalOpen(true);
-              }
-            }}
-            className="px-4 py-2.5 rounded-xl bg-white text-navy-950 font-bold text-xs shadow-md hover:bg-slate-100 transition-all flex items-center gap-1.5"
-          >
-            <Briefcase className="w-4 h-4 text-amber-600" /> Post Job
-          </button>
-        </div>
-      </div>
-
-      {/* =====================================================================
-          2. COMPLIANCE ALERT (IF NOT APPROVED)
-      ====================================================================== */}
-      {!isApproved && (
-        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-start gap-3.5 shadow-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
-          <div className="text-xs space-y-1 flex-grow">
-            <h4 className="font-extrabold text-sm text-navy-950">
-              Commercial Verification Required ({verificationStatus.replace('_', ' ').toUpperCase()})
-            </h4>
-            <p className="text-slate-700 leading-relaxed">
-              Your business status is currently{' '}
-              <span className="font-extrabold uppercase text-amber-700">{verificationStatus.replace('_', ' ')}</span>.
-              To protect marketplace consumers, only administrator-verified businesses can publish products, services, and career job vacancies. Please upload your Trade License and Tax Registry filings in the <strong>Verification Status</strong> tab.
-            </p>
-          </div>
-          <button
-            onClick={() => handleTabChange('verification')}
-            className="px-4 py-2 rounded-xl bg-amber-500 text-navy-950 font-bold text-xs whitespace-nowrap hover:bg-amber-400 transition-colors"
-          >
-            Submit Documents →
-          </button>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            {activeTab.replace('-', ' ')}
+          </span>
         </div>
       )}
 
       {/* =====================================================================
-          3. KPI SUMMARY CARDS
+          MODULE 1: OVERVIEW DASHBOARD
       ====================================================================== */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Total Products</span>
-          <p className="text-2xl font-extrabold text-navy-950">{products.length}</p>
-          <p className="text-[11px] font-semibold text-teal-600">Active Listings</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Total Orders</span>
-          <p className="text-2xl font-extrabold text-navy-950">{orders.length}</p>
-          <p className="text-[11px] font-semibold text-slate-500">
-            {pendingOrdersCount} Pending / {completedOrdersCount} Fulfilled
-          </p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Gross Sales</span>
-          <p className="text-2xl font-extrabold text-emerald-600">${totalSalesRevenue.toFixed(2)}</p>
-          <p className="text-[11px] font-semibold text-emerald-600">0% Platform Commission</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Active Job Posts</span>
-          <p className="text-2xl font-extrabold text-navy-950">{jobs.length}</p>
-          <p className="text-[11px] font-semibold text-amber-600">{applications.length} Candidates Applied</p>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1 col-span-2 lg:col-span-1">
-          <span className="text-[10px] uppercase font-bold text-slate-400">Privacy Status</span>
-          <p className="text-sm font-extrabold text-teal-600 pt-1 flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-teal-600" /> Shielded 100%
-          </p>
-          <p className="text-[10px] font-semibold text-slate-400">Owner Mobile &amp; Address Hidden</p>
-        </div>
-      </div>
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* 1. BUSINESS HEADER BANNER */}
+          <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-0.5 rounded-full">
+                  Enterprise Merchant Suite
+                </span>
+                <span
+                  className={`text-[11px] font-black uppercase px-3 py-0.5 rounded-full border ${
+                    isApproved
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : verificationStatus === 'rejected'
+                      ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                      : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                  }`}
+                >
+                  Status: {verificationStatus.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                {business?.businessName || 'Business Management Portal'}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Manage multi-vendor catalog inventory, fulfill customer purchases, recruit corporate talent, and operate under strict seller privacy protection.
+              </p>
+            </div>
 
-      {/* =====================================================================
-          4. IN-DASHBOARD NAVIGATION TABS
-      ====================================================================== */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 text-xs font-bold overflow-x-auto scrollbar-none">
-        {[
-          { id: 'overview', label: 'Overview' },
-          { id: 'verification', label: 'Verification & Legal Docs' },
-          { id: 'products', label: `Products & Storefront (${products.length})` },
-          { id: 'services', label: `Services (${services.length})` },
-          { id: 'orders', label: `Orders & Tracking (${orders.length})` },
-          { id: 'jobs', label: `Job Postings & Candidates (${jobs.length})` },
-          { id: 'sharing', label: `Clean Share Links (${sharedLinks.length})` },
-        ].map((tab) => {
-          const isActive =
-            activeTab === tab.id ||
-            (tab.id === 'verification' && activeTab === 'profile') ||
-            (tab.id === 'products' && (activeTab === 'store' || activeTab === 'add-product'));
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-navy-950 text-white shadow-md font-extrabold'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                onClick={() => {
+                  if (!isApproved) {
+                    alert('Your business must be Approved by Admin before publishing products.');
+                  } else {
+                    setProdModalOpen(true);
+                  }
+                }}
+                className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5"
+              >
+                <PlusCircle className="w-4 h-4" /> Add Product
+              </button>
+              <button
+                onClick={() => {
+                  if (!isApproved) {
+                    alert('Your business must be Approved by Admin before publishing services.');
+                  } else {
+                    setServiceModalOpen(true);
+                  }
+                }}
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center gap-1.5"
+              >
+                <Layers className="w-4 h-4 text-teal-400" /> Offer Service
+              </button>
+              <button
+                onClick={() => {
+                  if (!isApproved) {
+                    alert('Your business must be Approved by Admin before posting jobs.');
+                  } else {
+                    setJobModalOpen(true);
+                  }
+                }}
+                className="px-4 py-2.5 rounded-xl bg-white text-navy-950 font-bold text-xs shadow-md hover:bg-slate-100 transition-all flex items-center gap-1.5"
+              >
+                <Briefcase className="w-4 h-4 text-amber-600" /> Post Job
+              </button>
+            </div>
+          </div>
+
+          {/* 2. COMPLIANCE ALERT (IF NOT APPROVED) */}
+          {!isApproved && (
+            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-start gap-3.5 shadow-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
+              <div className="text-xs space-y-1 flex-grow">
+                <h4 className="font-extrabold text-sm text-navy-950">
+                  Commercial Verification Required ({verificationStatus.replace('_', ' ').toUpperCase()})
+                </h4>
+                <p className="text-slate-700 leading-relaxed">
+                  Your business status is currently{' '}
+                  <span className="font-extrabold uppercase text-amber-700">{verificationStatus.replace('_', ' ')}</span>.
+                  To protect marketplace consumers, only administrator-verified businesses can publish products, services, and career job vacancies. Please upload your Trade License and Tax Registry filings in the <strong>Verification Status</strong> tab.
+                </p>
+              </div>
+              <button
+                onClick={() => handleTabChange('verification')}
+                className="px-4 py-2 rounded-xl bg-amber-500 text-navy-950 font-bold text-xs whitespace-nowrap hover:bg-amber-400 transition-colors"
+              >
+                Submit Documents →
+              </button>
+            </div>
+          )}
+
+          {/* 3. KPI SUMMARY CARDS */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Products</span>
+              <p className="text-2xl font-extrabold text-navy-950">{products.length}</p>
+              <button onClick={() => handleTabChange('products')} className="text-[11px] font-semibold text-teal-600 hover:underline">
+                Manage Listings →
+              </button>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Total Orders</span>
+              <p className="text-2xl font-extrabold text-navy-950">{orders.length}</p>
+              <button onClick={() => handleTabChange('orders')} className="text-[11px] font-semibold text-slate-500 hover:underline">
+                {pendingOrdersCount} Pending / {completedOrdersCount} Fulfilled →
+              </button>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Gross Sales</span>
+              <p className="text-2xl font-extrabold text-emerald-600">${totalSalesRevenue.toFixed(2)}</p>
+              <p className="text-[11px] font-semibold text-emerald-600">0% Platform Commission</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Active Job Posts</span>
+              <p className="text-2xl font-extrabold text-navy-950">{jobs.length}</p>
+              <button onClick={() => handleTabChange('jobs')} className="text-[11px] font-semibold text-amber-600 hover:underline">
+                {applications.length} Candidates Applied →
+              </button>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1 col-span-2 lg:col-span-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Privacy Status</span>
+              <p className="text-sm font-extrabold text-teal-600 pt-1 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-teal-600" /> Shielded 100%
+              </p>
+              <p className="text-[10px] font-semibold text-slate-400">Owner Mobile &amp; Address Hidden</p>
+            </div>
+          </div>
+
+          {/* 4. OVERVIEW HIGHLIGHTS: Recent Orders & Catalog Highlights */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Orders Spotlight */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-extrabold text-base text-navy-950 flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-amber-500" /> Recent Customer Orders
+                </h3>
+                <button onClick={() => handleTabChange('orders')} className="text-xs font-bold text-teal-600 hover:underline">
+                  View all ({orders.length}) →
+                </button>
+              </div>
+              {orders.length === 0 ? (
+                <p className="text-xs text-slate-400 py-4 text-center">No orders received yet.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {orders.slice(0, 3).map((ord) => (
+                    <div key={ord._id} className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-bold text-navy-950">Order #{ord._id?.slice(-6).toUpperCase()}</p>
+                        <p className="text-[11px] text-slate-500">{ord.shippingAddress?.fullName} • ${ord.totalAmount?.toFixed(2)}</p>
+                      </div>
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                        {ord.orderStatus}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Active Products Spotlight */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-extrabold text-base text-navy-950 flex items-center gap-2">
+                  <Store className="w-4 h-4 text-teal-600" /> Active Catalog Inventory
+                </h3>
+                <button onClick={() => handleTabChange('products')} className="text-xs font-bold text-teal-600 hover:underline">
+                  Manage catalog ({products.length}) →
+                </button>
+              </div>
+              {products.length === 0 ? (
+                <p className="text-xs text-slate-400 py-4 text-center">No catalog products listed yet.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {products.slice(0, 3).map((prod) => (
+                    <div key={prod._id} className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3">
+                        <img src={prod.thumbnailUrl || (prod.images && prod.images[0])} alt={prod.title} className="w-9 h-9 rounded-xl object-cover bg-slate-200" />
+                        <div>
+                          <p className="font-bold text-navy-950 line-clamp-1">{prod.title}</p>
+                          <p className="text-[11px] text-slate-500">${prod.price?.toFixed(2)} • {prod.stockQuantity} in stock</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-500 capitalize">{prod.category}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* =====================================================================
           TAB 1: VERIFICATION & LEGAL DOCS (6-STAGE WORKFLOW)
       ====================================================================== */}
-      {(activeTab === 'overview' || activeTab === 'profile' || activeTab === 'verification') && (
+      {(activeTab === 'profile' || activeTab === 'verification') && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -660,7 +713,7 @@ export const BusinessDashboardPage = () => {
       {/* =====================================================================
           TAB 2: PRODUCTS & STOREFRONT
       ====================================================================== */}
-      {(activeTab === 'overview' || activeTab === 'products' || activeTab === 'store') && (
+      {(activeTab === 'products' || activeTab === 'store' || activeTab === 'add-product') && (
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
             <div>
@@ -725,7 +778,7 @@ export const BusinessDashboardPage = () => {
       {/* =====================================================================
           TAB 3: SERVICES
       ====================================================================== */}
-      {(activeTab === 'services' || activeTab === 'overview') && (
+      {activeTab === 'services' && (
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
             <div>
@@ -777,7 +830,7 @@ export const BusinessDashboardPage = () => {
       {/* =====================================================================
           TAB 4: ORDERS & TRACKING
       ====================================================================== */}
-      {(activeTab === 'orders' || activeTab === 'overview') && (
+      {activeTab === 'orders' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -861,7 +914,7 @@ export const BusinessDashboardPage = () => {
       {/* =====================================================================
           TAB 5: JOB POSTINGS & CANDIDATES
       ====================================================================== */}
-      {(activeTab === 'jobs' || activeTab === 'overview') && (
+      {activeTab === 'jobs' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -984,7 +1037,7 @@ export const BusinessDashboardPage = () => {
       {/* =====================================================================
           TAB 6: CLEAN SHARE LINKS
       ====================================================================== */}
-      {(activeTab === 'sharing' || activeTab === 'overview') && (
+      {activeTab === 'sharing' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
