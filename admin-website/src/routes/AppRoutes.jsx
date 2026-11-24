@@ -15,6 +15,10 @@ import { AdminEducationPage } from '../pages/AdminEducationPage';
 import { AdminJobsPage } from '../pages/AdminJobsPage';
 import { AdminReferralsPage } from '../pages/AdminReferralsPage';
 import { AdminReportsPage } from '../pages/AdminReportsPage';
+import { AdminRequestsPage } from '../pages/AdminRequestsPage';
+import { AdminRequestDetailsPage } from '../pages/AdminRequestDetailsPage';
+import { AdminConnectionsPage } from '../pages/AdminConnectionsPage';
+import { AdminCategoriesPage } from '../pages/AdminCategoriesPage';
 const ProtectedAdminRoute = ({ children }) => {
     const { isAuthenticated } = useSelector((state) => state.adminAuth);
     if (!isAuthenticated) {
@@ -51,6 +55,15 @@ export const AppRoutes = () => {
         <Route path="users/blocked-suspended" element={<AdminUsersPage initialCategory="blocked-suspended"/>}/>
 
         <Route path="businesses" element={<AdminBusinessesPage />}/>
+        
+        {/* Core Service Requests & Business Connections */}
+        <Route path="requests" element={<AdminRequestsPage initialTab="all"/>}/>
+        <Route path="requests/connections" element={<AdminConnectionsPage initialTab="all"/>}/>
+        <Route path="requests/:id" element={<AdminRequestDetailsPage />}/>
+
+        {/* Dynamic Categories Management */}
+        <Route path="categories" element={<AdminCategoriesPage />}/>
+
         <Route path="marketplace" element={<AdminMarketplacePage />}/>
         <Route path="orders" element={<AdminOrdersPage />}/>
         

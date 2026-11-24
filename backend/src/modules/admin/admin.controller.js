@@ -11,9 +11,13 @@ export const getDashboardMetrics = async (req, res) => {
         const liveClasses = dbStore.collection.liveClasses;
         const jobs = dbStore.collection.jobs;
         const teacherPayments = dbStore.collection.teacherPayments;
+        const serviceRequests = dbStore.collection.serviceRequests || [];
+        const businessConnections = dbStore.collection.businessConnections || [];
+
         const totalStudents = users.filter((u) => u.roles.includes('student')).length;
         const totalTeachers = users.filter((u) => u.roles.includes('teacher')).length;
         const totalBusinesses = businesses.length;
+        const approvedBusinesses = businesses.filter((b) => b.verificationStatus === 'approved').length;
         const pendingApprovals = businesses.filter((b) => b.verificationStatus === 'pending').length;
         const activeProducts = products.filter((p) => p.status === 'approved').length;
         const activeServices = services.filter((s) => s.status === 'approved').length;
@@ -22,6 +26,15 @@ export const getDashboardMetrics = async (req, res) => {
         const totalTeacherPaidAmount = teacherPayments
             .filter((p) => p.status === 'paid')
             .reduce((acc, p) => acc + p.amount, 0);
+
+        // Core Service Requests & Business Connections metrics
+        const totalRequests = serviceRequests.length;
+        const newRequests = serviceRequests.filter((r) => r.status === 'new').length;
+        const underReviewRequests = serviceRequests.filter((r) => r.status === 'under_review').length;
+        const assignedRequests = serviceRequests.filter((r) => r.status === 'assigned').length;
+        const inProgressRequests = serviceRequests.filter((r) => r.status === 'in_progress').length;
+        const completedRequests = serviceRequests.filter((r) => r.status === 'completed').length;
+        const totalConnections = businessConnections.length;
         // Monthly Analytics Mock / Aggregated Series for Charts
         const salesChart = [
             { month: 'Jun', revenue: 4200, orders: 35 },
@@ -44,7 +57,15 @@ export const getDashboardMetrics = async (req, res) => {
                 totalStudents,
                 totalTeachers,
                 totalBusinesses,
+                approvedBusinesses,
                 pendingApprovals,
+                totalRequests,
+                newRequests,
+                underReviewRequests,
+                assignedRequests,
+                inProgressRequests,
+                completedRequests,
+                totalConnections,
                 activeProducts,
                 activeServices,
                 totalOrders: orders.length,
@@ -55,6 +76,8 @@ export const getDashboardMetrics = async (req, res) => {
                 pendingTeacherPayments,
                 totalTeacherPaidAmount,
             },
+            recentRequests: serviceRequests.slice(0, 5),
+            recentConnections: businessConnections.slice(0, 5),
             charts: {
                 salesChart,
                 roleDistribution,

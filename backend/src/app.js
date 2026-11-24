@@ -11,6 +11,8 @@ import jobsRoutes from './modules/jobs/jobs.routes';
 import sharingRoutes from './modules/sharing/sharing.routes';
 import notificationsRoutes from './modules/notifications/notifications.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import requestsRoutes from './modules/requests/requests.routes';
+import categoriesRoutes from './modules/categories/categories.routes';
 import { seedData } from './utils/seed';
 import { dbStore } from './services/storage';
 const app = express();
@@ -61,6 +63,8 @@ app.use('/api/sharing', sharingRoutes);
 app.use('/api/shared-links', sharingRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/requests', requestsRoutes);
+app.use('/api/categories', categoriesRoutes);
 app.use('/api/search', (req, res, next) => {
     req.url = `/search${req.url === '/' ? '' : req.url}`;
     usersRoutes(req, res, next);

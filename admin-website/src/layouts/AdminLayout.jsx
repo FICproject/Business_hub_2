@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Home, Users, Building2, ShoppingCart, ShoppingBag, GraduationCap, BookOpen, Video, FileText, FolderTree, AlertTriangle, UserCheck, Briefcase, Share2, DollarSign, FileBarChart, Settings, Headphones, Search, Bell, ChevronDown, ChevronRight, Menu, X, LogOut, Rocket, User, Clock, Ban, ShieldCheck, } from 'lucide-react';
+import { Home, Users, Building2, ShoppingCart, ShoppingBag, GraduationCap, BookOpen, Video, FileText, FolderTree, AlertTriangle, UserCheck, Briefcase, Share2, DollarSign, FileBarChart, Settings, Headphones, Search, Bell, ChevronDown, ChevronRight, Menu, X, LogOut, Rocket, User, Clock, Ban, ShieldCheck, Handshake, Layers, } from 'lucide-react';
 import { adminLogout } from '../store';
 export const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,7 +59,10 @@ export const AdminLayout = () => {
     ];
     const mainNavItems = [
         { label: 'Dashboard', path: '/', icon: Home, isActiveMatch: (p) => p === '/' },
+        { label: 'Service Requests', path: '/requests', icon: FileText },
+        { label: 'Connections', path: '/requests/connections', icon: Handshake },
         { label: 'Business Management', path: '/businesses', icon: Building2 },
+        { label: 'Categories', path: '/categories', icon: FolderTree },
         { label: 'Marketplace', path: '/marketplace', icon: ShoppingCart },
         { label: 'Orders', path: '/orders', icon: ShoppingBag },
     ];

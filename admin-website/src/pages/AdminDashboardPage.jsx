@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Briefcase, ShoppingCart, TrendingUp, ArrowRight, UserPlus, Building2, GraduationCap, Store, Clock, Bell, Zap, } from 'lucide-react';
+import { Users, Briefcase, ShoppingCart, TrendingUp, ArrowRight, UserPlus, Building2, GraduationCap, Store, Clock, Bell, Zap, FileText, Handshake, CheckCircle2, AlertCircle, Sparkles, } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, } from 'recharts';
+import { adminApi } from '../services/api';
+
 export const AdminDashboardPage = () => {
     const [timeRange, setTimeRange] = useState('30D');
+    const [liveMetrics, setLiveMetrics] = useState(null);
+    const [recentRequests, setRecentRequests] = useState([]);
+    const [recentConnections, setRecentConnections] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadDashboardData = async () => {
+            try {
+                setLoading(true);
+                const res = await adminApi.getMetrics();
+                if (res.data?.success) {
+                    setLiveMetrics(res.data.metrics);
+                    setRecentRequests(res.data.recentRequests || []);
+                    setRecentConnections(res.data.recentConnections || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch dashboard metrics:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadDashboardData();
+    }, []);
+
     // Dynamic time-based greeting & icon
     const getGreetingData = () => {
         const hour = new Date().getHours();
         if (hour >= 5 && hour < 12) {
-            return { text: 'Good Morning, Admin!', emoji: '🌅' };
+            return { text: 'Good Morning, Admin!', emoji: '👋' };
         }
         else if (hour >= 12 && hour < 17) {
             return { text: 'Good Afternoon, Admin!', emoji: '☀️' };
@@ -75,7 +101,18 @@ export const AdminDashboardPage = () => {
     };
     return (<div className="space-y-5 max-w-[1600px] mx-auto pb-6">
       {/* 1. Hero Banner: Ultra High-Definition 3D Render with seamless integration */}
-      <div className="relative overflow-hidden rounded-[24px] bg-[#10052F] text-white min-h-[175px] lg:min-h-[195px] px-8 sm:px-10 py-6 flex items-center justify-between shadow-sm">
+      <div className="relative overflow-hidden rounded-[24px] bg-[#0E0628] text-white min-h-[175px] lg:min-h-[195px] px-8 sm:px-10 py-6 flex items-center justify-between shadow-sm">
+        {/* Full-width High-Definition 3D Illustration Background & Right Alignment */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+          <img 
+            src="/assets/saas-hero-rocket-laptop.png" 
+            alt="Business Hub Dashboard 3D Render" 
+            className="w-full h-full object-cover object-right"
+          />
+          {/* Subtle gradient overlay on the left to guarantee optimal text contrast */}
+          <div className="absolute inset-y-0 left-0 w-full sm:w-[58%] md:w-[45%] bg-gradient-to-r from-[#0E0628] via-[#0E0628]/80 to-transparent" />
+        </div>
+
         {/* Left text contents */}
         <div className="relative z-10 max-w-lg space-y-2.5">
           <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight flex items-center gap-2">
@@ -91,17 +128,12 @@ export const AdminDashboardPage = () => {
             </Link>
           </div>
         </div>
-
-        {/* Right side: Ultra-Crisp High-Resolution 3D Render (1376x768) */}
-        <div className="hidden md:flex absolute right-0 top-0 bottom-0 w-[62%] max-w-[700px] pointer-events-none select-none items-center justify-end overflow-hidden">
-          <img src="/assets/saas-hero-rocket-laptop.png" alt="Dashboard Rocket & Laptop 3D Render" className="h-full w-full object-cover object-right"/>
-        </div>
       </div>
 
       {/* 2. Four Primary KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Users */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+        <Link to="/users" className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className="w-13 h-13 p-3 rounded-2xl bg-[#2563EB] flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
               <Users className="w-6 h-6"/>
@@ -109,7 +141,7 @@ export const AdminDashboardPage = () => {
             <div>
               <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Total Users</p>
               <h3 className="text-[25px] font-black text-slate-900 leading-tight mt-0.5">
-                125,430
+                {liveMetrics?.totalUsers?.toLocaleString() || '125,430'}
               </h3>
               <p className="text-[12px] font-bold text-emerald-500 flex items-center gap-1 mt-1">
                 <span>↑ 12.5%</span>
@@ -122,21 +154,21 @@ export const AdminDashboardPage = () => {
               <path d="M0,28 Q20,34 38,18 T80,10"/>
             </svg>
           </div>
-        </div>
+        </Link>
 
         {/* Active Businesses */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+        <Link to="/businesses" className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className="w-13 h-13 p-3 rounded-2xl bg-[#10B981] flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
-              <Briefcase className="w-6 h-6"/>
+              <Building2 className="w-6 h-6"/>
             </div>
             <div>
-              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Active Businesses</p>
+              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Approved Businesses</p>
               <h3 className="text-[25px] font-black text-slate-900 leading-tight mt-0.5">
-                24,870
+                {liveMetrics?.approvedBusinesses?.toLocaleString() || liveMetrics?.totalBusinesses?.toLocaleString() || '24,870'}
               </h3>
-              <p className="text-[12px] font-bold text-emerald-500 flex items-center gap-1 mt-1">
-                <span>↑ 8.3%</span>
+              <p className="text-[12px] font-bold text-amber-500 flex items-center gap-1 mt-1">
+                <span>{liveMetrics?.pendingApprovals || 0} pending review</span>
               </p>
             </div>
           </div>
@@ -146,21 +178,21 @@ export const AdminDashboardPage = () => {
               <path d="M0,30 Q25,12 45,26 T80,8"/>
             </svg>
           </div>
-        </div>
+        </Link>
 
-        {/* Total Orders */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+        {/* Total Service Requests */}
+        <Link to="/requests" className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className="w-13 h-13 p-3 rounded-2xl bg-[#7C3AED] flex items-center justify-center text-white shadow-md shadow-purple-500/20 shrink-0">
-              <ShoppingCart className="w-6 h-6"/>
+              <FileText className="w-6 h-6"/>
             </div>
             <div>
-              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Total Orders</p>
+              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Service Requests</p>
               <h3 className="text-[25px] font-black text-slate-900 leading-tight mt-0.5">
-                89,340
+                {liveMetrics?.totalRequests?.toLocaleString() || '5'}
               </h3>
-              <p className="text-[12px] font-bold text-emerald-500 flex items-center gap-1 mt-1">
-                <span>↑ 14.2%</span>
+              <p className="text-[12px] font-bold text-indigo-600 flex items-center gap-1 mt-1">
+                <span>{liveMetrics?.newRequests || 1} new requests</span>
               </p>
             </div>
           </div>
@@ -170,21 +202,21 @@ export const AdminDashboardPage = () => {
               <path d="M0,32 Q22,35 40,16 T80,12"/>
             </svg>
           </div>
-        </div>
+        </Link>
 
-        {/* Total Revenue */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+        {/* Total Business Connections */}
+        <Link to="/requests/connections" className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className="w-13 h-13 p-3 rounded-2xl bg-[#F59E0B] flex items-center justify-center text-white shadow-md shadow-amber-500/20 shrink-0">
-              <span className="font-extrabold text-[22px]">₹</span>
+              <Handshake className="w-6 h-6"/>
             </div>
             <div>
-              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Total Revenue</p>
+              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">Business Connections</p>
               <h3 className="text-[25px] font-black text-slate-900 leading-tight mt-0.5">
-                ₹48,75,230
+                {liveMetrics?.totalConnections?.toLocaleString() || '3'}
               </h3>
               <p className="text-[12px] font-bold text-emerald-500 flex items-center gap-1 mt-1">
-                <span>↑ 18.6%</span>
+                <span>Active Matchmaking</span>
               </p>
             </div>
           </div>
@@ -194,7 +226,45 @@ export const AdminDashboardPage = () => {
               <path d="M0,30 Q28,34 50,14 T80,10"/>
             </svg>
           </div>
+        </Link>
+      </div>
+
+      {/* 2b. Core Service Request Breakdown Bar */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse" />
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Service Request Pipeline:</span>
         </div>
+        <div className="flex items-center flex-wrap gap-4 text-xs font-semibold text-slate-600">
+          <Link to="/requests" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>New: <strong>{liveMetrics?.newRequests || 1}</strong></span>
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/requests" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-indigo-500" />
+            <span>Under Review: <strong>{liveMetrics?.underReviewRequests || 1}</strong></span>
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/requests" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-purple-500" />
+            <span>Assigned: <strong>{liveMetrics?.assignedRequests || 1}</strong></span>
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/requests" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span>In Progress: <strong>{liveMetrics?.inProgressRequests || 1}</strong></span>
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/requests" className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>Completed: <strong>{liveMetrics?.completedRequests || 1}</strong></span>
+          </Link>
+        </div>
+        <Link to="/requests" className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800">
+          <span>Manage Requests</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* 3. Middle Section: Platform Analytics + User Distribution + Quick Actions */}

@@ -48,6 +48,20 @@ export const adminApi = {
     deleteMaterial: (id) => api.delete(`/education/materials/${id}`),
     // Referrals & Sharing
     getAllSharedLinks: () => api.get('/sharing/admin/all'),
+    // Service Requests & Workflows (Business Hub Core)
+    getServiceRequests: (params) => api.get('/requests', { params }),
+    getServiceRequestById: (id) => api.get(`/requests/${id}`),
+    updateRequestStatus: (id, status, note) => api.patch(`/requests/${id}/status`, { status, note }),
+    getMatchingBusinesses: (id) => api.get(`/requests/${id}/matching-businesses`),
+    assignBusinessToRequest: (id, data) => api.post(`/requests/${id}/assign`, data),
+    // Business Connections
+    getBusinessConnections: (params) => api.get('/requests/connections', { params }),
+    updateConnectionStatus: (id, status, notes) => api.patch(`/requests/connections/${id}/status`, { status, notes }),
+    // Categories Management
+    getCategories: (params) => api.get('/categories', { params }),
+    createCategory: (data) => api.post('/categories', data),
+    updateCategory: (id, data) => api.put(`/categories/${id}`, data),
+    deleteCategory: (id) => api.delete(`/categories/${id}`),
     // Direct login
     login: (data) => api.post('/auth/login', data),
 };
