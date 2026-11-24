@@ -614,7 +614,7 @@ export const BusinessDashboardPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-slate-800 transition-colors"
+                className="px-5 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-navy-900 transition-colors"
               >
                 Save Business Profile
               </button>
@@ -780,7 +780,7 @@ export const BusinessDashboardPage = () => {
                   setServiceModalOpen(true);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-slate-800 transition-colors flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-navy-900 transition-colors flex items-center gap-1.5 shadow-sm"
             >
               <PlusCircle className="w-4 h-4 text-amber-400" /> Offer New Service
             </button>
@@ -1035,7 +1035,7 @@ export const BusinessDashboardPage = () => {
             </div>
             <button
               onClick={() => setShareModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-slate-800 transition-colors flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 rounded-xl bg-navy-950 text-white font-bold text-xs hover:bg-navy-900 transition-colors flex items-center gap-1.5 shadow-sm"
             >
               <Share2 className="w-4 h-4 text-amber-400" /> Create Share Link
             </button>

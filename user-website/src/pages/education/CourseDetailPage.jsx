@@ -101,7 +101,7 @@ export const CourseDetailPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left 2 Cols: Video / Lesson Player */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-xl aspect-video relative flex items-center justify-center">
+          <div className="bg-navy-950 rounded-3xl overflow-hidden shadow-xl aspect-video relative flex items-center justify-center border border-navy-800">
             {activeLesson?.videoUrl ? (<iframe src={activeLesson.videoUrl} title={activeLesson.title} className="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>) : (<div className="text-center text-white space-y-2 p-6">
                 <PlayCircle className="w-16 h-16 text-teal-400 mx-auto opacity-80"/>
                 <h4 className="font-bold text-lg">{activeLesson?.title || 'Interactive Lesson Player'}</h4>

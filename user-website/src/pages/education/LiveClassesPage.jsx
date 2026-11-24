@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Video, Mic, MicOff, VideoOff, Share2, Users, MessageSquare, Send, X, PhoneOff, Calendar, Clock, Sparkles, } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Share2, Users, MessageSquare, Send, X, PhoneOff, Calendar, Clock, Sparkles, Link as LinkIcon, Copy, ExternalLink, Check, } from 'lucide-react';
 import { educationApi } from '../../services/api';
 export const LiveClassesPage = () => {
     const [classes, setClasses] = useState([]);
@@ -15,8 +15,16 @@ export const LiveClassesPage = () => {
         { sender: 'Alex Chen', text: 'Excited to be here! Can we ask questions about Redis cluster?', time: '18:03' },
     ]);
     const [messageInput, setMessageInput] = useState('');
+    const [copiedId, setCopiedId] = useState(null);
     const { user, isAuthenticated } = useSelector((state) => state.auth);
     const navigate = useNavigate();
+
+    const handleCopyLink = (text, id) => {
+        if (!text) return;
+        navigator.clipboard?.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2500);
+    };
     useEffect(() => {
         educationApi.getLiveClasses()
             .then((res) => setClasses(res.data.data))
@@ -101,18 +109,68 @@ export const LiveClassesPage = () => {
                     <span>Room: {cls.meetingId}</span>
                   </div>
                 </div>
+                {/* Live Class Link Callout */}
+                {(() => {
+                  const liveUrl = cls.classLink || cls.meetingLink || `https://meet.businesshub.com/room/${cls.meetingId || cls._id}`;
+                  return (
+                    <div className="p-3 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-extrabold text-teal-900 flex items-center gap-1.5 text-[11px]">
+                          <LinkIcon className="w-3.5 h-3.5 text-teal-600" /> Live Class Link:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(liveUrl, cls._id)}
+                          className="text-[11px] font-extrabold text-teal-700 hover:text-teal-800 flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-teal-200 shadow-2xs"
+                        >
+                          {copiedId === cls._id ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-600" /> Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" /> Copy Link
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-xs font-bold text-teal-700 hover:underline truncate"
+                        title={liveUrl}
+                      >
+                        {liveUrl}
+                      </a>
+                    </div>
+                  );
+                })()}
               </div>
 
-              <button onClick={() => handleJoinClass(cls)} className="w-full py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
-                <Video className="w-4 h-4"/> Enter Live WebRTC Classroom
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={cls.classLink || cls.meetingLink || `https://meet.businesshub.com/room/${cls.meetingId || cls._id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 text-center"
+                >
+                  <ExternalLink className="w-4 h-4" /> Join via Live Link
+                </a>
+                <button
+                  onClick={() => handleJoinClass(cls)}
+                  className="px-4 py-3 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  <Video className="w-4 h-4 text-teal-400" /> WebRTC Room
+                </button>
+              </div>
             </div>))}
         </div>)}
 
       {/* Interactive WebRTC Classroom Modal */}
       {activeClass && (<div className="fixed inset-0 z-50 bg-navy-950 flex flex-col animate-in fade-in">
           {/* Header */}
-          <div className="h-16 bg-navy-900 border-b border-slate-800 px-6 flex items-center justify-between text-white">
+          <div className="h-16 bg-navy-900 border-b border-navy-800 px-6 flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
               <div>
@@ -128,9 +186,9 @@ export const LiveClassesPage = () => {
           {/* Main Stage & Chat */}
           <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 overflow-hidden">
             {/* Video Canvas */}
-            <div className="lg:col-span-3 bg-black flex flex-col justify-between p-6 relative">
+            <div className="lg:col-span-3 bg-navy-950 flex flex-col justify-between p-6 relative">
               <div className="flex-grow flex items-center justify-center relative">
-                {cameraOn ? (<div className="relative w-full max-w-3xl rounded-3xl overflow-hidden aspect-video shadow-2xl bg-slate-900 border border-slate-800">
+                {cameraOn ? (<div className="relative w-full max-w-3xl rounded-3xl overflow-hidden aspect-video shadow-2xl bg-navy-900 border border-navy-800">
                     <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&auto=format&fit=crop&q=80" alt="Speaker" className="w-full h-full object-cover"/>
                     <div className="absolute bottom-4 left-4 bg-navy-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl text-white text-xs font-bold flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -161,8 +219,8 @@ export const LiveClassesPage = () => {
             </div>
 
             {/* Chat Box Panel */}
-            <div className="bg-navy-900 border-l border-slate-800 flex flex-col justify-between">
-              <div className="p-4 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-300">
+            <div className="bg-navy-900 border-l border-navy-800 flex flex-col justify-between">
+              <div className="p-4 border-b border-navy-800 flex items-center justify-between text-xs font-bold text-slate-300">
                 <span className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-teal-400"/> Live Questions & Chat
                 </span>
@@ -183,7 +241,7 @@ export const LiveClassesPage = () => {
               </div>
 
               {/* Chat Form */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-800 flex items-center gap-2">
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-navy-800 flex items-center gap-2">
                 <input type="text" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} placeholder="Ask a question..." className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-400"/>
                 <button type="submit" className="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white transition-colors">
                   <Send className="w-4 h-4"/>

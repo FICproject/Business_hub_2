@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { GraduationCap, Video, PlusCircle, FileText, DollarSign, Clock, Sparkles, } from 'lucide-react';
+import { GraduationCap, Video, PlusCircle, FileText, DollarSign, Clock, Sparkles, Link as LinkIcon, Copy, ExternalLink, Check, } from 'lucide-react';
 import { educationApi } from '../../services/api';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
@@ -40,6 +40,14 @@ export const TeacherDashboardPage = () => {
     const [lDesc, setLDesc] = useState('');
     const [lDate, setLDate] = useState('2026-11-30');
     const [lTime, setLTime] = useState('19:00 EST');
+    const [lLink, setLLink] = useState('');
+    const [copiedId, setCopiedId] = useState(null);
+    const handleCopyLink = (text, id) => {
+        if (!text) return;
+        navigator.clipboard?.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2500);
+    };
     const loadData = () => {
         educationApi.getCourses()
             .then((res) => setCourses(res.data.data))
@@ -101,12 +109,15 @@ export const TeacherDashboardPage = () => {
                 description: lDesc,
                 scheduledDate: lDate,
                 startTime: lTime,
+                classLink: lLink.trim(),
+                meetingLink: lLink.trim(),
                 durationMinutes: 60,
                 studentCapacity: 150,
             });
             setScheduleClassOpen(false);
             setLTitle('');
             setLDesc('');
+            setLLink('');
             loadData();
             handleTabChange('live-classes');
         }
@@ -127,7 +138,7 @@ export const TeacherDashboardPage = () => {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-navy-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-2 z-10">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
                 <Sparkles className="w-3.5 h-3.5"/>
@@ -220,19 +231,76 @@ export const TeacherDashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {liveClasses.map((lc) => (<div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-3">
-                <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
-                  Virtual Room
-                </span>
-                <h4 className="font-extrabold text-sm text-navy-950">{lc.title}</h4>
-                <p className="text-xs text-slate-500">{lc.subject}</p>
-                <p className="text-[11px] text-slate-400">
-                  {lc.scheduledDate} at {lc.startTime}
-                </p>
-                <button type="button" onClick={() => alert(`Starting live broadcast for: ${lc.title}`)} className="w-full py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs">
-                  Start Stream as Host
-                </button>
-              </div>))}
+            {liveClasses.map((lc) => {
+              const liveUrl = lc.classLink || lc.meetingLink || `https://meet.businesshub.com/room/${lc.meetingId || lc._id}`;
+              return (
+                <div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                      Virtual Room
+                    </span>
+                    <h4 className="font-extrabold text-sm text-navy-950">{lc.title}</h4>
+                    <p className="text-xs text-slate-500">{lc.subject}</p>
+                    <p className="text-[11px] text-slate-400">
+                      {lc.scheduledDate} at {lc.startTime}
+                    </p>
+
+                    {/* Class Link Display */}
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-slate-600 flex items-center gap-1">
+                          <LinkIcon className="w-3 h-3 text-teal-600" /> Class Link:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(liveUrl, lc._id)}
+                          className="text-teal-600 hover:text-teal-700 font-extrabold flex items-center gap-1 text-[10px]"
+                        >
+                          {copiedId === lc._id ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-600" /> Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" /> Copy
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-xs font-semibold text-teal-600 hover:underline truncate"
+                        title={liveUrl}
+                      >
+                        {liveUrl}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <a
+                      href={liveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-teal-400" />
+                      Start Stream
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyLink(liveUrl, lc._id)}
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                      title="Copy Class Link"
+                    >
+                      {copiedId === lc._id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>)}
 
@@ -386,6 +454,28 @@ export const TeacherDashboardPage = () => {
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Class Description</label>
                 <textarea rows={2} value={lDesc} onChange={(e) => setLDesc(e.target.value)} placeholder="Briefly state topics covered in this live session..." className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase">Live Class Link / Meeting URL</label>
+                  <button
+                    type="button"
+                    onClick={() => setLLink(`https://meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 5)}`)}
+                    className="text-[11px] font-bold text-teal-600 hover:underline"
+                  >
+                    Auto-Generate Google Meet
+                  </button>
+                </div>
+                <input
+                  type="url"
+                  value={lLink}
+                  onChange={(e) => setLLink(e.target.value)}
+                  placeholder="e.g. https://meet.google.com/xyz-abcd-efg or Zoom / Teams link"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Students will see this exact link in their Student Dashboard to join your live class.
+                </p>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => {

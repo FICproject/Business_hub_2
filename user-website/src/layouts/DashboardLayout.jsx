@@ -141,9 +141,9 @@ export const DashboardLayout = () => {
     const currentTab = searchParams.get('tab') || 'overview';
     return (<div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
       {/* Mobile Top Bar */}
-      <div className="md:hidden bg-navy-950 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-slate-800">
+      <div className="md:hidden bg-navy-950 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-navy-800">
         <div className="flex items-center gap-2">
-          <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-300">
+          <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-xl hover:bg-navy-900 text-slate-300">
             <Menu className="w-5 h-5"/>
           </button>
           <Link to="/" className="flex items-center gap-1.5">
@@ -154,10 +154,10 @@ export const DashboardLayout = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={() => setSearchModalOpen(true)} className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800">
+          <button onClick={() => setSearchModalOpen(true)} className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-navy-900">
             <Search className="w-4 h-4"/>
           </button>
-          <button onClick={() => setNotifDropdownOpen(!notifDropdownOpen)} className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800">
+          <button onClick={() => setNotifDropdownOpen(!notifDropdownOpen)} className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-navy-900">
             <Bell className="w-4 h-4"/>
             {unreadCount > 0 && (<span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-amber-500 text-[9px] font-extrabold flex items-center justify-center text-navy-950">
                 {unreadCount}
@@ -170,7 +170,7 @@ export const DashboardLayout = () => {
       <aside
         className={`fixed top-0 inset-y-0 left-0 z-40 w-64 lg:w-72 h-screen h-[100dvh] bg-navy-950 text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } border-r border-slate-800/80 shadow-lg`}
+        } border-r border-navy-800/80 shadow-lg`}
       >
         {/* Top Header: Logo & Profile Card (Fixed, non-scrolling) */}
         <div className="p-4 lg:p-5 pb-2 flex-shrink-0 space-y-3">
@@ -199,7 +199,7 @@ export const DashboardLayout = () => {
                   `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.fullName || 'User')}`
                 }
                 alt="Avatar"
-                className="w-10 h-10 rounded-xl object-cover bg-slate-800 border border-white/10"
+                className="w-10 h-10 rounded-xl object-cover bg-navy-900 border border-white/10"
               />
               <div className="overflow-hidden min-w-0">
                 <p className="font-bold text-sm text-white truncate">{user?.fullName}</p>
@@ -229,7 +229,7 @@ export const DashboardLayout = () => {
                       className={`px-2.5 py-1 rounded text-xs font-semibold capitalize transition-all ${
                         activeRole === r
                           ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
-                          : 'bg-slate-900 text-slate-300 hover:text-white'
+                          : 'bg-navy-900 text-slate-300 hover:text-white'
                       }`}
                     >
                       {r}
@@ -282,7 +282,7 @@ export const DashboardLayout = () => {
         </nav>
 
         {/* Sidebar Footer Logout (Fixed at bottom) */}
-        <div className="p-3 lg:p-4 border-t border-slate-800/80 flex-shrink-0">
+        <div className="p-3 lg:p-4 border-t border-navy-800/80 flex-shrink-0">
           <button
             type="button"
             onClick={() => setLogoutModalOpen(true)}

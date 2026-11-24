@@ -692,7 +692,7 @@ export const LandingPage = () => {
             9. HELP & SUPPORT / CONTACT ANCHOR SECTION
         ========================================================================== */}
       <section id="contact" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto scroll-mt-24">
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-navy-950 text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-navy-800 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="space-y-3 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold">
               <span>24/7 Help &amp; Support</span>

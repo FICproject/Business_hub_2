@@ -297,7 +297,7 @@ export const ProfilePage = () => {
                   {showPassword ? 'Hide Passwords' : 'Show Passwords'}
                 </button>
 
-                <button type="submit" disabled={passwordLoading} className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
+                <button type="submit" disabled={passwordLoading} className="px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
                   <Lock className="w-3.5 h-3.5"/>
                   {passwordLoading ? 'Updating...' : 'Update Password'}
                 </button>

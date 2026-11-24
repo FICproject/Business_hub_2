@@ -133,7 +133,17 @@ export const updateCourseProgress = async (req, res) => {
 // 2. LIVE CLASSES (100% Free for students)
 export const getLiveClasses = async (req, res) => {
     try {
-        return res.json({ success: true, data: dbStore.collection.liveClasses });
+        const liveClasses = (dbStore.collection.liveClasses || []).map((lc) => {
+            const meetingId = lc.meetingId || `MEET-${(lc._id || '').slice(0, 8).toUpperCase()}`;
+            const fallbackLink = `https://meet.businesshub.com/room/${meetingId}`;
+            return {
+                ...lc,
+                meetingId,
+                classLink: lc.classLink || lc.meetingLink || fallbackLink,
+                meetingLink: lc.meetingLink || lc.classLink || fallbackLink,
+            };
+        });
+        return res.json({ success: true, data: liveClasses });
     }
     catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -141,7 +151,9 @@ export const getLiveClasses = async (req, res) => {
 };
 export const createLiveClass = async (req, res) => {
     try {
-        const { title, subject, description, scheduledDate, startTime, durationMinutes, studentCapacity } = req.body;
+        const { title, subject, description, scheduledDate, startTime, durationMinutes, studentCapacity, classLink, meetingLink } = req.body;
+        const meetingId = `MEET-${uuidv4().slice(0, 8).toUpperCase()}`;
+        const finalClassLink = (classLink || meetingLink || '').trim() || `https://meet.businesshub.com/room/${meetingId}`;
         const newClass = {
             _id: uuidv4(),
             instructorId: req.user._id,
@@ -154,13 +166,15 @@ export const createLiveClass = async (req, res) => {
             durationMinutes: parseInt(durationMinutes || '60', 10),
             studentCapacity: parseInt(studentCapacity || '100', 10),
             enrolledCount: 0,
-            meetingId: `MEET-${uuidv4().slice(0, 8).toUpperCase()}`,
+            meetingId,
+            classLink: finalClassLink,
+            meetingLink: finalClassLink,
             status: 'scheduled',
             createdAt: new Date().toISOString(),
         };
         dbStore.collection.liveClasses.push(newClass);
         dbStore.save();
-        logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'CREATE_LIVE_CLASS', 'LiveClass', newClass._id, `Scheduled live class "${title}"`);
+        logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'CREATE_LIVE_CLASS', 'LiveClass', newClass._id, `Scheduled live class "${title}" with link "${finalClassLink}"`);
         return res.status(201).json({ success: true, message: 'Live class scheduled successfully!', liveClass: newClass });
     }
     catch (error) {

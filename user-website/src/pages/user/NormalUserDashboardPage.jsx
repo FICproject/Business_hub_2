@@ -68,7 +68,7 @@ export const NormalUserDashboardPage = () => {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           {/* Welcome Banner */}
-          <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-2 z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30">
                 <Sparkles className="w-3.5 h-3.5"/>

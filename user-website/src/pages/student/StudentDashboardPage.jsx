@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { GraduationCap, Video, Briefcase, Clock, PlayCircle, Award, FileText, Calendar, Sparkles, ShieldCheck, Download, Search, MessageSquare, Send, Building2, } from 'lucide-react';
+import { GraduationCap, Video, Briefcase, Clock, PlayCircle, Award, FileText, Calendar, Sparkles, ShieldCheck, Download, Search, MessageSquare, Send, Building2, ExternalLink, Copy, Check, Link as LinkIcon, } from 'lucide-react';
 import { educationApi, jobsApi, marketplaceApi, usersApi } from '../../services/api';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
@@ -48,6 +48,13 @@ export const StudentDashboardPage = () => {
     const [applySuccess, setApplySuccess] = useState(false);
     // Live class modal
     const [activeLiveRoom, setActiveLiveRoom] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
+    const handleCopyLink = (text, id) => {
+        if (!text) return;
+        navigator.clipboard?.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2500);
+    };
     const loadData = () => {
         setLoading(true);
         Promise.allSettled([
@@ -222,7 +229,7 @@ export const StudentDashboardPage = () => {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           {/* 100% Free Education Policy Ribbon */}
-          <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-2 z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold border border-teal-500/30">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -358,24 +365,82 @@ export const StudentDashboardPage = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {liveClasses.slice(0, 3).map((lc) => (<div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
-                      Live Video Class
-                    </span>
-                    <h4 className="font-extrabold text-sm text-navy-950">{lc.title}</h4>
-                    <p className="text-xs text-slate-500">{lc.subject}</p>
-                    <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                      <Clock className="w-3 h-3"/>
-                      {lc.scheduledDate} at {lc.startTime}
-                    </p>
-                  </div>
+              {liveClasses.slice(0, 3).map((lc) => {
+                const liveUrl = lc.classLink || lc.meetingLink || `https://meet.businesshub.com/room/${lc.meetingId || lc._id}`;
+                return (
+                  <div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                          Live Video Class
+                        </span>
+                        <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md">
+                          Free Stream
+                        </span>
+                      </div>
+                      <h4 className="font-extrabold text-sm text-navy-950">{lc.title}</h4>
+                      <p className="text-xs text-slate-500">{lc.subject}</p>
+                      <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {lc.scheduledDate} at {lc.startTime}
+                      </p>
 
-                  <button onClick={() => setActiveLiveRoom(lc)} className="w-full py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5">
-                    <Video className="w-3.5 h-3.5 text-teal-400"/>
-                    Enter Classroom
-                  </button>
-                </div>))}
+                      {/* Class Link Preview */}
+                      <div className="p-2.5 rounded-xl bg-teal-50/70 border border-teal-200/70 space-y-1">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-extrabold text-teal-900 flex items-center gap-1">
+                            <LinkIcon className="w-3 h-3 text-teal-600" /> Class Link:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyLink(liveUrl, `overview-${lc._id}`)}
+                            className="text-teal-700 hover:text-teal-900 font-bold text-[10px] flex items-center gap-0.5"
+                          >
+                            {copiedId === `overview-${lc._id}` ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-600" /> Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" /> Copy
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-[11px] font-semibold text-teal-700 hover:underline truncate"
+                          title={liveUrl}
+                        >
+                          {liveUrl}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-1">
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs text-center flex items-center justify-center gap-1 shadow-sm transition-all"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Join Class
+                      </a>
+                      <button
+                        onClick={() => setActiveLiveRoom(lc)}
+                        className="px-3 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all"
+                        title="Enter in-app live room"
+                      >
+                        <Video className="w-3.5 h-3.5 text-teal-400" />
+                        Room
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>)}
@@ -511,27 +576,104 @@ export const StudentDashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {liveClasses.map((lc) => (<div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
-                    Live Video Classroom
-                  </span>
-                  <h4 className="font-extrabold text-base text-navy-950">{lc.title}</h4>
-                  <p className="text-xs text-slate-500 line-clamp-2">{lc.description}</p>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
-                    <p className="font-bold text-slate-700">Subject: {lc.subject}</p>
-                    <p className="text-slate-500 flex items-center gap-1 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-slate-400"/>
-                      {lc.scheduledDate} at {lc.startTime} ({lc.durationMinutes} min)
-                    </p>
-                  </div>
-                </div>
+            {liveClasses.length === 0 ? (
+              <div className="col-span-full bg-white rounded-3xl border border-slate-200/80 p-12 text-center space-y-3">
+                <Video className="w-12 h-12 text-slate-400 mx-auto" />
+                <h4 className="font-extrabold text-base text-navy-950">No Live Classes Scheduled Yet</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Certified educators regularly schedule free interactive masterclasses and virtual Q&A sessions. Check back soon!
+                </p>
+              </div>
+            ) : (
+              liveClasses.map((lc) => {
+                const liveUrl = lc.classLink || lc.meetingLink || `https://meet.businesshub.com/room/${lc.meetingId || lc._id}`;
+                return (
+                  <div key={lc._id} className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition-all">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                          Live Video Classroom
+                        </span>
+                        <span className="text-[11px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md">
+                          100% Free Access
+                        </span>
+                      </div>
 
-                <button onClick={() => setActiveLiveRoom(lc)} className="w-full py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all">
-                  <Video className="w-4 h-4 text-teal-400"/>
-                  Join Live Classroom
-                </button>
-              </div>))}
+                      <div className="space-y-1">
+                        <h4 className="font-extrabold text-base text-navy-950 leading-snug">{lc.title}</h4>
+                        {lc.instructorName && (
+                          <p className="text-xs font-semibold text-slate-600">
+                            Faculty: <span className="text-navy-900 font-bold">{lc.instructorName}</span>
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-500 line-clamp-2">{lc.description}</p>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
+                        <p className="font-bold text-slate-700">Subject: {lc.subject}</p>
+                        <p className="text-slate-500 flex items-center gap-1 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          {lc.scheduledDate} at {lc.startTime} ({lc.durationMinutes || 60} min)
+                        </p>
+                      </div>
+
+                      {/* Class Link Section */}
+                      <div className="p-3 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-extrabold text-teal-900 flex items-center gap-1.5 text-[11px]">
+                            <LinkIcon className="w-3.5 h-3.5 text-teal-600" /> Live Class Link:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyLink(liveUrl, lc._id)}
+                            className="text-[11px] font-extrabold text-teal-700 hover:text-teal-800 flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-teal-200 shadow-2xs transition-colors"
+                          >
+                            {copiedId === lc._id ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-600" /> Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" /> Copy Link
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-xs font-bold text-teal-700 hover:text-teal-900 hover:underline truncate"
+                          title={liveUrl}
+                        >
+                          {liveUrl}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all text-center"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Join via Class Link
+                      </a>
+                      <button
+                        onClick={() => setActiveLiveRoom(lc)}
+                        className="py-2.5 px-3.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
+                        title="Launch in-app stream canvas"
+                      >
+                        <Video className="w-3.5 h-3.5 text-teal-400" />
+                        In-App Room
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>)}
 
@@ -589,7 +731,7 @@ export const StudentDashboardPage = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {certificates.map((cert) => (<div key={cert.id} className="bg-gradient-to-br from-navy-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xl space-y-6 relative overflow-hidden">
+            {certificates.map((cert) => (<div key={cert.id} className="bg-gradient-to-br from-navy-950 to-navy-900 rounded-3xl p-6 sm:p-8 text-white border border-navy-800 shadow-xl space-y-6 relative overflow-hidden">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-extrabold uppercase tracking-widest text-amber-400">
                     Business Hub Official Certificate
@@ -604,7 +746,7 @@ export const StudentDashboardPage = () => {
                   <p className="text-sm font-bold text-amber-300">{cert.courseTitle}</p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                <div className="pt-4 border-t border-navy-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>ID: {cert.credentialId}</span>
                   <span>Issued: {cert.issueDate}</span>
                 </div>
@@ -816,33 +958,79 @@ export const StudentDashboardPage = () => {
       {/* =========================================================================
             LIVE CLASSROOM MODAL (Opens inside dashboard!)
         ========================================================================= */}
-      {activeLiveRoom && (<div className="fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
-                  Active Virtual Room
-                </span>
-                <h3 className="text-lg font-extrabold text-navy-950 mt-1">{activeLiveRoom.title}</h3>
-                <p className="text-xs text-slate-500">{activeLiveRoom.subject} • 100% Free Live Stream</p>
+      {activeLiveRoom && (() => {
+        const liveUrl = activeLiveRoom.classLink || activeLiveRoom.meetingLink || `https://meet.businesshub.com/room/${activeLiveRoom.meetingId || activeLiveRoom._id}`;
+        return (
+          <div className="fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-slate-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                    Active Virtual Room
+                  </span>
+                  <h3 className="text-lg font-extrabold text-navy-950 mt-1">{activeLiveRoom.title}</h3>
+                  <p className="text-xs text-slate-500">{activeLiveRoom.subject} • 100% Free Live Stream</p>
+                </div>
+                <button onClick={() => setActiveLiveRoom(null)} className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600">
+                  Close Room
+                </button>
               </div>
-              <button onClick={() => setActiveLiveRoom(null)} className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600">
-                Close Room
-              </button>
-            </div>
 
-            {/* Video player canvas */}
-            <div className="w-full aspect-video bg-navy-950 rounded-2xl flex flex-col items-center justify-center text-white space-y-2 relative overflow-hidden">
-              <Video className="w-12 h-12 text-teal-400 animate-pulse"/>
-              <p className="text-sm font-extrabold">Virtual Classroom Live Stream</p>
-              <p className="text-xs text-slate-400">Broadcasting live with verified instructor</p>
-            </div>
+              {/* Direct Class Link Callout */}
+              <div className="p-3.5 rounded-2xl bg-teal-50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="min-w-0">
+                  <span className="font-extrabold text-teal-900 block text-[11px]">Teacher's Live Class Link:</span>
+                  <a
+                    href={liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-teal-700 hover:underline truncate block text-xs"
+                    title={liveUrl}
+                  >
+                    {liveUrl}
+                  </a>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyLink(liveUrl, 'modal')}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-teal-200 text-teal-800 font-bold text-xs flex items-center gap-1 hover:bg-teal-100/50 shadow-2xs"
+                  >
+                    {copiedId === 'modal' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" /> Copy Link
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href={liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-1.5 rounded-xl bg-teal-600 text-white font-extrabold text-xs flex items-center gap-1 hover:bg-teal-700 shadow-sm"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Open Link
+                  </a>
+                </div>
+              </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-              <span className="text-slate-600 font-medium">Session duration: {activeLiveRoom.durationMinutes} min</span>
-              <span className="text-teal-700 font-extrabold">HD 1080p Stream • Free Access</span>
+              {/* Video player canvas */}
+              <div className="w-full aspect-video bg-navy-950 rounded-2xl flex flex-col items-center justify-center text-white space-y-2 relative overflow-hidden">
+                <Video className="w-12 h-12 text-teal-400 animate-pulse"/>
+                <p className="text-sm font-extrabold">Virtual Classroom Live Stream</p>
+                <p className="text-xs text-slate-400">Broadcasting live with verified instructor</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                <span className="text-slate-600 font-medium">Session duration: {activeLiveRoom.durationMinutes} min</span>
+                <span className="text-teal-700 font-extrabold">HD 1080p Stream • Free Access</span>
+              </div>
             </div>
           </div>
-        </div>)}
+        );
+      })()}
     </div>);
 };
