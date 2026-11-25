@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Store, LayoutDashboard, GraduationCap, Video, FileText, Briefcase, ShoppingBag, Share2, Bell, User, Settings, LogOut, PlusCircle, Clock, DollarSign, ShieldCheck, CheckCircle, Menu, X, Search, Bookmark, Calendar, Users as UsersIcon, Award, Layers, } from 'lucide-react';
-import { logout, setActiveRole, setNotifications } from '../store';
-import { notificationsApi } from '../services/api';
+import { logout, setActiveRole, setNotifications, updateUser } from '../store';
+import { notificationsApi, authApi } from '../services/api';
 import { ConfirmationModal } from '../components/dashboard/ConfirmationModal';
 import { GlobalSearchModal } from '../components/dashboard/GlobalSearchModal';
+import { PendingApprovalView } from '../components/verification/PendingApprovalView';
 export const DashboardLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
@@ -137,6 +138,11 @@ export const DashboardLayout = () => {
         roleBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
         baseRolePath = '/dashboard/user';
     }
+    // Check if current role requires mandatory verification approval
+    const isVerifiableRole = activeRole === 'teacher' || activeRole === 'businessman' || activeRole === 'entrepreneur';
+    const isApproved = user?.verificationStatus === 'approved' && user?.status !== 'pending';
+    const isApprovalGated = isVerifiableRole && !isApproved;
+
     // Active Tab handling from URL search params
     const searchParams = new URLSearchParams(location.search);
     const currentTab = searchParams.get('tab') || 'overview';
@@ -244,42 +250,56 @@ export const DashboardLayout = () => {
 
         {/* Navigation Links (Larger font, comfortable spacing) */}
         <nav className="px-3 lg:px-4 flex-grow overflow-y-auto no-scrollbar space-y-1 py-1.5">
-          {currentNav.map((item, idx) => {
-            const targetUrl = item.tab
-              ? item.tab === 'overview'
-                ? baseRolePath
-                : `${baseRolePath}?tab=${item.tab}`
-              : item.path;
-            let isTabActive = false;
-            if (item.tab) {
-              isTabActive = location.pathname === baseRolePath && currentTab === item.tab;
-            } else if (item.path) {
-              const [itemPathname, itemQuery] = item.path.split('?');
-              if (itemQuery) {
-                const itemParams = new URLSearchParams(itemQuery);
-                const itemTab = itemParams.get('tab');
-                isTabActive = location.pathname === itemPathname && searchParams.get('tab') === itemTab;
-              } else {
-                isTabActive = location.pathname === itemPathname && !searchParams.get('tab');
+          {isApprovalGated ? (
+            <div className="py-4 px-2 space-y-3">
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-1.5">
+                <p className="font-extrabold uppercase tracking-wider flex items-center gap-1.5 text-amber-400">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  Approval Gated
+                </p>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  Dashboard features are locked until an administrator reviews and approves your mandatory documents.
+                </p>
+              </div>
+            </div>
+          ) : (
+            currentNav.map((item, idx) => {
+              const targetUrl = item.tab
+                ? item.tab === 'overview'
+                  ? baseRolePath
+                  : `${baseRolePath}?tab=${item.tab}`
+                : item.path;
+              let isTabActive = false;
+              if (item.tab) {
+                isTabActive = location.pathname === baseRolePath && currentTab === item.tab;
+              } else if (item.path) {
+                const [itemPathname, itemQuery] = item.path.split('?');
+                if (itemQuery) {
+                  const itemParams = new URLSearchParams(itemQuery);
+                  const itemTab = itemParams.get('tab');
+                  isTabActive = location.pathname === itemPathname && searchParams.get('tab') === itemTab;
+                } else {
+                  isTabActive = location.pathname === itemPathname && !searchParams.get('tab');
+                }
               }
-            }
-            const Icon = item.icon;
-            return (
-              <Link
-                key={`${item.label}-${idx}`}
-                to={targetUrl}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  isTabActive
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="truncate">{item.label}</span>
-              </Link>
-            );
-          })}
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={`${item.label}-${idx}`}
+                  to={targetUrl}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    isTabActive
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 shadow-md shadow-amber-500/20 font-extrabold'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })
+          )}
         </nav>
 
         {/* Sidebar Footer Logout (Fixed at bottom) */}
@@ -386,8 +406,12 @@ export const DashboardLayout = () => {
 
         {/* Dashboard Page Body */}
         <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          {/* Child Page Content */}
-          <Outlet />
+          {/* If the current role requires verification approval and is not approved, block dashboard access */}
+          {isApprovalGated ? (
+            <PendingApprovalView role={activeRole} />
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
 
