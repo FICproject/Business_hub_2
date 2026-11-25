@@ -181,6 +181,11 @@ export const DocumentVerificationPanel = ({
           <div className="space-y-0.5">
             <div className="flex items-center flex-wrap gap-2">
               <span className="text-sm font-bold text-slate-900">{requirement.name}</span>
+              {roles.length > 1 && requirement.role && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {requirement.role === 'businessman' ? 'Businessman' : requirement.role === 'entrepreneur' ? 'Entrepreneur' : requirement.role}
+                </span>
+              )}
               {isMandatory ? (
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-rose-50 text-rose-700 border border-rose-200">
                   Mandatory

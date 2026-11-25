@@ -66,8 +66,8 @@ export const adminApi = {
     getPendingDocumentApplicants: () => api.get('/documents/admin/pending'),
     getApplicantDocuments: (userId) => api.get(`/documents/admin/applicant/${userId}`),
     reviewDocument: (id, status, reason) => api.put(`/documents/${id}/review`, { status, reason }),
-    decideApplicantApplication: (userId, decision, reason) =>
-        api.post(`/documents/admin/applicant/${userId}/decision`, { decision, reason }),
+    decideApplicantApplication: (userId, decision, reason, targetRole) =>
+        api.post(`/documents/admin/applicant/${userId}/decision`, { decision, reason, targetRole }),
     getDocumentAccessToken: (id, download = false) =>
         api.get(`/documents/${id}/access-token`, { params: { download } }),
     getDocumentRequirements: (params) => api.get('/documents/requirements', { params }),

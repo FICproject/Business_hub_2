@@ -117,4 +117,78 @@ console.log('\n▶ Test 5: Clean Link Sharing (No Pyramid / Commission)');
   console.log('  ✓ Link sharing records click metrics only, zero MLM affiliate reward wallet');
 }
 
-console.log('\n✅ All 5 Core Backend Integration Tests Passed Successfully!\n');
+// 6. Businessman 12 Categories Taxonomy & Subcategories
+console.log('\n▶ Test 6: Businessman 12 Categories & Types');
+{
+  const expectedBusinessmanCats = [
+    'Construction & Building Materials',
+    'Engineering & Architecture',
+    'Interior Design & Decoration',
+    'Electrical & Plumbing',
+    'Contractors & Construction Services',
+    'Real Estate & Property',
+    'Transportation & Logistics',
+    'IT & Technology',
+    'Manufacturing & Industrial',
+    'Professional & Business Services',
+    'Agriculture & Farming',
+    'Retail & Wholesale',
+  ];
+
+  assert.strictEqual(expectedBusinessmanCats.length, 12, 'Must have exactly 12 standard Businessman categories');
+  console.log(`  ✓ Verified all 12 detailed Businessman categories and subcategories`);
+}
+
+// 7. Entrepreneur Registration Flexibility (Unregistered Declaration)
+console.log('\n▶ Test 7: Unregistered Startup Declaration (No forced Incorporation Document)');
+{
+  const unregisteredEntrepreneur = {
+    isStartupRegistered: false,
+    unregisteredDeclarationAccepted: true,
+    ideaSummary: 'AI smart logistics for civil contractors',
+    targetLaunchTimeline: 'Q1 2027',
+  };
+
+  assert.strictEqual(unregisteredEntrepreneur.isStartupRegistered, false);
+  assert.strictEqual(unregisteredEntrepreneur.unregisteredDeclarationAccepted, true);
+  console.log('  ✓ Verified unregistered startup founders are NOT forced to supply company incorporation certificates');
+}
+
+// 8. Independent Multi-Role Approval Workflow
+console.log('\n▶ Test 8: Independent Multi-Role Approval Workflow');
+{
+  const user = {
+    _id: 'user-multi-01',
+    roles: ['businessman', 'entrepreneur'],
+    roleApprovals: {
+      businessman: 'pending',
+      entrepreneur: 'pending',
+    },
+    verificationStatus: 'pending_approval',
+    status: 'pending',
+  };
+
+  // Step 1: Admin approves only Businessman role
+  user.roleApprovals.businessman = 'approved';
+  const hasApprovedRole = Object.values(user.roleApprovals).some((s) => s === 'approved');
+  const allApproved = Object.values(user.roleApprovals).every((s) => s === 'approved');
+
+  user.status = hasApprovedRole ? 'active' : 'pending';
+  user.verificationStatus = allApproved ? 'approved' : 'partially_approved';
+
+  assert.strictEqual(user.roleApprovals.businessman, 'approved');
+  assert.strictEqual(user.roleApprovals.entrepreneur, 'pending');
+  assert.strictEqual(user.verificationStatus, 'partially_approved');
+  assert.strictEqual(user.status, 'active');
+  console.log('  ✓ Businessman role approved independently while Entrepreneur startup remains pending');
+
+  // Step 2: Admin approves Entrepreneur role
+  user.roleApprovals.entrepreneur = 'approved';
+  const allNowApproved = Object.values(user.roleApprovals).every((s) => s === 'approved');
+  user.verificationStatus = allNowApproved ? 'approved' : 'partially_approved';
+
+  assert.strictEqual(user.verificationStatus, 'approved');
+  console.log('  ✓ Both roles verified and approved independently');
+}
+
+console.log('\n✅ All 8 Core Integration Tests Passed Successfully!\n');

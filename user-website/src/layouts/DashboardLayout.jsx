@@ -140,8 +140,10 @@ export const DashboardLayout = () => {
     }
     // Check if current role requires mandatory verification approval
     const isVerifiableRole = activeRole === 'teacher' || activeRole === 'businessman' || activeRole === 'entrepreneur';
-    const isApproved = user?.verificationStatus === 'approved' && user?.status !== 'pending';
-    const isApprovalGated = isVerifiableRole && !isApproved;
+    const isRoleApproved =
+        user?.roleApprovals?.[activeRole] === 'approved' ||
+        (user?.verificationStatus === 'approved' && user?.status !== 'pending');
+    const isApprovalGated = isVerifiableRole && !isRoleApproved;
 
     // Active Tab handling from URL search params
     const searchParams = new URLSearchParams(location.search);

@@ -4,11 +4,19 @@ import { logAudit } from '../../middleware/audit.middleware';
 import { buildApplicantVerificationSummary } from '../documents/documents.controller';
 export const getMyBusiness = async (req, res) => {
     try {
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
-        if (!business) {
+        const { roleType } = req.query;
+        const allMyBusinesses = dbStore.collection.businesses.filter((b) => b.ownerId === req.user._id);
+        if (allMyBusinesses.length === 0) {
             return res.status(404).json({ success: false, message: 'No business registered for this account.' });
         }
-        return res.json({ success: true, business });
+        let business = null;
+        if (roleType) {
+            business = allMyBusinesses.find((b) => b.roleType === roleType);
+        }
+        if (!business) {
+            business = allMyBusinesses[0];
+        }
+        return res.json({ success: true, business, businesses: allMyBusinesses });
     }
     catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -131,19 +139,37 @@ export const reviewVerification = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Business not found.' });
         }
         const owner = dbStore.collection.users.find((u) => u._id === business.ownerId);
+        const roleType = business.roleType || (business.businessType === 'unregistered_startup' ? 'entrepreneur' : 'businessman');
+
         if (status === 'approved' && owner) {
-            const summary = buildApplicantVerificationSummary(owner);
+            const summary = buildApplicantVerificationSummary(owner, null, roleType);
             if (summary.requiresVerification && !summary.summary.canApproveApplication) {
                 return res.status(400).json({
                     success: false,
-                    message: `Cannot approve business. All mandatory owner/business documents must be verified first: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
+                    message: `Cannot approve ${roleType} profile. All mandatory ${roleType} documents must be verified first: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
                     unverifiedMandatoryNames: summary.summary.unverifiedMandatoryNames,
                 });
             }
+            owner.roleApprovals = owner.roleApprovals || {};
+            owner.roleApprovals[roleType] = 'approved';
+
+            const verifiableRoles = (owner.roles || []).filter((r) => ['teacher', 'businessman', 'entrepreneur'].includes(r));
+            const allApproved = verifiableRoles.every((r) => owner.roleApprovals[r] === 'approved');
+
             owner.status = 'active';
-            owner.verificationStatus = 'approved';
+            owner.verificationStatus = allApproved ? 'approved' : 'partially_approved';
+            owner.updatedAt = new Date().toISOString();
+        } else if (status === 'rejected' && owner) {
+            owner.roleApprovals = owner.roleApprovals || {};
+            owner.roleApprovals[roleType] = 'rejected';
+            const verifiableRoles = (owner.roles || []).filter((r) => ['teacher', 'businessman', 'entrepreneur'].includes(r));
+            const allRejected = verifiableRoles.every((r) => owner.roleApprovals[r] === 'rejected');
+            if (allRejected) {
+                owner.verificationStatus = 'rejected';
+            }
             owner.updatedAt = new Date().toISOString();
         }
+
         business.verificationStatus = status;
         if (status === 'rejected') {
             business.rejectionReason = rejectionReason || 'Information or documents provided were insufficient or invalid.';
@@ -156,20 +182,20 @@ export const reviewVerification = async (req, res) => {
         dbStore.collection.notifications.push({
             _id: uuidv4(),
             userId: business.ownerId,
-            title: `Business Verification Update: ${status.toUpperCase()}`,
+            title: `${roleType === 'entrepreneur' ? 'Startup' : 'Business'} Verification Update: ${status.toUpperCase()}`,
             message: status === 'approved'
-                ? 'Congratulations! Your business verification has been approved. You can now publish products, services, and job listings.'
-                : `Your business verification has been set to ${status}. ${rejectionReason ? `Reason: ${rejectionReason}` : ''}`,
+                ? `Congratulations! Your ${roleType === 'entrepreneur' ? 'startup' : 'business'} verification has been approved. You can now access full features.`
+                : `Your ${roleType === 'entrepreneur' ? 'startup' : 'business'} verification has been set to ${status}. ${rejectionReason ? `Reason: ${rejectionReason}` : ''}`,
             type: status === 'approved' ? 'success' : 'warning',
             link: '/dashboard/business/verification',
             isRead: false,
             createdAt: new Date().toISOString(),
         });
         dbStore.save();
-        logAudit(req.user._id, req.user.fullName, 'admin', 'BUSINESS_REVIEW', 'Business', business._id, `Verification status updated to ${status}. Reason: ${rejectionReason || 'None'}`);
+        logAudit(req.user._id, req.user.fullName, 'admin', 'BUSINESS_REVIEW', 'Business', business._id, `Verification status for ${business.businessName} (${roleType}) updated to ${status}. Reason: ${rejectionReason || 'None'}`);
         return res.json({
             success: true,
-            message: `Business verification status updated to ${status}.`,
+            message: `${roleType === 'entrepreneur' ? 'Startup' : 'Business'} verification status updated to ${status}.`,
             business,
         });
     }

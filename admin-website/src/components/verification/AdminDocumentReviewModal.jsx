@@ -103,7 +103,7 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
     }
   };
 
-  const handleApplicationDecision = async (decision) => {
+  const handleApplicationDecision = async (decision, targetRole = null) => {
     if (decision === 'reject' && !appRejectReason.trim()) {
       setToast({ type: 'error', text: 'Please enter a rejection reason for the application.' });
       return;
@@ -113,7 +113,8 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
       const res = await adminApi.decideApplicantApplication(
         userId,
         decision,
-        decision === 'reject' ? appRejectReason : undefined
+        decision === 'reject' ? appRejectReason : undefined,
+        targetRole || undefined
       );
       if (res.data?.success) {
         setToast({ type: 'success', text: res.data.message });
@@ -153,6 +154,11 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
           <div>
             <div className="flex items-center flex-wrap gap-2">
               <span className="font-bold text-slate-900 text-xs sm:text-sm">{requirement.name}</span>
+              {requirement.role && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {requirement.role === 'businessman' ? 'Businessman' : requirement.role === 'entrepreneur' ? 'Entrepreneur' : requirement.role}
+                </span>
+              )}
               <span
                 className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
                   isMandatory
@@ -542,7 +548,7 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
               )}
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => setAppRejectOpen(true)}
@@ -551,6 +557,30 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
               >
                 Reject Application
               </button>
+
+              {/* Independent Role Approval Buttons */}
+              {(user?.roles || []).filter((r) => ['businessman', 'entrepreneur', 'teacher'].includes(r)).map((r) => {
+                const isRoleApproved = user?.roleApprovals?.[r] === 'approved';
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    disabled={actionLoading || isRoleApproved}
+                    onClick={() => handleApplicationDecision('approve', r)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isRoleApproved
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
+                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                    }`}
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>
+                      {isRoleApproved ? `${r.toUpperCase()}: APPROVED ✓` : `Approve ${r.charAt(0).toUpperCase() + r.slice(1)}`}
+                    </span>
+                  </button>
+                );
+              })}
+
               <button
                 type="button"
                 disabled={!canApprove || actionLoading || user?.status === 'active'}
@@ -560,7 +590,7 @@ export const AdminDocumentReviewModal = ({ userId, onClose, onDecisionComplete }
               >
                 <UserCheck className="w-4 h-4" />
                 <span>
-                  {user?.status === 'active' ? 'Already Approved' : 'Approve Application'}
+                  {user?.status === 'active' ? 'Account Active' : 'Approve All Roles'}
                 </span>
               </button>
             </div>

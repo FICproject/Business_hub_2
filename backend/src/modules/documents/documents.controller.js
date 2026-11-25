@@ -53,9 +53,12 @@ const sanitizeDocument = (doc) => {
 /**
  * Helper: evaluate an applicant's complete verification checklist and readiness
  */
-export const buildApplicantVerificationSummary = (user, draftSession = null) => {
+export const buildApplicantVerificationSummary = (user, draftSession = null, targetRole = null) => {
   const allReqs = ensureDocumentRequirementsSeeded();
-  const roles = user ? user.roles : draftSession?.roles || [];
+  let roles = user ? user.roles : draftSession?.roles || [];
+  if (targetRole) {
+    roles = [targetRole];
+  }
   const context = user ? user.applicationContext || {} : draftSession?.applicationContext || {};
   const evaluated = evaluateRequirementsForApplicant(allReqs, roles, context);
 
@@ -64,7 +67,20 @@ export const buildApplicantVerificationSummary = (user, draftSession = null) => 
   );
 
   const mergeSlot = (reqItem) => {
-    const doc = ownerDocs.find((d) => d.requirementId === reqItem.id);
+    let doc = ownerDocs.find((d) => d.requirementId === reqItem.id);
+    // Allow sharing common identity proof and profile photos across roles
+    if (!doc) {
+      if (reqItem.id === 'ent_id_proof') {
+        doc = ownerDocs.find((d) => d.requirementId === 'biz_owner_id_proof' || d.requirementId === 'teacher_id_proof');
+      } else if (reqItem.id === 'biz_owner_id_proof') {
+        doc = ownerDocs.find((d) => d.requirementId === 'ent_id_proof' || d.requirementId === 'teacher_id_proof');
+      } else if (reqItem.id === 'ent_profile_photo') {
+        doc = ownerDocs.find((d) => d.requirementId === 'biz_owner_photo' || d.requirementId === 'teacher_profile_photo');
+      } else if (reqItem.id === 'biz_owner_photo') {
+        doc = ownerDocs.find((d) => d.requirementId === 'ent_profile_photo' || d.requirementId === 'teacher_profile_photo');
+      }
+    }
+
     if (!doc) {
       return {
         requirement: reqItem,
@@ -98,6 +114,7 @@ export const buildApplicantVerificationSummary = (user, draftSession = null) => 
   return {
     requiresVerification: evaluated.requiresVerification,
     roles,
+    targetRole: targetRole || null,
     applicationContext: context,
     mandatorySlots,
     optionalSlots,
@@ -869,44 +886,58 @@ export const reviewIndividualDocument = async (req, res) => {
 export const decideApplicantApplication = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { decision, reason } = req.body; // 'approve' | 'reject'
+    const { decision, reason, targetRole } = req.body; // 'approve' | 'reject', optional targetRole: 'businessman' | 'entrepreneur' | 'teacher'
 
     const user = (dbStore.collection.users || []).find((u) => u._id === userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Applicant user not found.' });
     }
 
-    const summary = buildApplicantVerificationSummary(user);
+    const summary = buildApplicantVerificationSummary(user, null, targetRole || null);
     const now = new Date().toISOString();
 
     if (decision === 'approve') {
       if (!summary.summary.canApproveApplication) {
         return res.status(400).json({
           success: false,
-          message: `Application approval blocked. All mandatory documents must be verified first. Unverified: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
+          message: `Application approval blocked. All mandatory documents${targetRole ? ` for ${targetRole}` : ''} must be verified first. Unverified: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
           unverifiedMandatoryNames: summary.summary.unverifiedMandatoryNames,
         });
       }
 
+      user.roleApprovals = user.roleApprovals || {};
+      const rolesToApprove = targetRole ? [targetRole] : (user.roles || []);
+      rolesToApprove.forEach((r) => {
+        user.roleApprovals[r] = 'approved';
+      });
+
+      const userVerifiableRoles = (user.roles || []).filter((r) => ['teacher', 'businessman', 'entrepreneur'].includes(r));
+      const allRolesApproved = userVerifiableRoles.every((r) => user.roleApprovals[r] === 'approved');
+
       user.status = 'active';
-      user.verificationStatus = 'approved';
+      user.verificationStatus = allRolesApproved ? 'approved' : 'partially_approved';
       user.rejectionReason = undefined;
       user.verifiedAt = now;
       user.verifiedBy = req.user.fullName;
       user.updatedAt = now;
 
-      const business = (dbStore.collection.businesses || []).find((b) => b.ownerId === user._id);
-      if (business) {
-        business.verificationStatus = 'approved';
-        business.rejectionReason = undefined;
-        business.updatedAt = now;
-      }
+      // Update matching businesses
+      const matchingBusinesses = (dbStore.collection.businesses || []).filter(
+        (b) => b.ownerId === user._id && (!targetRole || b.roleType === targetRole)
+      );
+      matchingBusinesses.forEach((b) => {
+        b.verificationStatus = 'approved';
+        b.rejectionReason = undefined;
+        b.updatedAt = now;
+      });
 
       dbStore.collection.notifications.push({
         _id: uuidv4(),
         userId: user._id,
-        title: 'Application Approved! Welcome to Business Hub',
-        message: 'All your submitted documents have been verified and your account is now active.',
+        title: targetRole ? `${targetRole.charAt(0).toUpperCase() + targetRole.slice(1)} Verification Approved!` : 'Application Approved! Welcome to Business Hub',
+        message: targetRole
+          ? `Your ${targetRole} application documents have been verified and approved.`
+          : 'All your submitted documents have been verified and your account is now active.',
         type: 'success',
         link: user.roles.includes('teacher') ? '/dashboard/teacher' : '/dashboard/business',
         isRead: false,
@@ -921,13 +952,13 @@ export const decideApplicantApplication = async (req, res) => {
         actorId: req.user._id,
         actorName: req.user.fullName,
         actorRole: 'admin',
-        details: `Approved applicant ${user.fullName} after verifying all ${summary.summary.totalMandatory} mandatory documents.`,
+        details: `Approved ${targetRole ? `role "${targetRole}" for` : ''} applicant ${user.fullName} after verifying all ${summary.summary.totalMandatory} mandatory documents.`,
       });
 
       const { password, ...safeUser } = user;
       return res.json({
         success: true,
-        message: `Application for ${user.fullName} approved successfully.`,
+        message: `Application for ${user.fullName} ${targetRole ? `(${targetRole}) ` : ''}approved successfully.`,
         user: safeUser,
         verification: buildApplicantVerificationSummary(user),
       });
@@ -937,22 +968,40 @@ export const decideApplicantApplication = async (req, res) => {
       if (!reason || !String(reason).trim()) {
         return res.status(400).json({ success: false, message: 'A rejection reason is required.' });
       }
-      user.verificationStatus = 'rejected';
+
+      user.roleApprovals = user.roleApprovals || {};
+      if (targetRole) {
+        user.roleApprovals[targetRole] = 'rejected';
+      } else {
+        (user.roles || []).forEach((r) => {
+          user.roleApprovals[r] = 'rejected';
+        });
+      }
+
+      const userVerifiableRoles = (user.roles || []).filter((r) => ['teacher', 'businessman', 'entrepreneur'].includes(r));
+      const allRolesRejected = userVerifiableRoles.every((r) => user.roleApprovals[r] === 'rejected');
+
+      if (allRolesRejected) {
+        user.verificationStatus = 'rejected';
+      }
       user.rejectionReason = String(reason).trim();
       user.updatedAt = now;
 
-      const business = (dbStore.collection.businesses || []).find((b) => b.ownerId === user._id);
-      if (business) {
-        business.verificationStatus = 'rejected';
-        business.rejectionReason = String(reason).trim();
-        business.updatedAt = now;
-      }
+      // Update matching businesses
+      const matchingBusinesses = (dbStore.collection.businesses || []).filter(
+        (b) => b.ownerId === user._id && (!targetRole || b.roleType === targetRole)
+      );
+      matchingBusinesses.forEach((b) => {
+        b.verificationStatus = 'rejected';
+        b.rejectionReason = String(reason).trim();
+        b.updatedAt = now;
+      });
 
       dbStore.collection.notifications.push({
         _id: uuidv4(),
         userId: user._id,
-        title: 'Application Verification Rejected',
-        message: `Your application was not approved. Reason: ${String(reason).trim()}`,
+        title: targetRole ? `${targetRole.charAt(0).toUpperCase() + targetRole.slice(1)} Verification Rejected` : 'Application Verification Rejected',
+        message: `Your ${targetRole ? `${targetRole} ` : ''}application was not approved. Reason: ${String(reason).trim()}`,
         type: 'warning',
         link: user.roles.includes('teacher') ? '/dashboard/teacher?tab=verification' : '/dashboard/business?tab=verification',
         isRead: false,
@@ -967,13 +1016,13 @@ export const decideApplicantApplication = async (req, res) => {
         actorId: req.user._id,
         actorName: req.user.fullName,
         actorRole: 'admin',
-        details: `Rejected applicant ${user.fullName}. Reason: ${reason}`,
+        details: `Rejected ${targetRole ? `role "${targetRole}" for ` : ''}applicant ${user.fullName}. Reason: ${reason}`,
       });
 
       const { password, ...safeUser } = user;
       return res.json({
         success: true,
-        message: `Application for ${user.fullName} marked as rejected.`,
+        message: `Application for ${user.fullName} ${targetRole ? `(${targetRole}) ` : ''}marked as rejected.`,
         user: safeUser,
         verification: buildApplicantVerificationSummary(user),
       });

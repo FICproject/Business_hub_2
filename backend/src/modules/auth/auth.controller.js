@@ -42,7 +42,20 @@ const issueOtpForTarget = (target, type = 'email', userId = null) => {
 
 export const initRegistration = async (req, res) => {
     try {
-        const { fullName, email, mobile, dob, password, roles, termsAccepted, applicationContext } = req.body;
+        const {
+            fullName,
+            email,
+            mobile,
+            dob,
+            password,
+            roles,
+            termsAccepted,
+            personalAddress,
+            govIdDetails,
+            businessmanProfile,
+            entrepreneurProfile,
+            applicationContext,
+        } = req.body;
         if (!fullName || !email || !mobile || !dob || !password || !roles) {
             return res.status(400).json({ success: false, message: 'All registration fields are required.' });
         }
@@ -70,6 +83,17 @@ export const initRegistration = async (req, res) => {
             dbStore.collection.registrationDrafts = [];
         }
 
+        const mergedContext = {
+            ...(applicationContext || {}),
+            isStartupRegistered: entrepreneurProfile?.isStartupRegistered !== undefined ? entrepreneurProfile.isStartupRegistered : applicationContext?.isStartupRegistered,
+            hasBusinessAddress: entrepreneurProfile?.hasBusinessAddress !== undefined ? entrepreneurProfile.hasBusinessAddress : applicationContext?.hasBusinessAddress,
+            unregisteredDeclarationAccepted: entrepreneurProfile?.unregisteredDeclarationAccepted !== undefined ? entrepreneurProfile.unregisteredDeclarationAccepted : applicationContext?.unregisteredDeclarationAccepted,
+            businessmanProfile: businessmanProfile || applicationContext?.businessmanProfile,
+            entrepreneurProfile: entrepreneurProfile || applicationContext?.entrepreneurProfile,
+            personalAddress: personalAddress || applicationContext?.personalAddress,
+            govIdDetails: govIdDetails || applicationContext?.govIdDetails,
+        };
+
         let draft = dbStore.collection.registrationDrafts.find(
             (d) => d.email.toLowerCase() === email.toLowerCase()
         );
@@ -78,7 +102,7 @@ export const initRegistration = async (req, res) => {
             draft.fullName = fullName;
             draft.mobile = mobile;
             draft.roles = userRoles;
-            draft.applicationContext = applicationContext || draft.applicationContext || {};
+            draft.applicationContext = mergedContext;
             draft.updatedAt = now;
         } else {
             draft = {
@@ -87,7 +111,7 @@ export const initRegistration = async (req, res) => {
                 email: email.toLowerCase(),
                 mobile,
                 roles: userRoles,
-                applicationContext: applicationContext || {},
+                applicationContext: mergedContext,
                 createdAt: now,
                 updatedAt: now,
             };
@@ -115,7 +139,21 @@ export const initRegistration = async (req, res) => {
 
 export const register = async (req, res) => {
     try {
-        const { fullName, email, mobile, dob, password, roles, termsAccepted, draftId, applicationContext } = req.body;
+        const {
+            fullName,
+            email,
+            mobile,
+            dob,
+            password,
+            roles,
+            termsAccepted,
+            draftId,
+            personalAddress,
+            govIdDetails,
+            businessmanProfile,
+            entrepreneurProfile,
+            applicationContext,
+        } = req.body;
         // Validate required fields
         if (!fullName || !email || !mobile || !dob || !password || !roles) {
             return res.status(400).json({ success: false, message: 'All registration fields are required.' });
@@ -171,9 +209,25 @@ export const register = async (req, res) => {
             }
         }
 
+        const now = new Date().toISOString();
+        // Role approvals tracking for independent review
+        const roleApprovals = {};
+        userRoles.forEach((r) => {
+            if (VERIFICATION_ROLES.includes(r)) {
+                roleApprovals[r] = 'pending';
+            } else {
+                roleApprovals[r] = 'approved';
+            }
+        });
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        const effectiveContext = {
+            ...(draft ? draft.applicationContext : {}),
+            ...(applicationContext || {}),
+        };
+
         const newUser = {
             _id: uuidv4(),
             fullName,
@@ -182,14 +236,17 @@ export const register = async (req, res) => {
             dob,
             password: hashedPassword,
             roles: userRoles,
+            roleApprovals,
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fullName)}`,
             isEmailVerified: false,
             isMobileVerified: false,
             status: needsDocVerification ? 'pending' : 'active',
             verificationStatus: needsDocVerification ? 'pending_approval' : 'approved',
-            applicationContext: draft ? draft.applicationContext : (applicationContext || {}),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            personalAddress: personalAddress || effectiveContext.personalAddress || null,
+            govIdDetails: govIdDetails || effectiveContext.govIdDetails || null,
+            applicationContext: effectiveContext,
+            createdAt: now,
+            updatedAt: now,
         };
         dbStore.collection.users.push(newUser);
 
@@ -209,7 +266,7 @@ export const register = async (req, res) => {
                         actorName: newUser.fullName,
                         actorRole: userRoles[0] || 'applicant',
                         note: 'Application submitted for Admin verification review.',
-                        timestamp: new Date().toISOString(),
+                        timestamp: now,
                     },
                 ];
             }
@@ -223,26 +280,92 @@ export const register = async (req, res) => {
             );
         }
 
-        // If businessman or entrepreneur, automatically initialize business profile in pending approval status
-        if (userRoles.includes('businessman') || userRoles.includes('entrepreneur')) {
-            const isRegistered = Boolean(newUser.applicationContext?.isStartupRegistered || userRoles.includes('businessman'));
-            const newBusiness = {
+        // Businessman Business Profile
+        if (userRoles.includes('businessman')) {
+            const bProfile = effectiveContext.businessmanProfile || businessmanProfile || {};
+            const newBusinessmanBiz = {
                 _id: uuidv4(),
                 ownerId: newUser._id,
-                businessName: newUser.applicationContext?.businessName || `${fullName}'s Business Enterprise`,
-                businessType: newUser.applicationContext?.businessType || (isRegistered ? 'enterprise' : 'unregistered_startup'),
+                roleType: 'businessman',
+                businessName: bProfile.businessName || `${fullName}'s Business Enterprise`,
+                category: bProfile.category || 'Construction & Building Materials',
+                subcategory: bProfile.subcategory || 'General',
+                businessType: bProfile.businessType || 'Supplier',
+                description: bProfile.description || 'Established business enterprise awaiting admin verification.',
+                productsServices: bProfile.productsServices || '',
+                address: bProfile.businessAddress || bProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
+                operatingLocations: bProfile.operatingLocations || '',
+                website: bProfile.businessWebsite || bProfile.website || '',
+                phone: bProfile.businessPhone || bProfile.phone || mobile,
+                altPhone: bProfile.businessAltPhone || bProfile.altPhone || '',
+                email: (bProfile.businessEmail || bProfile.email || email).toLowerCase(),
+                verificationStatus: 'pending',
+                logoUrl: '',
+                documents: [],
+                createdAt: now,
+                updatedAt: now,
+            };
+            dbStore.collection.businesses.push(newBusinessmanBiz);
+        }
+
+        // Entrepreneur Startup Profile
+        if (userRoles.includes('entrepreneur')) {
+            const eProfile = effectiveContext.entrepreneurProfile || entrepreneurProfile || {};
+            const isRegistered = Boolean(eProfile.isStartupRegistered || effectiveContext.isStartupRegistered);
+            const newEntrepreneurStartup = {
+                _id: uuidv4(),
+                ownerId: newUser._id,
+                roleType: 'entrepreneur',
+                businessName: eProfile.startupName || `${fullName}'s Startup Innovation`,
+                category: eProfile.category || 'Technology & IT Startups',
+                subcategory: eProfile.subcategory || 'Software Development',
+                businessType: isRegistered ? 'registered_startup' : 'unregistered_startup',
+                stage: eProfile.stage || 'Ideation / Concept',
                 isStartupRegistered: isRegistered,
-                description: newUser.applicationContext?.startupSummary || 'New business awaiting admin verification of submitted documents.',
+                registrationType: eProfile.registrationType || '',
+                registrationNumber: eProfile.registrationNumber || '',
+                registrationDate: eProfile.registrationDate || '',
+                unregisteredDeclarationAccepted: Boolean(eProfile.unregisteredDeclarationAccepted || effectiveContext.unregisteredDeclarationAccepted),
+                ideaSummary: eProfile.ideaSummary || '',
+                targetLaunchTimeline: eProfile.targetLaunchTimeline || '',
+                description: eProfile.description || 'Emerging startup concept awaiting admin verification.',
+                problemStatement: eProfile.problemStatement || '',
+                solutionDescription: eProfile.solutionDescription || '',
+                targetMarket: eProfile.targetMarket || '',
+                hasBusinessAddress: Boolean(eProfile.hasBusinessAddress || effectiveContext.hasBusinessAddress),
+                address: eProfile.officeAddress || eProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
+                website: eProfile.websiteUrl || eProfile.website || '',
+                pitchDeckUrl: eProfile.pitchDeckUrl || '',
+                phone: mobile,
+                email: email.toLowerCase(),
+                verificationStatus: 'pending',
+                logoUrl: '',
+                documents: [],
+                createdAt: now,
+                updatedAt: now,
+            };
+            dbStore.collection.businesses.push(newEntrepreneurStartup);
+        }
+
+        // Fallback backward-compatibility for business if neither was triggered (shouldn't happen)
+        if (!userRoles.includes('businessman') && !userRoles.includes('entrepreneur') && userRoles.includes('business')) {
+            const newBiz = {
+                _id: uuidv4(),
+                ownerId: newUser._id,
+                roleType: 'businessman',
+                businessName: `${fullName}'s Business Enterprise`,
+                businessType: 'enterprise',
+                description: 'New business awaiting admin verification.',
                 address: { street: '', city: '', state: '', postalCode: '', country: '' },
                 phone: mobile,
                 email: email.toLowerCase(),
                 verificationStatus: 'pending',
                 logoUrl: '',
                 documents: [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                createdAt: now,
+                updatedAt: now,
             };
-            dbStore.collection.businesses.push(newBusiness);
+            dbStore.collection.businesses.push(newBiz);
         }
         // Create welcome notification
         dbStore.collection.notifications.push({

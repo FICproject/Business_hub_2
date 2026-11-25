@@ -101,6 +101,11 @@ export const usersApi = {
     globalSearch: (params) => api.get('/users/search', { params }),
 };
 
+// Categories & Taxonomy Services
+export const categoriesApi = {
+    getCategories: (params) => api.get('/categories', { params }),
+};
+
 // Document Verification Services (Supports both User JWT and Registration Draft Token)
 export const documentsApi = {
     getRequirements: (params) => api.get('/documents/requirements', { params }),

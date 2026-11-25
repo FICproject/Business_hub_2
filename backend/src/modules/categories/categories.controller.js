@@ -1,13 +1,39 @@
 import { v4 as uuidv4 } from 'uuid';
 import { dbStore } from '../../services/storage';
 import { logAudit } from '../../middleware/audit.middleware';
+import {
+  BUSINESSMAN_CATEGORIES,
+  ENTREPRENEUR_CATEGORIES,
+  BUSINESS_TYPES,
+  STARTUP_STAGES,
+  STARTUP_REGISTRATION_TYPES,
+} from './roleCategories.defaults';
 
 /**
- * 1. Get all categories (both service and material)
+ * 1. Get all categories (service, material, businessman, entrepreneur)
  */
 export const getAllCategories = async (req, res) => {
   try {
-    const { type } = req.query; // 'service' | 'material' | optional
+    const { type, role } = req.query; // 'service' | 'material' | 'businessman' | 'entrepreneur'
+
+    if (role === 'businessman' || type === 'businessman') {
+      return res.json({
+        success: true,
+        categories: BUSINESSMAN_CATEGORIES,
+        businessTypes: BUSINESS_TYPES,
+        totalCount: BUSINESSMAN_CATEGORIES.length,
+      });
+    }
+
+    if (role === 'entrepreneur' || type === 'entrepreneur') {
+      return res.json({
+        success: true,
+        categories: ENTREPRENEUR_CATEGORIES,
+        startupStages: STARTUP_STAGES,
+        registrationTypes: STARTUP_REGISTRATION_TYPES,
+        totalCount: ENTREPRENEUR_CATEGORIES.length,
+      });
+    }
 
     const serviceCategories = (dbStore.collection.serviceCategories || []).sort((a, b) => (a.order || 0) - (b.order || 0));
     const materialCategories = (dbStore.collection.materialCategories || []).sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -23,6 +49,11 @@ export const getAllCategories = async (req, res) => {
       success: true,
       serviceCategories,
       materialCategories,
+      businessmanCategories: BUSINESSMAN_CATEGORIES,
+      entrepreneurCategories: ENTREPRENEUR_CATEGORIES,
+      businessTypes: BUSINESS_TYPES,
+      startupStages: STARTUP_STAGES,
+      registrationTypes: STARTUP_REGISTRATION_TYPES,
       totalCount: serviceCategories.length + materialCategories.length,
     });
   } catch (error) {
