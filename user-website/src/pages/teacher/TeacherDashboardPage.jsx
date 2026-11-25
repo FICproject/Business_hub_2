@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { GraduationCap, Video, PlusCircle, FileText, DollarSign, Clock, Sparkles, Link as LinkIcon, Copy, ExternalLink, Check, } from 'lucide-react';
-import { educationApi } from '../../services/api';
+import { GraduationCap, Video, PlusCircle, FileText, DollarSign, Clock, Sparkles, Link as LinkIcon, Copy, ExternalLink, Check, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { educationApi, documentsApi } from '../../services/api';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
 import { CommunityView } from '../../components/dashboard/CommunityView';
 import { EventsView } from '../../components/dashboard/EventsView';
+import { DocumentVerificationPanel } from '../../components/verification/DocumentVerificationPanel';
 export const TeacherDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,7 @@ export const TeacherDashboardPage = () => {
     const [liveClasses, setLiveClasses] = useState([]);
     const [payments, setPayments] = useState([]);
     const [materials, setMaterials] = useState([]);
+    const [docChecklist, setDocChecklist] = useState(null);
     // Course Modal
     const [createCourseOpen, setCreateCourseOpen] = useState(false);
     const [cTitle, setCTitle] = useState('');
@@ -60,6 +62,11 @@ export const TeacherDashboardPage = () => {
             .catch((err) => console.error(err));
         educationApi.getMaterials()
             .then((res) => setMaterials(res.data.data))
+            .catch((err) => console.error(err));
+        documentsApi.getMyChecklist()
+            .then((res) => {
+                if (res.data?.success) setDocChecklist(res.data);
+            })
             .catch((err) => console.error(err));
     };
     useEffect(() => {
@@ -132,6 +139,32 @@ export const TeacherDashboardPage = () => {
         .filter((p) => p.status === 'pending' || p.status === 'approved')
         .reduce((acc, p) => acc + p.amount, 0);
     return (<div className="space-y-6 max-w-7xl mx-auto">
+      {/* Pending Approval / Replacement Banner */}
+      {(user?.status === 'pending' || (docChecklist?.summary?.rejectedOrReplacementCount > 0)) && activeTab !== 'verification' && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-extrabold text-amber-950">
+                {docChecklist?.summary?.rejectedOrReplacementCount > 0
+                  ? 'Action Required: Document Replacement Requested'
+                  : 'Teacher Application Pending Admin Approval'}
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Your mandatory verification documents are currently under Admin review ({docChecklist?.summary?.verifiedMandatory || 0}/{docChecklist?.summary?.totalMandatory || 0} verified). Publishing features unlock once approved.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleTabChange('verification')}
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shrink-0 shadow-xs"
+          >
+            View Verification Docs →
+          </button>
+        </div>
+      )}
+
       {/* =========================================================================
             OVERVIEW DASHBOARD
         ========================================================================= */}
@@ -379,6 +412,41 @@ export const TeacherDashboardPage = () => {
       {/* 7. EVENTS */}
       {activeTab === 'events' && (
         <EventsView role="teacher" onSchedule={() => setScheduleClassOpen(true)} />
+      )}
+
+      {/* 8. VERIFICATION DOCUMENTS */}
+      {activeTab === 'verification' && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+            <div>
+              <h3 className="font-extrabold text-lg text-navy-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-teal-600" />
+                Teacher Document Verification Center
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Track verification statuses, view uploaded credentials, or upload replacement files if requested by Admin.
+              </p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${
+              user?.status === 'active'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-amber-50 text-amber-700 border-amber-200'
+            }`}>
+              Account Status: {user?.verificationStatus?.replace('_', ' ') || user?.status}
+            </span>
+          </div>
+
+          {docChecklist ? (
+            <DocumentVerificationPanel
+              checklistData={docChecklist}
+              onChecklistUpdated={(updated) => setDocChecklist(updated)}
+              roles={user?.roles || ['teacher']}
+              isPostSubmission={true}
+            />
+          ) : (
+            <p className="text-xs text-slate-400">Loading verification checklist...</p>
+          )}
+        </div>
       )}
 
       {/* Create Course Modal */}

@@ -62,6 +62,18 @@ export const adminApi = {
     createCategory: (data) => api.post('/categories', data),
     updateCategory: (id, data) => api.put(`/categories/${id}`, data),
     deleteCategory: (id) => api.delete(`/categories/${id}`),
+    // Document Verification & Configurable Rules
+    getPendingDocumentApplicants: () => api.get('/documents/admin/pending'),
+    getApplicantDocuments: (userId) => api.get(`/documents/admin/applicant/${userId}`),
+    reviewDocument: (id, status, reason) => api.put(`/documents/${id}/review`, { status, reason }),
+    decideApplicantApplication: (userId, decision, reason) =>
+        api.post(`/documents/admin/applicant/${userId}/decision`, { decision, reason }),
+    getDocumentAccessToken: (id, download = false) =>
+        api.get(`/documents/${id}/access-token`, { params: { download } }),
+    getDocumentRequirements: (params) => api.get('/documents/requirements', { params }),
+    createDocumentRequirement: (data) => api.post('/documents/requirements', data),
+    updateDocumentRequirement: (id, data) => api.put(`/documents/requirements/${id}`, data),
+    deleteDocumentRequirement: (id) => api.delete(`/documents/requirements/${id}`),
     // Direct login
     login: (data) => api.post('/auth/login', data),
 };

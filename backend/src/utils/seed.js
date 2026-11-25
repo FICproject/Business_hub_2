@@ -1,5 +1,9 @@
 import bcrypt from 'bcryptjs';
+import fs from 'fs';
+import path from 'path';
 import { dbStore } from '../services/storage';
+import { DEFAULT_DOCUMENT_REQUIREMENTS } from '../modules/documents/documentRequirements.defaults';
+import { PRIVATE_DOCS_DIR } from '../modules/documents/documentUpload.middleware';
 export const seedData = async () => {
     console.log('[Seed]: Populating database with comprehensive demo dataset...');
     // Password hashes
@@ -1156,6 +1160,245 @@ export const seedData = async () => {
         },
     ];
 
+    // 19. Seed Document Requirements & Pending Verification Samples
+    const documentRequirements = JSON.parse(JSON.stringify(DEFAULT_DOCUMENT_REQUIREMENTS));
+
+    if (!fs.existsSync(PRIVATE_DOCS_DIR)) {
+        fs.mkdirSync(PRIVATE_DOCS_DIR, { recursive: true });
+    }
+
+    // Minimal valid PDF and PNG sample payloads for Admin secure preview testing
+    const createSamplePdf = (filename, label) => {
+        const filePath = path.join(PRIVATE_DOCS_DIR, filename);
+        const safeText = label.replace(/[()\\]/g, '');
+        const stream = `BT /F1 16 Tf 50 720 Td (Business Hub Secure Verification Document) Tj 0 -30 Td (${safeText}) Tj ET`;
+        const pdf = `%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+5 0 obj << /Length ${stream.length} >> stream
+${stream}
+endstream endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000309 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+${365 + stream.length}
+%%EOF`;
+        fs.writeFileSync(filePath, pdf, 'utf-8');
+        return fs.statSync(filePath).size;
+    };
+
+    const createSamplePng = (filename) => {
+        const filePath = path.join(PRIVATE_DOCS_DIR, filename);
+        // 1x1 teal PNG base64
+        const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+        const buf = Buffer.from(pngBase64, 'base64');
+        fs.writeFileSync(filePath, buf);
+        return buf.length;
+    };
+
+    const pendingTeacherId = 'user-teacher-pending-001';
+    const pendingEntrepreneurId = 'user-entrepreneur-pending-001';
+
+    users.push(
+        {
+            _id: pendingTeacherId,
+            fullName: 'Dr. Ananya Verma (Pending Teacher)',
+            email: 'pending.teacher@businesshub.com',
+            mobile: '+1-555-0188',
+            dob: '1989-04-18',
+            password: teacherPassword,
+            roles: ['teacher'],
+            avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya',
+            isEmailVerified: true,
+            isMobileVerified: true,
+            status: 'pending',
+            verificationStatus: 'pending_approval',
+            applicationContext: { hasTeachingQualification: true },
+            createdAt: '2026-11-24T10:00:00.000Z',
+            updatedAt: '2026-11-24T10:00:00.000Z',
+        },
+        {
+            _id: pendingEntrepreneurId,
+            fullName: 'Kavita Menon (Unregistered Startup)',
+            email: 'pending.entrepreneur@businesshub.com',
+            mobile: '+1-555-0199',
+            dob: '1995-12-04',
+            password: businessPassword,
+            roles: ['entrepreneur'],
+            avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Kavita',
+            isEmailVerified: true,
+            isMobileVerified: true,
+            status: 'pending',
+            verificationStatus: 'pending_approval',
+            applicationContext: {
+                isStartupRegistered: false,
+                hasBusinessAddress: false,
+                unregisteredDeclarationAccepted: true,
+            },
+            createdAt: '2026-11-24T12:00:00.000Z',
+            updatedAt: '2026-11-24T12:00:00.000Z',
+        }
+    );
+
+    const tIdSize = createSamplePdf('seed-teacher-id.pdf', 'Aadhaar ID Proof - Ananya Verma');
+    const tEduSize = createSamplePdf('seed-teacher-edu.pdf', 'M.Tech Degree Certificate - Ananya Verma');
+    const tTeachSize = createSamplePdf('seed-teacher-bed.pdf', 'B.Ed Teaching Credential - Ananya Verma');
+    const tPhotoSize = createSamplePng('seed-teacher-photo.png');
+
+    const eIdSize = createSamplePdf('seed-ent-id.pdf', 'Passport ID Proof - Kavita Menon');
+    const eDetSize = createSamplePdf('seed-ent-details.pdf', 'Unregistered Robotics Startup Idea & Plan');
+    const ePhotoSize = createSamplePng('seed-ent-photo.png');
+
+    const verificationDocuments = [
+        {
+            _id: 'vdoc-t-001',
+            userId: pendingTeacherId,
+            draftId: null,
+            requirementId: 'teacher_id_proof',
+            requirementName: 'Government-issued Identity Proof',
+            role: 'teacher',
+            originalName: 'ananya-id-proof.pdf',
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            sizeBytes: tIdSize,
+            storageKey: 'seed-teacher-id.pdf',
+            status: 'Under Verification',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T10:02:00.000Z',
+            updatedAt: '2026-11-24T10:02:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingTeacherId, actorName: 'Dr. Ananya Verma', actorRole: 'teacher', note: 'Uploaded during registration.', timestamp: '2026-11-24T10:02:00.000Z' }],
+        },
+        {
+            _id: 'vdoc-t-002',
+            userId: pendingTeacherId,
+            draftId: null,
+            requirementId: 'teacher_edu_cert',
+            requirementName: 'Educational Qualification Certificate',
+            role: 'teacher',
+            originalName: 'ananya-mtech-degree.pdf',
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            sizeBytes: tEduSize,
+            storageKey: 'seed-teacher-edu.pdf',
+            status: 'Uploaded',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T10:03:00.000Z',
+            updatedAt: '2026-11-24T10:03:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingTeacherId, actorName: 'Dr. Ananya Verma', actorRole: 'teacher', note: 'Uploaded during registration.', timestamp: '2026-11-24T10:03:00.000Z' }],
+        },
+        {
+            _id: 'vdoc-t-003',
+            userId: pendingTeacherId,
+            draftId: null,
+            requirementId: 'teacher_teaching_cert',
+            requirementName: 'Teaching Qualification Certificate',
+            role: 'teacher',
+            originalName: 'ananya-bed-cert.pdf',
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            sizeBytes: tTeachSize,
+            storageKey: 'seed-teacher-bed.pdf',
+            status: 'Uploaded',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T10:04:00.000Z',
+            updatedAt: '2026-11-24T10:04:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingTeacherId, actorName: 'Dr. Ananya Verma', actorRole: 'teacher', note: 'Uploaded during registration.', timestamp: '2026-11-24T10:04:00.000Z' }],
+        },
+        {
+            _id: 'vdoc-t-004',
+            userId: pendingTeacherId,
+            draftId: null,
+            requirementId: 'teacher_profile_photo',
+            requirementName: 'Recent Profile Photograph',
+            role: 'teacher',
+            originalName: 'ananya-photo.png',
+            mimeType: 'image/png',
+            extension: 'png',
+            sizeBytes: tPhotoSize,
+            storageKey: 'seed-teacher-photo.png',
+            status: 'Verified',
+            reviewedBy: 'Sarah Sterling (Admin)',
+            reviewedAt: '2026-11-24T11:00:00.000Z',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T10:05:00.000Z',
+            updatedAt: '2026-11-24T11:00:00.000Z',
+            history: [
+                { status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingTeacherId, actorName: 'Dr. Ananya Verma', actorRole: 'teacher', note: 'Uploaded during registration.', timestamp: '2026-11-24T10:05:00.000Z' },
+                { status: 'Verified', action: 'ADMIN_MARKED_VERIFIED', actorId: adminId, actorName: 'Sarah Sterling (Admin)', actorRole: 'admin', note: 'Admin marked document as Verified.', timestamp: '2026-11-24T11:00:00.000Z' },
+            ],
+        },
+        {
+            _id: 'vdoc-e-001',
+            userId: pendingEntrepreneurId,
+            draftId: null,
+            requirementId: 'ent_id_proof',
+            requirementName: 'Government-issued Identity Proof of Applicant',
+            role: 'entrepreneur',
+            originalName: 'kavita-passport.pdf',
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            sizeBytes: eIdSize,
+            storageKey: 'seed-ent-id.pdf',
+            status: 'Under Verification',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T12:02:00.000Z',
+            updatedAt: '2026-11-24T12:02:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingEntrepreneurId, actorName: 'Kavita Menon', actorRole: 'entrepreneur', note: 'Uploaded during registration.', timestamp: '2026-11-24T12:02:00.000Z' }],
+        },
+        {
+            _id: 'vdoc-e-002',
+            userId: pendingEntrepreneurId,
+            draftId: null,
+            requirementId: 'ent_profile_photo',
+            requirementName: 'Recent Profile Photograph',
+            role: 'entrepreneur',
+            originalName: 'kavita-headshot.png',
+            mimeType: 'image/png',
+            extension: 'png',
+            sizeBytes: ePhotoSize,
+            storageKey: 'seed-ent-photo.png',
+            status: 'Uploaded',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T12:03:00.000Z',
+            updatedAt: '2026-11-24T12:03:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingEntrepreneurId, actorName: 'Kavita Menon', actorRole: 'entrepreneur', note: 'Uploaded during registration.', timestamp: '2026-11-24T12:03:00.000Z' }],
+        },
+        {
+            _id: 'vdoc-e-003',
+            userId: pendingEntrepreneurId,
+            draftId: null,
+            requirementId: 'ent_business_details',
+            requirementName: 'Startup / Business Details Document',
+            role: 'entrepreneur',
+            originalName: 'nextgen-startup-concept.pdf',
+            mimeType: 'application/pdf',
+            extension: 'pdf',
+            sizeBytes: eDetSize,
+            storageKey: 'seed-ent-details.pdf',
+            status: 'Uploaded',
+            rejectionReason: null,
+            replacementNote: null,
+            uploadedAt: '2026-11-24T12:04:00.000Z',
+            updatedAt: '2026-11-24T12:04:00.000Z',
+            history: [{ status: 'Uploaded', action: 'DOCUMENT_UPLOADED', actorId: pendingEntrepreneurId, actorName: 'Kavita Menon', actorRole: 'entrepreneur', note: 'Uploaded during registration.', timestamp: '2026-11-24T12:04:00.000Z' }],
+        },
+    ];
+
     // Populate data store
     dbStore.collection.users = users;
     dbStore.collection.businesses = businesses;
@@ -1175,6 +1418,10 @@ export const seedData = async () => {
     dbStore.collection.materialCategories = materialCategories;
     dbStore.collection.serviceRequests = serviceRequests;
     dbStore.collection.businessConnections = businessConnections;
+    dbStore.collection.documentRequirements = documentRequirements;
+    dbStore.collection.verificationDocuments = verificationDocuments;
+    dbStore.collection.registrationDrafts = [];
+    dbStore.collection.documentAuditLogs = [];
     dbStore.save();
     console.log('[Seed]: Database initialized with rich production demo data!');
 };

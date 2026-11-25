@@ -16,6 +16,7 @@ api.interceptors.request.use((config) => {
 }, (error) => Promise.reject(error));
 // Auth Services
 export const authApi = {
+    initRegistration: (data) => api.post('/auth/init-registration', data),
     register: (data) => api.post('/auth/register', data),
     login: (data) => api.post('/auth/login', data),
     getMe: () => api.get('/auth/me'),
@@ -97,5 +98,37 @@ export const usersApi = {
     addSavedItem: (data) => api.post('/users/saved-items', data),
     removeSavedItem: (id) => api.delete(`/users/saved-items/${id}`),
     globalSearch: (params) => api.get('/users/search', { params }),
+};
+
+// Document Verification Services (Supports both User JWT and Registration Draft Token)
+export const documentsApi = {
+    getRequirements: (params) => api.get('/documents/requirements', { params }),
+    getMyChecklist: (customToken) =>
+        api.get('/documents/my', customToken ? { headers: { Authorization: `Bearer ${customToken}` } } : undefined),
+    updateContext: (applicationContext, customToken) =>
+        api.put(
+            '/documents/context',
+            { applicationContext },
+            customToken ? { headers: { Authorization: `Bearer ${customToken}` } } : undefined
+        ),
+    uploadDocument: (requirementId, file, { customToken, onUploadProgress } = {}) => {
+        const formData = new FormData();
+        formData.append('requirementId', requirementId);
+        formData.append('file', file);
+        return api.post('/documents/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                ...(customToken ? { Authorization: `Bearer ${customToken}` } : {}),
+            },
+            onUploadProgress,
+        });
+    },
+    removeDocument: (id, customToken) =>
+        api.delete(`/documents/${id}`, customToken ? { headers: { Authorization: `Bearer ${customToken}` } } : undefined),
+    getAccessToken: (id, download = false, customToken) =>
+        api.get(`/documents/${id}/access-token`, {
+            params: { download },
+            ...(customToken ? { headers: { Authorization: `Bearer ${customToken}` } } : {}),
+        }),
 };
 export default api;

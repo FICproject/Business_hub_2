@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { register, login, getMe, sendOtp, verifyOtp, forgotPassword, resetPassword, } from './auth.controller';
+import { initRegistration, register, login, getMe, sendOtp, verifyOtp, forgotPassword, resetPassword, } from './auth.controller';
 import { authenticateToken } from '../../middleware/auth.middleware';
 const router = Router();
+router.post('/init-registration', initRegistration);
 router.post('/register', register);
 router.post('/login', login);
 router.get('/me', authenticateToken, getMe);

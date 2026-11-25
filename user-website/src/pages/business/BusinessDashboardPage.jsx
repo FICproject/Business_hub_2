@@ -27,9 +27,10 @@ import {
   Eye,
   Check,
 } from 'lucide-react';
-import { businessApi, marketplaceApi, jobsApi, sharingApi } from '../../services/api';
+import { businessApi, marketplaceApi, jobsApi, sharingApi, documentsApi } from '../../services/api';
 import { CommunityView } from '../../components/dashboard/CommunityView';
 import { EventsView } from '../../components/dashboard/EventsView';
+import { DocumentVerificationPanel } from '../../components/verification/DocumentVerificationPanel';
 
 export const BusinessDashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -56,6 +57,7 @@ export const BusinessDashboardPage = () => {
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
   const [sharedLinks, setSharedLinks] = useState([]);
+  const [docChecklist, setDocChecklist] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Business Profile & Verification Form State
@@ -146,6 +148,13 @@ export const BusinessDashboardPage = () => {
     sharingApi
       .getMySharedLinks()
       .then((res) => setSharedLinks(res.data.data || []))
+      .catch((err) => console.error(err));
+
+    documentsApi
+      .getMyChecklist()
+      .then((res) => {
+        if (res.data?.success) setDocChecklist(res.data);
+      })
       .catch((err) => console.error(err));
   };
 
@@ -621,79 +630,28 @@ export const BusinessDashboardPage = () => {
             </div>
           </form>
 
-          {/* Current Submitted Documents */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold uppercase text-navy-950 tracking-wider">
-              2. Uploaded Compliance Filings
-            </h4>
-            {business?.documents && business.documents.length > 0 ? (
-              <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl p-3 bg-slate-50/50">
-                {business.documents.map((doc, idx) => (
-                  <div key={idx} className="py-2.5 flex items-center justify-between text-xs px-2">
-                    <div className="flex items-center gap-2.5">
-                      <FileText className="w-4 h-4 text-amber-600" />
-                      <span className="font-bold text-slate-800">{doc.documentType}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] text-slate-400">
-                        Uploaded on {new Date(doc.uploadedAt).toLocaleDateString()}
-                      </span>
-                      <a
-                        href={doc.documentUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[11px] font-bold text-amber-600 hover:underline flex items-center gap-1"
-                      >
-                        View File <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Role-Specific Secure Mandatory & Optional Documents Center */}
+          <div className="pt-4 border-t border-slate-100 space-y-4">
+            <div>
+              <h4 className="text-xs font-extrabold uppercase text-navy-950 tracking-wider">
+                2. Submitted Verification Documents &amp; Replacement Upload
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Secure private storage with time-limited preview links. Upload replacement files here if Admin marks any document as Rejected or Replacement Required.
+              </p>
+            </div>
+
+            {docChecklist ? (
+              <DocumentVerificationPanel
+                checklistData={docChecklist}
+                onChecklistUpdated={(updated) => setDocChecklist(updated)}
+                roles={user?.roles || ['businessman']}
+                isPostSubmission={true}
+              />
             ) : (
-              <p className="text-xs text-slate-400 italic">No verification documents on file yet.</p>
+              <p className="text-xs text-slate-400 italic">Loading your verification documents...</p>
             )}
           </div>
-
-          {/* Upload New Document Form */}
-          <form onSubmit={handleDocumentSubmit} className="pt-4 border-t border-slate-100 space-y-4">
-            <h4 className="text-xs font-extrabold uppercase text-navy-950 tracking-wider">
-              3. Submit Trade License &amp; Tax Documents
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Select Document Category</label>
-                <select
-                  value={docType}
-                  onChange={(e) => setDocType(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                >
-                  <option value="Commercial Trade License">Commercial Trade License</option>
-                  <option value="Certificate of Incorporation">Certificate of Incorporation</option>
-                  <option value="Tax Identification Registry (EIN / VAT)">Tax Identification Registry (EIN / VAT)</option>
-                  <option value="Owner Identity Verification (Passport/ID)">Owner Identity Verification (Passport/ID)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Document URL / Proof PDF
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={docUrl}
-                  onChange={(e) => setDocUrl(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-            </div>
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs shadow-md transition-all flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" /> Submit Document for Admin Review
-            </button>
-          </form>
         </div>
       )}
 

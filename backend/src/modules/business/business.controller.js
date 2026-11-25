@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { dbStore } from '../../services/storage';
 import { logAudit } from '../../middleware/audit.middleware';
+import { buildApplicantVerificationSummary } from '../documents/documents.controller';
 export const getMyBusiness = async (req, res) => {
     try {
         const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
@@ -128,6 +129,20 @@ export const reviewVerification = async (req, res) => {
         const business = dbStore.collection.businesses.find((b) => b._id === id);
         if (!business) {
             return res.status(404).json({ success: false, message: 'Business not found.' });
+        }
+        const owner = dbStore.collection.users.find((u) => u._id === business.ownerId);
+        if (status === 'approved' && owner) {
+            const summary = buildApplicantVerificationSummary(owner);
+            if (summary.requiresVerification && !summary.summary.canApproveApplication) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Cannot approve business. All mandatory owner/business documents must be verified first: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
+                    unverifiedMandatoryNames: summary.summary.unverifiedMandatoryNames,
+                });
+            }
+            owner.status = 'active';
+            owner.verificationStatus = 'approved';
+            owner.updatedAt = new Date().toISOString();
         }
         business.verificationStatus = status;
         if (status === 'rejected') {

@@ -67,7 +67,17 @@ export const requireApprovedTeacher = (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ success: false, message: 'Unauthorized.' });
     }
-    if (req.user.roles.includes('admin') || req.user.roles.includes('teacher')) {
+    if (req.user.roles.includes('admin')) {
+        return next();
+    }
+    if (req.user.roles.includes('teacher')) {
+        if (req.user.status === 'pending' || (req.user.verificationStatus && req.user.verificationStatus !== 'approved')) {
+            return res.status(403).json({
+                success: false,
+                message: 'Your teacher application and mandatory documents are currently pending Admin verification and approval.',
+                verificationStatus: req.user.verificationStatus || 'pending_approval',
+            });
+        }
         return next();
     }
     return res.status(403).json({

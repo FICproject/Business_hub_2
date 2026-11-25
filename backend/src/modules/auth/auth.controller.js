@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../config';
 import { dbStore } from '../../services/storage';
 import { logAudit } from '../../middleware/audit.middleware';
+import { buildApplicantVerificationSummary } from '../documents/documents.controller';
 // Helper to calculate age
 const calculateAge = (dobString) => {
     const birthDate = new Date(dobString);
@@ -15,9 +16,85 @@ const calculateAge = (dobString) => {
     }
     return age;
 };
+
+const VERIFICATION_ROLES = ['teacher', 'businessman', 'entrepreneur'];
+
+export const initRegistration = async (req, res) => {
+    try {
+        const { fullName, email, mobile, dob, password, roles, termsAccepted, applicationContext } = req.body;
+        if (!fullName || !email || !mobile || !dob || !password || !roles) {
+            return res.status(400).json({ success: false, message: 'All registration fields are required.' });
+        }
+        if (!termsAccepted) {
+            return res.status(400).json({ success: false, message: 'You must accept the Terms and Privacy Policy.' });
+        }
+        const age = calculateAge(dob);
+        if (age < config.minAge) {
+            return res.status(400).json({
+                success: false,
+                message: `Registration rejected. You must be at least 18 years old to join Business Hub. Current age calculated: ${age} years.`,
+            });
+        }
+        const existingEmail = dbStore.collection.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        if (existingEmail) {
+            return res.status(400).json({ success: false, message: 'An account with this email address already exists.' });
+        }
+        const existingMobile = dbStore.collection.users.find((u) => u.mobile === mobile);
+        if (existingMobile) {
+            return res.status(400).json({ success: false, message: 'An account with this mobile number already exists.' });
+        }
+
+        const userRoles = Array.isArray(roles) ? roles : [roles];
+        if (!dbStore.collection.registrationDrafts) {
+            dbStore.collection.registrationDrafts = [];
+        }
+
+        let draft = dbStore.collection.registrationDrafts.find(
+            (d) => d.email.toLowerCase() === email.toLowerCase()
+        );
+        const now = new Date().toISOString();
+        if (draft) {
+            draft.fullName = fullName;
+            draft.mobile = mobile;
+            draft.roles = userRoles;
+            draft.applicationContext = applicationContext || draft.applicationContext || {};
+            draft.updatedAt = now;
+        } else {
+            draft = {
+                draftId: uuidv4(),
+                fullName,
+                email: email.toLowerCase(),
+                mobile,
+                roles: userRoles,
+                applicationContext: applicationContext || {},
+                createdAt: now,
+                updatedAt: now,
+            };
+            dbStore.collection.registrationDrafts.push(draft);
+        }
+        dbStore.save();
+
+        const draftToken = jwt.sign(
+            { scope: 'registration_draft', draftId: draft.draftId, email: draft.email },
+            config.jwtSecret,
+            { expiresIn: '2h' }
+        );
+
+        const verification = buildApplicantVerificationSummary(null, draft);
+        return res.json({
+            success: true,
+            draftId: draft.draftId,
+            draftToken,
+            ...verification,
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 export const register = async (req, res) => {
     try {
-        const { fullName, email, mobile, dob, password, roles, termsAccepted } = req.body;
+        const { fullName, email, mobile, dob, password, roles, termsAccepted, draftId, applicationContext } = req.body;
         // Validate required fields
         if (!fullName || !email || !mobile || !dob || !password || !roles) {
             return res.status(400).json({ success: false, message: 'All registration fields are required.' });
@@ -42,10 +119,40 @@ export const register = async (req, res) => {
         if (existingMobile) {
             return res.status(400).json({ success: false, message: 'An account with this mobile number already exists.' });
         }
+
+        const userRoles = Array.isArray(roles) ? roles : [roles];
+        const needsDocVerification = userRoles.some((r) => VERIFICATION_ROLES.includes(r));
+
+        let draft = null;
+        if (needsDocVerification) {
+            draft = (dbStore.collection.registrationDrafts || []).find((d) => d.draftId === draftId);
+            if (!draft) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Mandatory verification documents must be uploaded before submitting your application.',
+                });
+            }
+            if (applicationContext) {
+                draft.applicationContext = { ...(draft.applicationContext || {}), ...applicationContext };
+            }
+            draft.roles = userRoles;
+            const verificationCheck = buildApplicantVerificationSummary(null, draft);
+            if (!verificationCheck.summary.canSubmitApplication) {
+                const missing = verificationCheck.summary.missingMandatoryNames;
+                const declMsg = verificationCheck.summary.unregisteredDeclarationRequired && !verificationCheck.summary.unregisteredDeclarationAccepted
+                    ? ' Unregistered startup declaration must be confirmed.'
+                    : '';
+                return res.status(400).json({
+                    success: false,
+                    message: `Cannot submit application. Missing mandatory document(s): ${missing.join(', ') || 'None'}.${declMsg}`,
+                    missingMandatoryNames: missing,
+                });
+            }
+        }
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const userRoles = Array.isArray(roles) ? roles : [roles];
         const newUser = {
             _id: uuidv4(),
             fullName,
@@ -57,23 +164,58 @@ export const register = async (req, res) => {
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fullName)}`,
             isEmailVerified: false,
             isMobileVerified: false,
-            status: 'active',
+            status: needsDocVerification ? 'pending' : 'active',
+            verificationStatus: needsDocVerification ? 'pending_approval' : 'approved',
+            applicationContext: draft ? draft.applicationContext : (applicationContext || {}),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
         dbStore.collection.users.push(newUser);
-        // If businessman or entrepreneur, automatically initialize draft business profile
+
+        // Attach uploaded draft verification documents to the newly registered user
+        if (needsDocVerification && draft) {
+            const draftDocs = (dbStore.collection.verificationDocuments || []).filter((d) => d.draftId === draft.draftId);
+            for (const doc of draftDocs) {
+                doc.userId = newUser._id;
+                doc.draftId = null;
+                doc.status = 'Under Verification';
+                doc.history = [
+                    ...(doc.history || []),
+                    {
+                        status: 'Under Verification',
+                        action: 'APPLICATION_SUBMITTED',
+                        actorId: newUser._id,
+                        actorName: newUser.fullName,
+                        actorRole: userRoles[0] || 'applicant',
+                        note: 'Application submitted for Admin verification review.',
+                        timestamp: new Date().toISOString(),
+                    },
+                ];
+            }
+            const draftLogs = (dbStore.collection.documentAuditLogs || []).filter((l) => l.draftId === draft.draftId);
+            for (const log of draftLogs) {
+                log.userId = newUser._id;
+                log.draftId = null;
+            }
+            dbStore.collection.registrationDrafts = (dbStore.collection.registrationDrafts || []).filter(
+                (d) => d.draftId !== draft.draftId
+            );
+        }
+
+        // If businessman or entrepreneur, automatically initialize business profile in pending approval status
         if (userRoles.includes('businessman') || userRoles.includes('entrepreneur')) {
+            const isRegistered = Boolean(newUser.applicationContext?.isStartupRegistered || userRoles.includes('businessman'));
             const newBusiness = {
                 _id: uuidv4(),
                 ownerId: newUser._id,
-                businessName: `${fullName}'s Business Enterprise`,
-                businessType: 'other',
-                description: 'New business awaiting profile completion and admin verification.',
+                businessName: newUser.applicationContext?.businessName || `${fullName}'s Business Enterprise`,
+                businessType: newUser.applicationContext?.businessType || (isRegistered ? 'enterprise' : 'unregistered_startup'),
+                isStartupRegistered: isRegistered,
+                description: newUser.applicationContext?.startupSummary || 'New business awaiting admin verification of submitted documents.',
                 address: { street: '', city: '', state: '', postalCode: '', country: '' },
                 phone: mobile,
                 email: email.toLowerCase(),
-                verificationStatus: 'draft',
+                verificationStatus: 'pending',
                 logoUrl: '',
                 documents: [],
                 createdAt: new Date().toISOString(),
@@ -85,10 +227,14 @@ export const register = async (req, res) => {
         dbStore.collection.notifications.push({
             _id: uuidv4(),
             userId: newUser._id,
-            title: 'Welcome to Business Hub!',
-            message: 'Explore our Marketplace, Free Courses, and Career Opportunities.',
+            title: needsDocVerification ? 'Application Submitted for Admin Approval' : 'Welcome to Business Hub!',
+            message: needsDocVerification
+                ? 'Your registration and mandatory documents have been received and are currently Pending Admin Approval.'
+                : 'Explore our Marketplace, Free Courses, and Career Opportunities.',
             type: 'success',
-            link: '/dashboard',
+            link: needsDocVerification
+                ? (userRoles.includes('teacher') ? '/dashboard/teacher?tab=verification' : '/dashboard/business?tab=verification')
+                : '/dashboard',
             isRead: false,
             createdAt: new Date().toISOString(),
         });
@@ -96,10 +242,12 @@ export const register = async (req, res) => {
         // Generate JWT
         const token = jwt.sign({ id: newUser._id, email: newUser.email, roles: newUser.roles }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
         const { password: _, ...userWithoutPassword } = newUser;
-        logAudit(newUser._id, newUser.fullName, newUser.roles[0], 'USER_REGISTERED', 'User', newUser._id, 'User account registered.');
+        logAudit(newUser._id, newUser.fullName, newUser.roles[0], 'USER_REGISTERED', 'User', newUser._id, needsDocVerification ? 'Applicant registered with mandatory documents (Pending Admin Approval).' : 'User account registered.');
         return res.status(201).json({
             success: true,
-            message: 'Registration successful! Welcome to Business Hub.',
+            message: needsDocVerification
+                ? 'Application and verification documents submitted! Status: Pending Admin Approval.'
+                : 'Registration successful! Welcome to Business Hub.',
             token,
             user: userWithoutPassword,
         });

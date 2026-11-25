@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { dbStore } from '../../services/storage';
 import { logAudit } from '../../middleware/audit.middleware';
+import { buildApplicantVerificationSummary } from '../documents/documents.controller';
 export const getUsers = async (req, res) => {
     try {
         const { role, status, search, page = '1', limit = '10' } = req.query;
@@ -239,10 +240,29 @@ export const searchAll = async (req, res) => {
 export const updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, reason } = req.body; // 'active' | 'suspended' | 'blocked'
+        const { status, reason } = req.body; // 'active' | 'suspended' | 'blocked' | 'pending'
         const user = dbStore.collection.users.find((u) => u._id === id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        // Guard: Approving/activating a pending verifiable applicant requires all mandatory documents verified
+        if (status === 'active' && user.status === 'pending') {
+            const summary = buildApplicantVerificationSummary(user);
+            if (summary.requiresVerification && !summary.summary.canApproveApplication) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Cannot approve application. Mandatory documents still unverified: ${summary.summary.unverifiedMandatoryNames.join(', ')}`,
+                    unverifiedMandatoryNames: summary.summary.unverifiedMandatoryNames,
+                });
+            }
+            user.verificationStatus = 'approved';
+            user.verifiedAt = new Date().toISOString();
+            user.verifiedBy = req.user.fullName;
+            const business = (dbStore.collection.businesses || []).find((b) => b.ownerId === user._id);
+            if (business && business.verificationStatus === 'pending') {
+                business.verificationStatus = 'approved';
+                business.updatedAt = new Date().toISOString();
+            }
         }
         user.status = status;
         user.updatedAt = new Date().toISOString();

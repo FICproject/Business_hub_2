@@ -38,6 +38,10 @@ const defaultStore = {
   notifications: [],
   auditLogs: [],
   savedItems: [],
+  documentRequirements: [],
+  verificationDocuments: [],
+  registrationDrafts: [],
+  documentAuditLogs: [],
   platformSettings: {
     siteName: 'Business Hub',
     maintenanceMode: false,
@@ -66,6 +70,10 @@ class DataStore {
         if (!parsed.businessConnections) parsed.businessConnections = [];
         if (!parsed.serviceCategories) parsed.serviceCategories = [];
         if (!parsed.materialCategories) parsed.materialCategories = [];
+        if (!parsed.documentRequirements) parsed.documentRequirements = [];
+        if (!parsed.verificationDocuments) parsed.verificationDocuments = [];
+        if (!parsed.registrationDrafts) parsed.registrationDrafts = [];
+        if (!parsed.documentAuditLogs) parsed.documentAuditLogs = [];
         return parsed;
       }
     } catch (err) {

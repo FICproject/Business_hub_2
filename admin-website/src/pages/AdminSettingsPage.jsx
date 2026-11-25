@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, CheckCircle2 } from 'lucide-react';
+import { Save, CheckCircle2, Settings2 } from 'lucide-react';
 import { adminApi } from '../services/api';
+import { AdminDocRequirementsModal } from '../components/verification/AdminDocRequirementsModal';
 export const AdminSettingsPage = () => {
+    const [showDocRulesModal, setShowDocRulesModal] = useState(false);
     const [siteName, setSiteName] = useState('Business Hub');
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [allowNewRegistrations, setAllowNewRegistrations] = useState(true);
@@ -97,5 +99,27 @@ export const AdminSettingsPage = () => {
           <Save className="w-4 h-4"/> Save Configuration
         </button>
       </form>
+
+      {/* Role-Specific Document Requirements Configuration Card */}
+      <div className="bg-slate-950 rounded-3xl p-6 sm:p-8 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+            <Settings2 className="w-5 h-5 text-teal-400"/>
+            Role-Specific Document Verification Requirements
+          </h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Dynamically add, edit, enable/disable, or configure conditional mandatory documents for Teachers, Businessmen, and Entrepreneurs.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowDocRulesModal(true)}
+          className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shrink-0 shadow-md"
+        >
+          Configure Document Rules
+        </button>
+      </div>
+
+      {showDocRulesModal && <AdminDocRequirementsModal onClose={() => setShowDocRulesModal(false)} />}
     </div>);
 };

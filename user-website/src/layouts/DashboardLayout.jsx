@@ -72,6 +72,7 @@ export const DashboardLayout = () => {
     // 2. TEACHER NAVIGATION
     const teacherNav = [
         { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+        { label: 'Verification Docs', tab: 'verification', icon: ShieldCheck },
         { label: 'My Courses', tab: 'courses', icon: GraduationCap },
         { label: 'Create Course', tab: 'create-course', icon: PlusCircle },
         { label: 'Live Class Management', tab: 'live-classes', icon: Video },
