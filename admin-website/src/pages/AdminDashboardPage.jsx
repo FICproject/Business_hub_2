@@ -11,15 +11,88 @@ export const AdminDashboardPage = () => {
     const [recentConnections, setRecentConnections] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const [pendingApprovals, setPendingApprovals] = useState([]);
+    const [recentActivities, setRecentActivities] = useState([]);
+    const [analyticsData, setAnalyticsData] = useState([]);
+    const [userDistributionData, setUserDistributionData] = useState([]);
+
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
                 setLoading(true);
-                const res = await adminApi.getMetrics();
-                if (res.data?.success) {
-                    setLiveMetrics(res.data.metrics);
-                    setRecentRequests(res.data.recentRequests || []);
-                    setRecentConnections(res.data.recentConnections || []);
+                const [metricsRes, pendingRes, businessesRes, logsRes] = await Promise.all([
+                    adminApi.getMetrics(),
+                    adminApi.getPendingDocumentApplicants().catch(() => ({ data: { data: [] } })),
+                    adminApi.getBusinesses({ status: 'pending' }).catch(() => ({ data: { data: [] } })),
+                    adminApi.getAuditLogs().catch(() => ({ data: { data: [] } })),
+                ]);
+
+                if (metricsRes.data?.success) {
+                    const m = metricsRes.data.metrics;
+                    setLiveMetrics(m);
+                    setRecentRequests(metricsRes.data.recentRequests || []);
+                    setRecentConnections(metricsRes.data.recentConnections || []);
+
+                    // Dynamic charts from backend
+                    if (metricsRes.data.charts?.salesChart) {
+                        setAnalyticsData(metricsRes.data.charts.salesChart.map((s) => ({
+                            name: s.month,
+                            users: Math.round(s.orders * 1.5),
+                            orders: s.orders,
+                            revenue: Math.round(s.revenue / 100),
+                        })));
+                    }
+
+                    if (metricsRes.data.charts?.roleDistribution) {
+                        const total = m.totalUsers || 1;
+                        const colors = ['#3B82F6', '#8B5CF6', '#F59E0B', '#10B981'];
+                        setUserDistributionData(metricsRes.data.charts.roleDistribution.map((r, i) => ({
+                            name: r.name,
+                            value: r.value,
+                            color: colors[i % colors.length],
+                            percent: `${Math.round((r.value / total) * 100)}%`,
+                        })));
+                    }
+                }
+
+                // Construct real pending approvals list from pending businesses and applicants
+                const realPending = [];
+                const pendingBiz = businessesRes.data?.data || [];
+                pendingBiz.slice(0, 5).forEach((b) => {
+                    realPending.push({
+                        id: b._id,
+                        type: 'Business',
+                        icon: Store,
+                        iconBg: 'bg-rose-50 text-rose-500',
+                        name: b.businessName,
+                        details: `${b.businessType || 'Enterprise'} • ${b.email || 'Pending review'}`,
+                    });
+                });
+
+                const pendingDocs = pendingRes.data?.data || [];
+                pendingDocs.slice(0, 5).forEach((item) => {
+                    if (!realPending.some((p) => p.id === item.user?._id)) {
+                        realPending.push({
+                            id: item.user?._id,
+                            type: item.user?.roles?.[0] ? item.user.roles[0].charAt(0).toUpperCase() + item.user.roles[0].slice(1) : 'Applicant',
+                            icon: GraduationCap,
+                            iconBg: 'bg-indigo-50 text-indigo-500',
+                            name: item.user?.fullName,
+                            details: `Docs: ${item.verification?.summary?.verifiedMandatory || 0}/${item.verification?.summary?.totalMandatory || 0} verified`,
+                        });
+                    }
+                });
+                setPendingApprovals(realPending);
+
+                // Construct real activities from audit logs
+                const logs = logsRes.data?.data || [];
+                if (logs.length > 0) {
+                    setRecentActivities(logs.slice(0, 5).map((l) => ({
+                        id: l._id,
+                        text: `${l.action.replace(/_/g, ' ').toLowerCase()}:`,
+                        highlight: l.details || l.targetType,
+                        time: new Date(l.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    })));
                 }
             } catch (err) {
                 console.error('Failed to fetch dashboard metrics:', err);
@@ -47,57 +120,12 @@ export const AdminDashboardPage = () => {
         }
     };
     const greeting = getGreetingData();
-    // Exact 5-point wave curves matching the screenshot
-    const analyticsData = [
-        { name: 'Oct 1', users: 24, orders: 15, revenue: 9 },
-        { name: 'Oct 7', users: 38, orders: 26, revenue: 17 },
-        { name: 'Oct 14', users: 35, orders: 22, revenue: 15 },
-        { name: 'Oct 21', users: 50, orders: 36, revenue: 26 },
-        { name: 'Oct 30', users: 80, orders: 58, revenue: 42 },
-    ];
-    // Donut chart user distribution
-    const userDistributionData = [
-        { name: 'Students', value: 42, color: '#3B82F6', percent: '42%' },
-        { name: 'Professionals', value: 35, color: '#8B5CF6', percent: '35%' },
-        { name: 'Businesses', value: 23, color: '#F59E0B', percent: '23%' },
-    ];
-    // Pending Approvals exactly from reference design
-    const [pendingApprovals, setPendingApprovals] = useState([
-        {
-            id: '1',
-            type: 'Business',
-            icon: Store,
-            iconBg: 'bg-rose-50 text-rose-500',
-            name: 'ABC Traders',
-            details: 'Retail Business',
-        },
-        {
-            id: '2',
-            type: 'Course',
-            icon: GraduationCap,
-            iconBg: 'bg-indigo-50 text-indigo-500',
-            name: 'Web Development',
-            details: 'By John Doe',
-        },
-        {
-            id: '3',
-            type: 'Job',
-            icon: Briefcase,
-            iconBg: 'bg-sky-50 text-sky-500',
-            name: 'Frontend Developer',
-            details: 'Full-time • Bengaluru',
-        },
-    ]);
-    // Recent Activities exactly from screenshot
-    const recentActivities = [
-        { id: 1, text: 'New business registered:', highlight: 'Tech Mart', time: '2 mins ago' },
-        { id: 2, text: 'Order placed by', highlight: 'Priya Sharma – ₹1,250', time: '5 mins ago' },
-        { id: 3, text: 'New course added:', highlight: 'React JS Basics', time: '10 mins ago' },
-        { id: 4, text: 'Job posted:', highlight: 'Full Stack Developer', time: '15 mins ago' },
-        { id: 5, text: 'Payment received:', highlight: '₹9,999', time: '20 mins ago' },
-    ];
-    const handleAction = (id) => {
-        setPendingApprovals((prev) => prev.filter((item) => item.id !== id));
+
+    const handleAction = async (item) => {
+        if (item.type === 'Business') {
+            await adminApi.reviewBusiness(item.id, 'approved', '');
+        }
+        setPendingApprovals((prev) => prev.filter((p) => p.id !== item.id));
     };
     return (<div className="space-y-5 max-w-[1600px] mx-auto pb-6">
       {/* 1. Hero Banner: Ultra High-Definition 3D Render with seamless integration */}
@@ -346,7 +374,9 @@ export const AdminDashboardPage = () => {
             </div>
             {/* Donut Center */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[20px] font-black text-slate-900 leading-none">125K</span>
+              <span className="text-[20px] font-black text-slate-900 leading-none">
+                {liveMetrics?.totalUsers || 0}
+              </span>
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Total Users</span>
             </div>
           </div>
@@ -432,42 +462,49 @@ export const AdminDashboardPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {pendingApprovals.map((item) => {
-            const Icon = item.icon;
-            return (<tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                      {/* Type */}
-                      <td className="py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.iconBg}`}>
-                            <Icon className="w-4 h-4"/>
+                {pendingApprovals.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-slate-400 text-xs">
+                      No pending approvals requiring review. All clear!
+                    </td>
+                  </tr>
+                ) : (
+                  pendingApprovals.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                        {/* Type */}
+                        <td className="py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.iconBg}`}>
+                              <Icon className="w-4 h-4"/>
+                            </div>
+                            <span className="font-semibold text-slate-800">{item.type}</span>
                           </div>
-                          <span className="font-semibold text-slate-800">{item.type}</span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Name */}
-                      <td className="py-3 font-semibold text-slate-900">
-                        {item.name}
-                      </td>
+                        {/* Name */}
+                        <td className="py-3 font-semibold text-slate-900">
+                          {item.name}
+                        </td>
 
-                      {/* Details */}
-                      <td className="py-3 text-slate-500">
-                        {item.details}
-                      </td>
+                        {/* Details */}
+                        <td className="py-3 text-slate-500">
+                          {item.details}
+                        </td>
 
-                      {/* Action Buttons: Green Approve & Red Reject */}
-                      <td className="py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => handleAction(item.id)} className="px-3 py-1 rounded-full text-[11px] font-bold text-emerald-600 border border-emerald-400 hover:bg-emerald-50 transition-colors">
-                            Approve
-                          </button>
-                          <button onClick={() => handleAction(item.id)} className="px-3 py-1 rounded-full text-[11px] font-bold text-rose-500 border border-rose-400 hover:bg-rose-50 transition-colors">
-                            Reject
-                          </button>
-                        </div>
-                      </td>
-                    </tr>);
-        })}
+                        {/* Action Buttons: Green Approve & Red Reject */}
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => handleAction(item)} className="px-3 py-1 rounded-full text-[11px] font-bold text-emerald-600 border border-emerald-400 hover:bg-emerald-50 transition-colors">
+                              Review
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -487,16 +524,22 @@ export const AdminDashboardPage = () => {
           </div>
 
           <div className="space-y-3.5 pt-1">
-            {recentActivities.map((act) => (<div key={act.id} className="flex items-start justify-between gap-3 text-[12.5px]">
-                <div className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"/>
-                  <div>
-                    <span className="text-slate-600 font-medium">{act.text} </span>
-                    <span className="font-bold text-slate-900">{act.highlight}</span>
+            {recentActivities.length === 0 ? (
+              <p className="text-xs text-slate-400 py-6 text-center">No recent platform activities recorded.</p>
+            ) : (
+              recentActivities.map((act) => (
+                <div key={act.id} className="flex items-start justify-between gap-3 text-[12.5px]">
+                  <div className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"/>
+                    <div>
+                      <span className="text-slate-600 font-medium capitalize">{act.text} </span>
+                      <span className="font-bold text-slate-900">{act.highlight}</span>
+                    </div>
                   </div>
+                  <span className="text-[11px] text-slate-400 whitespace-nowrap font-medium">{act.time}</span>
                 </div>
-                <span className="text-[11px] text-slate-400 whitespace-nowrap font-medium">{act.time}</span>
-              </div>))}
+              ))
+            )}
           </div>
         </div>
       </div>

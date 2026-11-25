@@ -65,7 +65,7 @@ export const BusinessDashboardPage = () => {
   const [bizCategory, setBizCategory] = useState('Retail & Commerce');
   const [bizDesc, setBizDesc] = useState('');
   const [docType, setDocType] = useState('Commercial Trade License');
-  const [docUrl, setDocUrl] = useState('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf');
+  const [docUrl, setDocUrl] = useState('');
   const [verificationSubmitted, setVerificationSubmitted] = useState(false);
 
   // Add Product Form State

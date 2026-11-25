@@ -15,7 +15,7 @@ export const JobDetailPage = () => {
     const [fullName, setFullName] = useState(user?.fullName || '');
     const [email, setEmail] = useState(user?.email || '');
     const [phone, setPhone] = useState(user?.mobile || '');
-    const [resumeUrl, setResumeUrl] = useState('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf');
+    const [resumeUrl, setResumeUrl] = useState('');
     const [coverLetter, setCoverLetter] = useState('');
     const [applied, setApplied] = useState(false);
     const [applyLoading, setApplyLoading] = useState(false);

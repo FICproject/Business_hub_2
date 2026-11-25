@@ -1,12 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { FileBarChart, Users, Building2, Store, ShoppingBag, DollarSign, GraduationCap, UserCheck, Briefcase, Share2, Download, } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts';
+import { adminApi } from '../services/api';
+
 export const AdminReportsPage = ({ initialTab = 'overview' }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
     const [timeRange, setTimeRange] = useState('30D');
+    const [metrics, setMetrics] = useState(null);
+    const [salesTrendData, setSalesTrendData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         setActiveTab(initialTab);
     }, [initialTab]);
+
+    useEffect(() => {
+        const loadReports = async () => {
+            try {
+                setLoading(true);
+                const res = await adminApi.getMetrics();
+                if (res.data?.success) {
+                    setMetrics(res.data.metrics);
+                    if (res.data.charts?.salesChart) {
+                        setSalesTrendData(res.data.charts.salesChart.map((s) => ({
+                            name: s.month,
+                            orders: s.orders,
+                            revenue: s.revenue,
+                        })));
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load reports:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadReports();
+    }, []);
+
     const reportTabs = [
         { key: 'overview', label: 'Platform Overview', icon: FileBarChart },
         { key: 'users', label: 'User Reports', icon: Users },
@@ -19,12 +50,7 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
         { key: 'jobs', label: 'Jobs Reports', icon: Briefcase },
         { key: 'referrals', label: 'Referral Reports', icon: Share2 },
     ];
-    const salesTrendData = [
-        { name: 'Week 1', orders: 1240, revenue: 450000 },
-        { name: 'Week 2', orders: 1980, revenue: 780000 },
-        { name: 'Week 3', orders: 2450, revenue: 1120000 },
-        { name: 'Week 4', orders: 3100, revenue: 1650000 },
-    ];
+
     const currentTabObj = reportTabs.find((t) => t.key === activeTab) || reportTabs[0];
     return (<div className="space-y-6 max-w-[1550px] mx-auto pb-8">
       {/* Header */}
@@ -87,23 +113,23 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                 <span className="text-[11px] text-slate-400 font-semibold uppercase">Total GMV</span>
-                <p className="text-2xl font-black text-slate-900">₹48,75,230</p>
-                <p className="text-xs text-emerald-600 font-bold">↑ 18.6% vs previous cycle</p>
+                <p className="text-2xl font-black text-slate-900">₹{metrics?.totalRevenue?.toLocaleString() || '0'}</p>
+                <p className="text-xs text-emerald-600 font-bold">Settled Order Volume</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                 <span className="text-[11px] text-slate-400 font-semibold uppercase">Total Platform Users</span>
-                <p className="text-2xl font-black text-slate-900">125,430</p>
-                <p className="text-xs text-emerald-600 font-bold">↑ 12.5% new registrations</p>
+                <p className="text-2xl font-black text-slate-900">{metrics?.totalUsers?.toLocaleString() || '0'}</p>
+                <p className="text-xs text-emerald-600 font-bold">Registered Members</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                 <span className="text-[11px] text-slate-400 font-semibold uppercase">Verified Businesses</span>
-                <p className="text-2xl font-black text-slate-900">24,870</p>
-                <p className="text-xs text-emerald-600 font-bold">↑ 8.3% merchant growth</p>
+                <p className="text-2xl font-black text-slate-900">{metrics?.approvedBusinesses?.toLocaleString() || metrics?.totalBusinesses?.toLocaleString() || '0'}</p>
+                <p className="text-xs text-emerald-600 font-bold">{metrics?.pendingApprovals || 0} Pending Verification</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-                <span className="text-[11px] text-slate-400 font-semibold uppercase">Fulfilled Orders</span>
-                <p className="text-2xl font-black text-slate-900">89,340</p>
-                <p className="text-xs text-emerald-600 font-bold">↑ 14.2% completion rate</p>
+                <span className="text-[11px] text-slate-400 font-semibold uppercase">Total Orders</span>
+                <p className="text-2xl font-black text-slate-900">{metrics?.totalOrders?.toLocaleString() || '0'}</p>
+                <p className="text-xs text-emerald-600 font-bold">Marketplace Orders</p>
               </div>
             </div>
 
@@ -118,7 +144,7 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9"/>
                   <XAxis dataKey="name" stroke="#94A3B8" fontSize={11}/>
-                  <YAxis stroke="#94A3B8" fontSize={11} tickFormatter={(val) => `₹${val / 1000}k`}/>
+                  <YAxis stroke="#94A3B8" fontSize={11} tickFormatter={(val) => `₹${val}`}/>
                   <Tooltip />
                   <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)"/>
                 </AreaChart>
@@ -132,18 +158,18 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Students</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">52,680 (42%)</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalStudents || 0}</p>
                 <p className="text-xs text-slate-500 mt-1">Free courses enrolled & active</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Professionals & Job Seekers</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">43,900 (35%)</p>
-                <p className="text-xs text-slate-500 mt-1">Active job applications submitted</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Teachers & Faculty</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalTeachers || 0}</p>
+                <p className="text-xs text-slate-500 mt-1">Active educators hosting classes</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Registered Businesses</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">28,850 (23%)</p>
-                <p className="text-xs text-slate-500 mt-1">Verified vendor catalogs</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalBusinesses || 0}</p>
+                <p className="text-xs text-slate-500 mt-1">{metrics?.approvedBusinesses || 0} approved & active</p>
               </div>
             </div>
           </div>)}
@@ -163,18 +189,18 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
                 <tbody className="divide-y divide-slate-50">
                   <tr>
                     <td className="py-3 font-semibold text-slate-800">Approved Active Enterprises</td>
-                    <td className="py-3 font-bold text-slate-900">24,870</td>
+                    <td className="py-3 font-bold text-slate-900">{metrics?.approvedBusinesses || 0}</td>
                     <td className="py-3 text-emerald-600 font-bold">Compliant</td>
                   </tr>
                   <tr>
                     <td className="py-3 font-semibold text-slate-800">Pending Verification Review</td>
-                    <td className="py-3 font-bold text-slate-900">142</td>
+                    <td className="py-3 font-bold text-slate-900">{metrics?.pendingApprovals || 0}</td>
                     <td className="py-3 text-amber-600 font-bold">Awaiting Admin Action</td>
                   </tr>
                   <tr>
-                    <td className="py-3 font-semibold text-slate-800">Rejected / Incomplete Documentation</td>
-                    <td className="py-3 font-bold text-slate-900">38</td>
-                    <td className="py-3 text-rose-600 font-bold">Requires Resubmission</td>
+                    <td className="py-3 font-semibold text-slate-800">Total Registered Enterprises</td>
+                    <td className="py-3 font-bold text-slate-900">{metrics?.totalBusinesses || 0}</td>
+                    <td className="py-3 text-indigo-600 font-bold">Directory Total</td>
                   </tr>
                 </tbody>
               </table>
@@ -187,18 +213,18 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Live Products</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">18,450</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.activeProducts || 0}</p>
                 <p className="text-xs text-emerald-600 font-medium">Privacy Guaranteed (No PII)</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Professional Services</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">6,420</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.activeServices || 0}</p>
                 <p className="text-xs text-slate-500">Verified provider offerings</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Cart Abandonment Rate</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">18.4%</p>
-                <p className="text-xs text-emerald-600">Industry leading checkout conversion</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Total Completed Orders</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalOrders || 0}</p>
+                <p className="text-xs text-emerald-600">Direct platform fulfillments</p>
               </div>
             </div>
           </div>)}
@@ -206,22 +232,18 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
         {/* 5. Orders & Sales */}
         {activeTab === 'orders-sales' && (<div className="space-y-4">
             <p className="text-sm text-slate-600">Fulfillment statistics, shipping statuses, and order volume distribution.</p>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                <h4 className="text-xs font-bold text-emerald-700 uppercase">Delivered Orders</h4>
-                <p className="text-xl font-black text-emerald-900 mt-1">78,210</p>
+                <h4 className="text-xs font-bold text-emerald-700 uppercase">Total Orders Processed</h4>
+                <p className="text-xl font-black text-emerald-900 mt-1">{metrics?.totalOrders || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100">
-                <h4 className="text-xs font-bold text-blue-700 uppercase">In Transit</h4>
-                <p className="text-xl font-black text-blue-900 mt-1">6,480</p>
+                <h4 className="text-xs font-bold text-blue-700 uppercase">Settled Order Volume</h4>
+                <p className="text-xl font-black text-blue-900 mt-1">₹{metrics?.totalRevenue || 0}</p>
               </div>
-              <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-100">
-                <h4 className="text-xs font-bold text-amber-700 uppercase">Processing / Packaging</h4>
-                <p className="text-xl font-black text-amber-900 mt-1">3,890</p>
-              </div>
-              <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100">
-                <h4 className="text-xs font-bold text-rose-700 uppercase">Returns & Refunds</h4>
-                <p className="text-xl font-black text-rose-900 mt-1">760</p>
+              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100">
+                <h4 className="text-xs font-bold text-purple-700 uppercase">Active Products in Catalog</h4>
+                <p className="text-xl font-black text-purple-900 mt-1">{metrics?.activeProducts || 0}</p>
               </div>
             </div>
           </div>)}
@@ -232,15 +254,15 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Gross Platform GMV</h4>
-                <p className="text-2xl font-black text-slate-900 mt-1">₹48,75,230</p>
+                <p className="text-2xl font-black text-slate-900 mt-1">₹{metrics?.totalRevenue?.toLocaleString() || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Settled to Vendors</h4>
-                <p className="text-2xl font-black text-emerald-600 mt-1">₹42,90,200</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Teacher Disbursed Compensation</h4>
+                <p className="text-2xl font-black text-emerald-600 mt-1">₹{metrics?.totalTeacherPaidAmount?.toLocaleString() || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Platform Take Rate & Reserves</h4>
-                <p className="text-2xl font-black text-indigo-600 mt-1">₹5,85,030</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Pending Teacher Stipends</h4>
+                <p className="text-2xl font-black text-amber-600 mt-1">{metrics?.pendingTeacherPayments || 0}</p>
               </div>
             </div>
           </div>)}
@@ -250,17 +272,17 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <p className="text-sm text-slate-600">Course completion metrics, student enrollments, and live class attendance rates.</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Course Enrollments</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">34,500+</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Total Published Courses</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalCourses || 0}</p>
                 <p className="text-xs text-emerald-600">100% Free Access</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">WebRTC Class Hours Hosted</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">1,240 Hours</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Live WebRTC Classes Hosted</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.liveClasses || 0} Sessions</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Study Notes Downloads</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">45,800 Files</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Total Enrolled Students</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalStudents || 0}</p>
               </div>
             </div>
           </div>)}
@@ -271,15 +293,15 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Active Instructors</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">185</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalTeachers || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Disbursed Stipends</h4>
-                <p className="text-xl font-bold text-emerald-600 mt-1">₹8,45,000</p>
+                <p className="text-xl font-bold text-emerald-600 mt-1">₹{metrics?.totalTeacherPaidAmount || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Pending Compensation Approvals</h4>
-                <p className="text-xl font-bold text-amber-600 mt-1">12 Sessions</p>
+                <p className="text-xl font-bold text-amber-600 mt-1">{metrics?.pendingTeacherPayments || 0} Sessions</p>
               </div>
             </div>
           </div>)}
@@ -290,15 +312,15 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Active Vacancies</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">1,890 Positions</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalJobs || 0} Positions</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Applications Processed</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">28,400</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Registered Businesses Hiring</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.approvedBusinesses || 0} Companies</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Verified Hiring Employers</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">420 Companies</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Job Seekers & Students</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalStudents || 0}</p>
               </div>
             </div>
           </div>)}
@@ -308,12 +330,12 @@ export const AdminReportsPage = ({ initialTab = 'overview' }) => {
             <p className="text-sm text-slate-600">Clean link clicks & shares (Zero MLM / Zero pyramid wallet schemes).</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Clean Links Generated</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">94,300 Links</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Service Requests Generated</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalRequests || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase">Total Click Traffic</h4>
-                <p className="text-xl font-bold text-slate-900 mt-1">380,200 Clicks</p>
+                <h4 className="text-xs font-bold text-slate-400 uppercase">Business Connections Created</h4>
+                <p className="text-xl font-bold text-slate-900 mt-1">{metrics?.totalConnections || 0}</p>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <h4 className="text-xs font-bold text-slate-400 uppercase">Referral Integrity</h4>

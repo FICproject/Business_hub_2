@@ -43,7 +43,7 @@ export const StudentDashboardPage = () => {
     const [discussionInput, setDiscussionInput] = useState('');
     // Apply modal
     const [applyModalJob, setApplyModalJob] = useState(null);
-    const [applyResume, setApplyResume] = useState('https://businesshub.com/resumes/my-resume.pdf');
+    const [applyResume, setApplyResume] = useState('');
     const [applyCover, setApplyCover] = useState('');
     const [applySuccess, setApplySuccess] = useState(false);
     // Live class modal
@@ -126,54 +126,16 @@ export const StudentDashboardPage = () => {
             loadData();
         }
     };
-    // Demo certificates based on enrollments
-    const certificates = enrollments.length > 0
-        ? enrollments.map((enr, i) => ({
-            id: `cert-${enr._id || i}`,
-            courseTitle: enr.courseTitle || 'Mastering Modern Web Architecture',
-            issueDate: new Date().toLocaleDateString(),
-            credentialId: `BH-CERT-${Math.floor(100000 + Math.random() * 900000)}`,
-            instructor: 'Verified Faculty',
-        }))
-        : [
-            {
-                id: 'cert-default',
-                courseTitle: 'Full-Stack Enterprise Engineering & Cloud Systems',
-                issueDate: new Date().toLocaleDateString(),
-                credentialId: 'BH-CERT-749102',
-                instructor: 'Verified Faculty',
-            },
-        ];
-    // Community discussions mock
-    const [discussions, setDiscussions] = useState([
-        {
-            id: 1,
-            author: 'Aarav Patel',
-            role: 'Student',
-            group: 'Software Engineering',
-            content: 'What are best practices for optimizing React 18 concurrent rendering in enterprise dashboards?',
-            time: '2 hours ago',
-            replies: 4,
-        },
-        {
-            id: 2,
-            author: 'Sophia Chen',
-            role: 'Alumni',
-            group: 'Data Science & AI',
-            content: 'Sharing free reference materials on vector embeddings and retrieval-augmented generation (RAG).',
-            time: '5 hours ago',
-            replies: 7,
-        },
-        {
-            id: 3,
-            author: 'Marcus Vance',
-            role: 'Entrepreneur',
-            group: 'Commerce & Careers',
-            content: 'We are hiring junior engineers from Business Hub graduates! Feel free to ask questions about interview prep.',
-            time: '1 day ago',
-            replies: 12,
-        },
-    ]);
+    // Certificates based on real course enrollments
+    const certificates = enrollments.map((enr, i) => ({
+        id: `cert-${enr._id || i}`,
+        courseTitle: enr.courseTitle || 'Free Certified Course',
+        issueDate: enr.enrolledAt ? new Date(enr.enrolledAt).toLocaleDateString() : new Date().toLocaleDateString(),
+        credentialId: `BH-CERT-${(enr._id || String(i)).slice(-6).toUpperCase()}`,
+        instructor: enr.instructorName || 'Verified Faculty',
+    }));
+    // Community discussions
+    const [discussions, setDiscussions] = useState([]);
     const handlePostDiscussion = (e) => {
         e.preventDefault();
         if (!discussionInput.trim())
@@ -192,36 +154,16 @@ export const StudentDashboardPage = () => {
         ]);
         setDiscussionInput('');
     };
-    // Events mock
-    const eventList = [
-        {
-            id: 'ev-1',
-            title: 'Full-Stack System Design Masterclass',
-            category: 'Workshop',
-            date: 'Nov 28, 2026',
-            time: '6:00 PM EST',
-            speaker: 'Alex Rivera (Staff Architect)',
-            registered: true,
-        },
-        {
-            id: 'ev-2',
-            title: 'Cracking the Modern Coding Interview',
-            category: 'Webinar',
-            date: 'Dec 02, 2026',
-            time: '5:00 PM EST',
-            speaker: 'Elena Rostova (Engineering Lead)',
-            registered: false,
-        },
-        {
-            id: 'ev-3',
-            title: 'Building Scalable APIs with Node.js & Microservices',
-            category: 'Live Session',
-            date: 'Dec 06, 2026',
-            time: '7:00 PM EST',
-            speaker: 'David Kim (Principal Engineer)',
-            registered: false,
-        },
-    ];
+    // Events dynamically sourced from scheduled live classes
+    const eventList = liveClasses.map((lc) => ({
+        id: lc._id,
+        title: lc.title,
+        category: lc.subject || 'Live Masterclass',
+        date: lc.scheduledDate || 'Upcoming',
+        time: lc.startTime || 'TBD',
+        speaker: lc.instructorName || 'Verified Faculty',
+        registered: true,
+    }));
     return (<div className="space-y-6 max-w-7xl mx-auto">
       {/* =========================================================================
             MODULE 1: OVERVIEW DASHBOARD
