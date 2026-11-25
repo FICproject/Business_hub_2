@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   Clock,
@@ -10,94 +10,51 @@ import {
   CheckCircle2,
   Tv,
 } from 'lucide-react';
+import { educationApi } from '../../services/api';
 
 export const EventsView = ({ role = 'teacher', onSchedule }) => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [registeredIds, setRegisteredIds] = useState(new Set(['evt-1']));
+  const [registeredIds, setRegisteredIds] = useState(new Set());
+  const [allEvents, setAllEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = ['All', 'Workshop', 'Webinar', 'Live Session', 'Summit'];
+  useEffect(() => {
+    let active = true;
+    educationApi
+      .getLiveClasses()
+      .then((res) => {
+        if (!active) return;
+        const rows = res.data?.data || [];
+        setAllEvents(
+          rows.map((lc) => {
+            const capacity = Number(lc.studentCapacity || 100);
+            const enrolled = Number(lc.enrolledCount || 0);
+            return {
+              id: lc._id,
+              title: lc.title,
+              category: lc.subject || 'Live Session',
+              date: lc.scheduledDate || 'Upcoming',
+              time: lc.startTime || 'TBD',
+              speaker: lc.instructorName || 'Verified Faculty',
+              speakerRole: lc.subject || 'Instructor',
+              description: lc.description || 'Interactive live workshop hosted on Business Hub.',
+              seatsLeft: Math.max(0, capacity - enrolled),
+              isLive: lc.status === 'live',
+            };
+          })
+        );
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  const allEvents = [
-    {
-      id: 'evt-1',
-      title: 'Full-Stack Distributed System Architecture Masterclass',
-      category: 'Workshop',
-      date: 'Saturday, Dec 5, 2026',
-      time: '4:00 PM - 6:00 PM EST',
-      speaker: 'Dr. Sarah Mitchell',
-      speakerRole: 'Principal Cloud Architect',
-      description:
-        'Hands-on architectural deep dive: building microservices, Redis caching layers, and resilient CI/CD pipelines with zero downtime.',
-      seatsLeft: 34,
-      isLive: false,
-    },
-    {
-      id: 'evt-2',
-      title: 'Small Business & Merchant Growth Summit 2026',
-      category: 'Summit',
-      date: 'Wednesday, Dec 9, 2026',
-      time: '6:30 PM - 8:30 PM EST',
-      speaker: 'Vikram Mehta & Strategic Panel',
-      speakerRole: 'Commercial Strategy Directors',
-      description:
-        'Practical playbooks for digital merchants: catalog turnover, identity privacy compliance, and clean referral link attribution.',
-      seatsLeft: 78,
-      isLive: false,
-    },
-    {
-      id: 'evt-3',
-      title: 'Tech & Commerce Virtual Career Hiring Fair',
-      category: 'Webinar',
-      date: 'Friday, Dec 11, 2026',
-      time: '2:00 PM - 5:00 PM EST',
-      speaker: 'Business Hub Talent Council',
-      speakerRole: 'Hiring Leads at 15+ Companies',
-      description:
-        'Meet corporate hiring managers, submit fast-track resumes, and discover high-demand software and business vacancies.',
-      seatsLeft: 120,
-      isLive: false,
-    },
-    {
-      id: 'evt-4',
-      title: 'Modern Digital Classroom Engagement for Educators',
-      category: 'Workshop',
-      date: 'Thursday, Dec 17, 2026',
-      time: '5:00 PM - 7:00 PM EST',
-      speaker: 'Prof. Anita Roy',
-      speakerRole: 'Educational Technologist',
-      description:
-        'Techniques for hosting interactive virtual streaming rooms, evaluating live code exercises, and engaging remote learners.',
-      seatsLeft: 42,
-      isLive: false,
-    },
-    {
-      id: 'evt-5',
-      title: 'Data Science & Machine Learning Real-World Case Studies',
-      category: 'Webinar',
-      date: 'Tuesday, Dec 22, 2026',
-      time: '7:00 PM - 8:30 PM EST',
-      speaker: 'Karan Joshi',
-      speakerRole: 'Senior Data Scientist',
-      description:
-        'Explore production predictive analytics, transformer model fine-tuning, and scalable feature store designs.',
-      seatsLeft: 89,
-      isLive: false,
-    },
-    {
-      id: 'evt-6',
-      title: 'Interactive Live Coding: React 18 Concurrent Rendering',
-      category: 'Live Session',
-      date: 'Today',
-      time: '8:00 PM - 9:30 PM EST',
-      speaker: 'Prof. David Vance',
-      speakerRole: 'Software Engineering Faculty',
-      description:
-        'Live stream covering React 18 transitions, useDeferredValue, and custom concurrent state orchestrations with live student Q&A.',
-      seatsLeft: 15,
-      isLive: true,
-    },
-  ];
+  const categories = ['All', ...Array.from(new Set(allEvents.map((ev) => ev.category).filter(Boolean)))];
 
   const toggleRegister = (id, title) => {
     setRegisteredIds((prev) => {
@@ -183,7 +140,12 @@ export const EventsView = ({ role = 'teacher', onSchedule }) => {
       </div>
 
       {/* Events Grid */}
-      {filteredEvents.length === 0 ? (
+      {loading ? (
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center space-y-2">
+          <Calendar className="w-10 h-10 text-slate-300 mx-auto animate-pulse" />
+          <p className="text-sm font-bold text-navy-950">Loading upcoming events...</p>
+        </div>
+      ) : filteredEvents.length === 0 ? (
         <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center space-y-2">
           <Calendar className="w-10 h-10 text-slate-300 mx-auto" />
           <p className="text-sm font-bold text-navy-950">No events found matching your criteria.</p>

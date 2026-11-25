@@ -239,7 +239,7 @@ export const uploadStudyMaterial = async (req, res) => {
             title,
             subject,
             topic,
-            fileUrl: fileUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+            fileUrl: fileUrl || '',
             fileSize: fileSize || '2.4 MB',
             fileType: fileType || 'PDF',
             moderationStatus: 'approved', // Auto-approved for verified teachers

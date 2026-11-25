@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../config';
 import { dbStore } from '../../services/storage';
@@ -18,6 +19,26 @@ const calculateAge = (dobString) => {
 };
 
 const VERIFICATION_ROLES = ['teacher', 'businessman', 'entrepreneur'];
+
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+const issueOtpForTarget = (target, type = 'email', userId = null) => {
+    const cleanTarget = String(target || '').trim().toLowerCase();
+    const code = crypto.randomInt(100000, 1000000).toString();
+    const now = Date.now();
+    dbStore.collection.otpCodes = (dbStore.collection.otpCodes || []).filter(
+        (entry) => !(entry.target === cleanTarget && entry.type === type) && entry.expiresAt > now
+    );
+    dbStore.collection.otpCodes.push({
+        target: cleanTarget,
+        type,
+        userId,
+        code,
+        expiresAt: now + OTP_TTL_MS,
+    });
+    console.info(`[Auth OTP] Generated ${type} verification code for ${cleanTarget}: ${code}`);
+    return code;
+};
 
 export const initRegistration = async (req, res) => {
     try {
@@ -238,6 +259,7 @@ export const register = async (req, res) => {
             isRead: false,
             createdAt: new Date().toISOString(),
         });
+        issueOtpForTarget(newUser.email, 'email', newUser._id);
         dbStore.save();
         // Generate JWT
         const token = jwt.sign({ id: newUser._id, email: newUser.email, roles: newUser.roles }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
@@ -302,15 +324,18 @@ export const getMe = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
-// Send mock OTP for verification
+// Send OTP for verification
 export const sendOtp = async (req, res) => {
     try {
-        const { target, type } = req.body; // type: 'email' | 'mobile'
-        const otp = '123456'; // Standard predictable mock OTP for development
+        const { target, type = 'email' } = req.body;
+        if (!target || !String(target).trim()) {
+            return res.status(400).json({ success: false, message: 'Verification target (email or mobile) is required.' });
+        }
+        issueOtpForTarget(target, type);
+        dbStore.save();
         return res.json({
             success: true,
-            message: `OTP sent to ${target}. Use code 123456 to verify.`,
-            debugOtp: otp,
+            message: `A 6-digit verification code has been sent to ${target}.`,
         });
     }
     catch (error) {
@@ -320,10 +345,28 @@ export const sendOtp = async (req, res) => {
 // Verify OTP
 export const verifyOtp = async (req, res) => {
     try {
-        const { otp, type } = req.body;
-        if (otp !== '123456') {
-            return res.status(400).json({ success: false, message: 'Invalid OTP code.' });
+        const { otp, type = 'email' } = req.body;
+        const submittedOtp = String(otp || '').trim();
+        if (!submittedOtp) {
+            return res.status(400).json({ success: false, message: 'OTP code is required.' });
         }
+        const now = Date.now();
+        const userTargets = [req.user?.email, req.user?.mobile]
+            .filter(Boolean)
+            .map((val) => String(val).trim().toLowerCase());
+        const otpRecords = dbStore.collection.otpCodes || [];
+        const matchedIndex = otpRecords.findIndex(
+            (entry) =>
+                entry.type === type &&
+                entry.expiresAt > now &&
+                (entry.userId === req.user._id || userTargets.includes(entry.target)) &&
+                entry.code === submittedOtp
+        );
+        if (matchedIndex === -1) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired OTP code.' });
+        }
+        otpRecords.splice(matchedIndex, 1);
+        dbStore.collection.otpCodes = otpRecords.filter((entry) => entry.expiresAt > now);
         const user = dbStore.collection.users.find((u) => u._id === req.user._id);
         if (user) {
             if (type === 'mobile') {

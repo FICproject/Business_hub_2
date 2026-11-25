@@ -5,8 +5,8 @@ import { Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { adminApi } from '../services/api';
 import { setAdminCredentials } from '../store';
 export const AdminLoginPage = () => {
-    const [email, setEmail] = useState('admin@businesshub.com');
-    const [password, setPassword] = useState('admin12345');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
@@ -53,7 +53,7 @@ export const AdminLoginPage = () => {
             <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Admin Email</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"/>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-teal-500"/>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter admin email" className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-teal-500"/>
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export const AdminLoginPage = () => {
             <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"/>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-teal-500"/>
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-teal-500"/>
             </div>
           </div>
 
@@ -70,10 +70,6 @@ export const AdminLoginPage = () => {
             {!loading && <ArrowRight className="w-4 h-4"/>}
           </button>
         </form>
-
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 text-center">
-          Default Credential: <span className="font-mono text-teal-400">admin@businesshub.com / admin12345</span>
-        </div>
       </div>
     </div>);
 };

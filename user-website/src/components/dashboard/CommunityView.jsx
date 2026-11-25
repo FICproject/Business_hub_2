@@ -27,86 +27,22 @@ export const CommunityView = ({ role = 'teacher' }) => {
     role === 'teacher' ? 'Educators & Mentor Lounge' : 'General Discussion'
   );
 
-  const groups = [
-    { name: 'All', count: 28 },
-    { name: 'Educators & Mentor Lounge', count: 9 },
-    { name: 'Software Engineering', count: 8 },
-    { name: 'Data Science & AI', count: 5 },
-    { name: 'Commerce & Careers', count: 6 },
+  const [discussions, setDiscussions] = useState([]);
+
+  const groupNames = [
+    'Educators & Mentor Lounge',
+    'Software Engineering',
+    'Data Science & AI',
+    'Commerce & Careers',
   ];
 
-  const [discussions, setDiscussions] = useState([
-    {
-      id: 1,
-      author: 'Dr. Sarah Mitchell',
-      role: 'Faculty Lead',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80',
-      group: 'Educators & Mentor Lounge',
-      title: 'Techniques for conducting real-time code reviews during live stream classes',
-      content:
-        'When teaching microservice patterns, pairing live terminal demonstrations with asynchronous pull request reviews has significantly boosted student completion rates.',
-      time: '1 hour ago',
-      likes: 18,
-      replies: 7,
-      liked: false,
-    },
-    {
-      id: 2,
-      author: 'Prof. Anita Roy',
-      role: 'Educational Technologist',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=128&q=80',
-      group: 'Educators & Mentor Lounge',
-      title: 'Open Curriculum: Modern Cloud Computing syllabus and grading rubric',
-      content:
-        'Sharing our standardized semester rubric for distributed systems. Feel free to clone the assignment repos and adapt them for your Business Hub courses!',
-      time: '3 hours ago',
-      likes: 34,
-      replies: 12,
-      liked: true,
-    },
-    {
-      id: 3,
-      author: 'Aarav Patel',
-      role: 'Student Member',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=128&q=80',
-      group: 'Software Engineering',
-      title: 'Best practices for caching Redis layers in Docker Compose for production?',
-      content:
-        'Working on the final capstone project. What cache eviction strategies do faculty members recommend when handling high-throughput cart transactions?',
-      time: '5 hours ago',
-      likes: 9,
-      replies: 4,
-      liked: false,
-    },
-    {
-      id: 4,
-      author: 'Marcus Vance',
-      role: 'Entrepreneur & Employer',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=128&q=80',
-      group: 'Commerce & Careers',
-      title: 'We are hiring junior engineers from Business Hub graduate cohorts!',
-      content:
-        'Verified businesses on Business Hub have 20+ open entry-level engineering roles. Instructors, please encourage your top graduates to submit resumes via the Job Pipeline!',
-      time: '1 day ago',
-      likes: 56,
-      replies: 19,
-      liked: false,
-    },
-    {
-      id: 5,
-      author: 'Sophia Chen',
-      role: 'Data Science Faculty',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80',
-      group: 'Data Science & AI',
-      title: 'Free GPU lab allocations for university classroom projects',
-      content:
-        'We have secured 500 hours of cloud compute for student deep learning projects. Check the study materials section for onboarding instructions.',
-      time: '2 days ago',
-      likes: 27,
-      replies: 6,
-      liked: false,
-    },
-  ]);
+  const groups = [
+    { name: 'All', count: discussions.length },
+    ...groupNames.map((name) => ({
+      name,
+      count: discussions.filter((d) => d.group === name).length,
+    })),
+  ];
 
   const handleLike = (id) => {
     setDiscussions((prev) =>

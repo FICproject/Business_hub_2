@@ -21,7 +21,8 @@ export const authApi = {
     login: (data) => api.post('/auth/login', data),
     getMe: () => api.get('/auth/me'),
     sendOtp: (data) => api.post('/auth/send-otp', data),
-    verifyOtp: (data) => api.post('/auth/verify-otp', data),
+    verifyOtp: (data, customToken) =>
+        api.post('/auth/verify-otp', data, customToken ? { headers: { Authorization: `Bearer ${customToken}` } } : undefined),
     forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
     resetPassword: (data) => api.post('/auth/reset-password', data),
 };

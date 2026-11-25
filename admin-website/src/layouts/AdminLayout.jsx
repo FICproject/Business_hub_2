@@ -285,7 +285,7 @@ export const AdminLayout = () => {
               {dropdownOpen && (<div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
                   <div className="px-3 py-1.5 border-b border-slate-100 text-[11px]">
                     <p className="font-bold text-slate-800">Admin Account</p>
-                    <p className="text-slate-400 truncate">{user?.email || 'admin@businesshub.com'}</p>
+                    <p className="text-slate-400 truncate">{user?.email || ''}</p>
                   </div>
                   <button onClick={handleLogout} className="w-full text-left px-3 py-1.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2">
                     <LogOut className="w-3.5 h-3.5"/>

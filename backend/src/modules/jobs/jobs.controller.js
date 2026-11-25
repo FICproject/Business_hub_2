@@ -98,7 +98,7 @@ export const applyForJob = async (req, res) => {
             fullName: fullName || req.user.fullName,
             email: email || req.user.email,
             phone: phone || req.user.mobile,
-            resumeUrl: resumeUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+            resumeUrl: resumeUrl || '',
             coverLetter: coverLetter || '',
             status: 'submitted',
             appliedAt: new Date().toISOString(),

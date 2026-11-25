@@ -29,6 +29,7 @@ export const RegisterPage = () => {
   // OTP Step
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [otpMessage, setOtpMessage] = useState(null);
   const [registeredData, setRegisteredData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -153,20 +154,42 @@ export const RegisterPage = () => {
   };
 
   const handleVerifyOtp = async () => {
-    if (otpCode !== '123456') {
-      setError('Invalid OTP code. For test purposes, enter 123456.');
+    setError(null);
+    setOtpMessage(null);
+    const trimmed = otpCode.trim();
+    if (trimmed.length !== 6) {
+      setError('Please enter the 6-digit OTP code.');
       return;
     }
-    dispatch(setCredentials({ user: registeredData.user, token: registeredData.token }));
+    setLoading(true);
+    try {
+      await authApi.verifyOtp({ otp: trimmed, type: 'email' }, registeredData?.token);
+      dispatch(setCredentials({ user: { ...registeredData.user, isEmailVerified: true }, token: registeredData.token }));
 
-    if (selectedRole === 'teacher') {
-      navigate('/dashboard/teacher?tab=verification');
-    } else if (selectedRole === 'businessman' || selectedRole === 'entrepreneur') {
-      navigate('/dashboard/business?tab=verification');
-    } else if (selectedRole === 'normal' || selectedRole === 'user') {
-      navigate('/dashboard/user');
-    } else {
-      navigate('/dashboard/student');
+      if (selectedRole === 'teacher') {
+        navigate('/dashboard/teacher?tab=verification');
+      } else if (selectedRole === 'businessman' || selectedRole === 'entrepreneur') {
+        navigate('/dashboard/business?tab=verification');
+      } else if (selectedRole === 'normal' || selectedRole === 'user') {
+        navigate('/dashboard/user');
+      } else {
+        navigate('/dashboard/student');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid or expired OTP code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError(null);
+    setOtpMessage(null);
+    try {
+      const res = await authApi.sendOtp({ target: email, type: 'email' });
+      setOtpMessage(res.data?.message || 'A new verification code has been sent.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to resend OTP code.');
     }
   };
 
@@ -427,9 +450,11 @@ export const RegisterPage = () => {
                     Your documents are submitted! Your account remains <strong>Pending Admin Approval</strong> until verified.
                   </p>
                 )}
-                <p className="text-[11px] text-teal-600 font-semibold bg-teal-50 py-1 rounded-md">
-                  (Development Code: 123456)
-                </p>
+                {otpMessage && (
+                  <p className="text-[11px] text-teal-700 bg-teal-50 border border-teal-200 p-2 rounded-lg font-medium">
+                    {otpMessage}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -438,7 +463,7 @@ export const RegisterPage = () => {
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="123456"
+                  placeholder="••••••"
                   className="w-full text-center tracking-[0.5em] text-2xl font-extrabold py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
@@ -446,9 +471,18 @@ export const RegisterPage = () => {
               <button
                 type="button"
                 onClick={handleVerifyOtp}
-                className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md transition-all"
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-sm shadow-md transition-all"
               >
-                Confirm OTP & Continue
+                {loading ? 'Verifying...' : 'Confirm OTP & Continue'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="w-full text-xs font-bold text-teal-600 hover:text-teal-700"
+              >
+                Resend verification code
               </button>
             </div>
           </div>

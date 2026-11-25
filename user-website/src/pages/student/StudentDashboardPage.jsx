@@ -106,9 +106,9 @@ export const StudentDashboardPage = () => {
             return;
         try {
             await jobsApi.applyForJob(applyModalJob._id, {
-                fullName: user?.fullName || 'Candidate',
-                email: user?.email || 'student@businesshub.com',
-                phone: user?.mobile || '+1 555-0199',
+                fullName: user?.fullName || '',
+                email: user?.email || '',
+                phone: user?.mobile || '',
                 resumeUrl: applyResume,
                 coverLetter: applyCover,
             });

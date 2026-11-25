@@ -46,10 +46,6 @@ export const LoginPage = () => {
             setLoading(false);
         }
     };
-    const handleQuickLogin = (demoLogin, demoPass) => {
-        setIdentifier(demoLogin);
-        setPassword(demoPass);
-    };
     return (<div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-slate-50">
       <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/80 shadow-xl p-8 space-y-6">
         <div className="text-center space-y-2">
@@ -100,27 +96,6 @@ export const LoginPage = () => {
             {!loading && <ArrowRight className="w-4 h-4"/>}
           </button>
         </form>
-
-        {/* Quick Demo Logins for Fast Evaluator Testing */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-            One-Click Test Accounts:
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button type="button" onClick={() => handleQuickLogin('student@businesshub.com', 'student12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
-              📚 Student
-            </button>
-            <button type="button" onClick={() => handleQuickLogin('teacher@businesshub.com', 'teacher12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
-              🎓 Teacher
-            </button>
-            <button type="button" onClick={() => handleQuickLogin('business@businesshub.com', 'business12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
-              🏢 Businessman
-            </button>
-            <button type="button" onClick={() => handleQuickLogin('user@businesshub.com', 'user12345')} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-left truncate">
-              👤 Normal User
-            </button>
-          </div>
-        </div>
 
         <p className="text-center text-xs text-slate-500">
           Don't have an account yet?{' '}

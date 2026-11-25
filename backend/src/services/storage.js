@@ -42,6 +42,7 @@ const defaultStore = {
   verificationDocuments: [],
   registrationDrafts: [],
   documentAuditLogs: [],
+  otpCodes: [],
   platformSettings: {
     siteName: 'Business Hub',
     maintenanceMode: false,
@@ -74,6 +75,7 @@ class DataStore {
         if (!parsed.verificationDocuments) parsed.verificationDocuments = [];
         if (!parsed.registrationDrafts) parsed.registrationDrafts = [];
         if (!parsed.documentAuditLogs) parsed.documentAuditLogs = [];
+        if (!parsed.otpCodes) parsed.otpCodes = [];
         return parsed;
       }
     } catch (err) {
