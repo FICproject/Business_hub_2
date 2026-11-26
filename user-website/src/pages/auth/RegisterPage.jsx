@@ -364,7 +364,12 @@ export const RegisterPage = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration initialization failed. Please verify your details.');
+      setError(
+        err.response?.data?.message ||
+          (!err.response
+            ? 'Unable to reach the server. Please ensure the backend API is running.'
+            : 'Registration initialization failed. Please verify your details.')
+      );
     } finally {
       setLoading(false);
     }

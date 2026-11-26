@@ -1,5 +1,9 @@
+import fs from 'fs';
+import path from 'path';
 import mongoose from 'mongoose';
 import { modelsMap } from '../models';
+
+const DB_FILE = path.resolve(__dirname, '../../data/data_store.json');
 
 export const defaultStore = {
   users: [],
@@ -60,13 +64,51 @@ class MongoDataStore {
   }
 
   /**
-   * Initializes store by loading all collections directly from MongoDB.
+   * Loads store data from the local JSON fallback file when MongoDB is unavailable.
+   */
+  loadFromFile() {
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+        const parsed = JSON.parse(raw);
+        const merged = { ...JSON.parse(JSON.stringify(defaultStore)), ...parsed };
+        this.data = merged;
+        return true;
+      }
+    } catch (err) {
+      console.warn('[JSON Storage Fallback]: Could not read data_store.json, initializing fresh store:', err.message);
+    }
+    this.data = JSON.parse(JSON.stringify(defaultStore));
+    return true;
+  }
+
+  /**
+   * Persists store data to the local JSON fallback file.
+   */
+  saveToFile() {
+    try {
+      const dir = path.dirname(DB_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('[JSON Storage Fallback]: Failed to persist data_store.json:', err.message);
+    }
+  }
+
+  /**
+   * Initializes store by loading collections from MongoDB, or JSON file fallback if offline.
    */
   async init() {
     try {
       if (mongoose.connection.readyState !== 1) {
-        console.warn('[MongoDB Storage]: Waiting for MongoDB connection before loading collections...');
-        return false;
+        this.loadFromFile();
+        this.initialized = true;
+        console.log(
+          `[JSON Storage Fallback]: Loaded collections from ${DB_FILE}. Users count: ${this.data.users.length}`
+        );
+        return true;
       }
 
       console.log('[MongoDB Storage]: Synchronizing collections from MongoDB Atlas...');
@@ -108,6 +150,7 @@ class MongoDataStore {
    */
   async save() {
     if (mongoose.connection.readyState !== 1) {
+      this.saveToFile();
       return;
     }
 
@@ -196,6 +239,8 @@ class MongoDataStore {
     const Model = this.models[collectionName];
     if (Model && mongoose.connection.readyState === 1) {
       await Model.create(doc);
+    } else {
+      this.saveToFile();
     }
     return doc;
   }
@@ -224,6 +269,9 @@ class MongoDataStore {
     if (index !== -1) {
       Object.assign(items[index], update.$set || update);
     }
+    if (mongoose.connection.readyState !== 1) {
+      this.saveToFile();
+    }
   }
 
   /**
@@ -241,6 +289,9 @@ class MongoDataStore {
         }
         return true;
       });
+    }
+    if (mongoose.connection.readyState !== 1) {
+      this.saveToFile();
     }
   }
 
