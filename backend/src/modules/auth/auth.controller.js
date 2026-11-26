@@ -111,8 +111,11 @@ export const initRegistration = async (req, res) => {
             draft.applicationContext = mergedContext;
             draft.updatedAt = now;
         } else {
+            const dId = uuidv4();
             draft = {
-                draftId: uuidv4(),
+                _id: dId,
+                id: dId,
+                draftId: dId,
                 fullName,
                 email: email.toLowerCase(),
                 mobile,

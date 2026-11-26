@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.js",
     "build": "node -e \"console.log('Backend build ready')\"",
-    "start": "node src/server.js",
+    "start": "tsx src/server.js",
     "seed": "tsx src/utils/seed.js",
     "test": "tsx tests/index.test.ts"
   },

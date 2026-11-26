@@ -125,6 +125,9 @@ class MongoDataStore {
               if (d && !d.id && d._id) {
                 d.id = d._id;
               }
+              if (key === 'registrationDrafts' && d && !d.draftId && d._id) {
+                d.draftId = d._id;
+              }
               return d;
             });
           }
@@ -177,6 +180,9 @@ class MongoDataStore {
           const items = rawItems.map((item) => {
             if (item && !item._id && item.id) {
               item._id = item.id;
+            }
+            if (item && !item._id && item.draftId) {
+              item._id = item.draftId;
             }
             if (item && !item.id && item._id) {
               item.id = item._id;

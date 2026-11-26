@@ -35,7 +35,7 @@ import {
   STARTUP_REGISTRATION_TYPES,
 } from '../../data/roleCategories';
 
-const VERIFICATION_ROLES = ['teacher', 'businessman', 'entrepreneur'];
+const VERIFICATION_ROLES = ['teacher', 'businessman', 'entrepreneur', 'business'];
 
 // Combined Comprehensive Category Taxonomy
 const ALL_BUSINESS_CATS = [
@@ -364,12 +364,14 @@ export const RegisterPage = () => {
         }
       }
     } catch (err) {
-      setError(
+      console.error('Registration init error:', err);
+      const errMsg =
         err.response?.data?.message ||
-          (!err.response
-            ? 'Unable to reach the server. Please ensure the backend API is running.'
-            : 'Registration initialization failed. Please verify your details.')
-      );
+        (!err.response || err.message === 'Network Error'
+          ? 'Unable to connect to the backend server. Please verify the server is running on port 5000.'
+          : err.message) ||
+        'Registration initialization failed. Please verify your details.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -410,7 +412,14 @@ export const RegisterPage = () => {
         setShowOtpModal(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Application submission failed.');
+      console.error('Registration final submit error:', err);
+      const errMsg =
+        err.response?.data?.message ||
+        (err.message === 'Network Error'
+          ? 'Unable to connect to the backend server. Please verify the server is running on port 5000.'
+          : err.message) ||
+        'Application submission failed. Please verify your uploaded documents.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
