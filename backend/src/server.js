@@ -4,9 +4,11 @@ import { connectDB } from './config/db';
 import { seedData } from './utils/seed';
 import { dbStore } from './services/storage';
 const startServer = async () => {
-    // Try connecting to MongoDB (Atlas or local)
+    // Connect directly to MongoDB Atlas
     await connectDB();
-    // If database is empty, automatically seed initial dataset
+    // Load all collections from MongoDB Atlas
+    await dbStore.init();
+    // If MongoDB database is empty, automatically seed initial dataset into MongoDB Atlas
     if (dbStore.collection.users.length === 0) {
         await seedData();
     }

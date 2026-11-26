@@ -8,7 +8,7 @@
     "build": "node -e \"console.log('Backend build ready')\"",
     "start": "node src/server.js",
     "seed": "tsx src/utils/seed.js",
-    "test": "tsx tests/index.test.js"
+    "test": "tsx tests/index.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

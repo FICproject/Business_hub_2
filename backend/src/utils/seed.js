@@ -1422,15 +1422,18 @@ ${365 + stream.length}
     dbStore.collection.verificationDocuments = verificationDocuments;
     dbStore.collection.registrationDrafts = [];
     dbStore.collection.documentAuditLogs = [];
-    dbStore.save();
-    console.log('[Seed]: Database initialized with rich production demo data!');
+    await dbStore.save();
+    console.log('[Seed]: MongoDB Atlas database initialized with rich production demo data!');
 };
 // Execute if run directly
 if (require.main === module) {
-    seedData()
+    const { connectDB } = require('../config/db');
+    connectDB()
+        .then(() => dbStore.init())
+        .then(() => seedData())
         .then(() => process.exit(0))
         .catch((err) => {
-        console.error(err);
-        process.exit(1);
-    });
+            console.error(err);
+            process.exit(1);
+        });
 }
