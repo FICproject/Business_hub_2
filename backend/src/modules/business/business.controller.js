@@ -24,37 +24,87 @@ export const getMyBusiness = async (req, res) => {
 };
 export const registerOrUpdateBusiness = async (req, res) => {
     try {
-        const { businessName, businessType, description, address, phone, email, logoUrl } = req.body;
-        let business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+        const {
+            businessId,
+            roleType,
+            businessName,
+            category,
+            subcategory,
+            businessType,
+            description,
+            productsServices,
+            address,
+            operatingLocations,
+            website,
+            phone,
+            altPhone,
+            email,
+            logoUrl,
+            stage,
+            businessModel,
+            problemStatement,
+            solutionDescription,
+            targetMarket,
+            pitchDeckUrl,
+        } = req.body;
+
+        let business = null;
+        if (businessId) {
+            business = dbStore.collection.businesses.find((b) => b._id === businessId && b.ownerId === req.user._id);
+        } else if (roleType) {
+            business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id && b.roleType === roleType);
+        }
+        if (!business) {
+            business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+        }
+
         if (business) {
-            if (businessName)
-                business.businessName = businessName;
-            if (businessType)
-                business.businessType = businessType;
-            if (description)
-                business.description = description;
-            if (address)
-                business.address = address;
-            if (phone)
-                business.phone = phone;
-            if (email)
-                business.email = email;
-            if (logoUrl)
-                business.logoUrl = logoUrl;
+            if (businessName) business.businessName = businessName;
+            if (category) business.category = category;
+            if (subcategory) business.subcategory = subcategory;
+            if (businessType) business.businessType = businessType;
+            if (description !== undefined) business.description = description;
+            if (productsServices !== undefined) business.productsServices = productsServices;
+            if (address) business.address = address;
+            if (operatingLocations !== undefined) business.operatingLocations = operatingLocations;
+            if (website !== undefined) business.website = website;
+            if (phone) business.phone = phone;
+            if (altPhone !== undefined) business.altPhone = altPhone;
+            if (email) business.email = email;
+            if (logoUrl !== undefined) business.logoUrl = logoUrl;
+            if (stage !== undefined) business.stage = stage;
+            if (businessModel !== undefined) business.businessModel = businessModel;
+            if (problemStatement !== undefined) business.problemStatement = problemStatement;
+            if (solutionDescription !== undefined) business.solutionDescription = solutionDescription;
+            if (targetMarket !== undefined) business.targetMarket = targetMarket;
+            if (pitchDeckUrl !== undefined) business.pitchDeckUrl = pitchDeckUrl;
             business.updatedAt = new Date().toISOString();
         }
         else {
             business = {
                 _id: uuidv4(),
                 ownerId: req.user._id,
-                businessName,
-                businessType: businessType || 'retail',
-                description,
-                address: address || { street: '', city: '', state: '', postalCode: '', country: '' },
+                roleType: roleType || (req.user.roles.includes('entrepreneur') ? 'entrepreneur' : 'businessman'),
+                businessName: businessName || `${req.user.fullName}'s Business`,
+                category: category || 'General',
+                subcategory: subcategory || 'General',
+                businessType: businessType || 'Supplier',
+                description: description || '',
+                productsServices: productsServices || '',
+                address: address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
+                operatingLocations: operatingLocations || '',
+                website: website || '',
                 phone: phone || req.user.mobile,
+                altPhone: altPhone || '',
                 email: email || req.user.email,
                 verificationStatus: 'draft',
                 logoUrl: logoUrl || '',
+                stage: stage || '',
+                businessModel: businessModel || '',
+                problemStatement: problemStatement || '',
+                solutionDescription: solutionDescription || '',
+                targetMarket: targetMarket || '',
+                pitchDeckUrl: pitchDeckUrl || '',
                 documents: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -62,6 +112,7 @@ export const registerOrUpdateBusiness = async (req, res) => {
             dbStore.collection.businesses.push(business);
         }
         dbStore.save();
+        logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'BUSINESS_PROFILE_UPDATED', 'Business', business._id, `Updated business profile: ${business.businessName}`);
         return res.json({ success: true, message: 'Business profile saved successfully.', business });
     }
     catch (error) {

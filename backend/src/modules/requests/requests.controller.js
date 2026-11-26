@@ -420,3 +420,345 @@ export const updateConnectionStatus = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/**
+ * 9. Get Service Requests assigned to the logged-in Business (Businessman / Entrepreneur)
+ */
+export const getMyBusinessRequests = async (req, res) => {
+  try {
+    const { status, search, businessId, roleType } = req.query;
+    const myBusinesses = dbStore.collection.businesses.filter((b) => b.ownerId === req.user._id);
+    if (myBusinesses.length === 0 && !req.user.roles.includes('admin')) {
+      return res.json({
+        success: true,
+        businessId: null,
+        businessName: null,
+        metrics: {
+          totalRequests: 0,
+          newRequests: 0,
+          pendingResponses: 0,
+          acceptedRequests: 0,
+          inProgressRequests: 0,
+          completedRequests: 0,
+          rejectedRequests: 0,
+          totalConnections: 0,
+        },
+        requests: [],
+      });
+    }
+
+    let targetBusiness = null;
+    if (businessId) {
+      targetBusiness = myBusinesses.find((b) => b._id === businessId);
+    } else if (roleType) {
+      targetBusiness = myBusinesses.find((b) => b.roleType === roleType);
+    }
+    if (!targetBusiness) {
+      targetBusiness = myBusinesses[0];
+    }
+
+    const targetBizId = targetBusiness ? targetBusiness._id : null;
+    const targetBizIds = targetBizId ? [targetBizId] : myBusinesses.map((b) => b._id);
+
+    // Get all requests assigned to this business
+    let assignedRequests = dbStore.collection.serviceRequests.filter((r) =>
+      targetBizIds.includes(r.assignedBusinessId)
+    );
+
+    // Calculate metrics before status filter
+    const totalRequests = assignedRequests.length;
+    const newRequests = assignedRequests.filter((r) => r.status === 'assigned' || r.status === 'new').length;
+    const pendingResponses = assignedRequests.filter((r) => r.status === 'assigned').length;
+    const acceptedRequests = assignedRequests.filter((r) => r.status === 'accepted').length;
+    const inProgressRequests = assignedRequests.filter((r) => r.status === 'in_progress').length;
+    const completedRequests = assignedRequests.filter((r) => r.status === 'completed').length;
+    const rejectedRequests = assignedRequests.filter((r) => r.status === 'rejected').length;
+
+    // Total connections count
+    const connections = dbStore.collection.businessConnections.filter((c) =>
+      targetBizIds.includes(c.businessId)
+    );
+    const totalConnections = connections.length;
+
+    // Status filtering
+    if (status && status !== 'all') {
+      if (status === 'new') {
+        assignedRequests = assignedRequests.filter((r) => r.status === 'assigned' || r.status === 'new');
+      } else if (status === 'pending_response') {
+        assignedRequests = assignedRequests.filter((r) => r.status === 'assigned');
+      } else {
+        assignedRequests = assignedRequests.filter((r) => r.status === status);
+      }
+    }
+
+    // Search filter
+    if (search) {
+      const q = search.toLowerCase();
+      assignedRequests = assignedRequests.filter(
+        (r) =>
+          r._id.toLowerCase().includes(q) ||
+          r.title.toLowerCase().includes(q) ||
+          r.category.toLowerCase().includes(q) ||
+          (r.userName && r.userName.toLowerCase().includes(q)) ||
+          r.location.toLowerCase().includes(q)
+      );
+    }
+
+    // Attach connection info to requests
+    const enriched = assignedRequests.map((r) => {
+      const conn = connections.find((c) => c.requestId === r._id);
+      return {
+        ...r,
+        connectionId: conn?._id || null,
+        connectionStatus: conn?.status || null,
+        rejectionReason: conn?.rejectionReason || null,
+      };
+    });
+
+    return res.json({
+      success: true,
+      businessId: targetBusiness?._id || null,
+      businessName: targetBusiness?.businessName || null,
+      roleType: targetBusiness?.roleType || null,
+      metrics: {
+        totalRequests,
+        newRequests,
+        pendingResponses,
+        acceptedRequests,
+        inProgressRequests,
+        completedRequests,
+        rejectedRequests,
+        totalConnections,
+      },
+      requests: enriched,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 10. Get Business Connections for logged-in Business
+ */
+export const getMyBusinessConnections = async (req, res) => {
+  try {
+    const { status, search, businessId, roleType } = req.query;
+    const myBusinesses = dbStore.collection.businesses.filter((b) => b.ownerId === req.user._id);
+    if (myBusinesses.length === 0 && !req.user.roles.includes('admin')) {
+      return res.json({ success: true, count: 0, connections: [] });
+    }
+
+    let targetBusiness = null;
+    if (businessId) {
+      targetBusiness = myBusinesses.find((b) => b._id === businessId);
+    } else if (roleType) {
+      targetBusiness = myBusinesses.find((b) => b.roleType === roleType);
+    }
+    if (!targetBusiness) {
+      targetBusiness = myBusinesses[0];
+    }
+
+    const targetBizId = targetBusiness ? targetBusiness._id : null;
+    const targetBizIds = targetBizId ? [targetBizId] : myBusinesses.map((b) => b._id);
+
+    let connections = dbStore.collection.businessConnections.filter((c) =>
+      targetBizIds.includes(c.businessId)
+    );
+
+    if (status && status !== 'all') {
+      connections = connections.filter((c) => c.status === status);
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      connections = connections.filter(
+        (c) =>
+          c._id.toLowerCase().includes(q) ||
+          c.requestId.toLowerCase().includes(q) ||
+          c.userName.toLowerCase().includes(q) ||
+          c.requestTitle.toLowerCase().includes(q) ||
+          c.category.toLowerCase().includes(q) ||
+          c.location.toLowerCase().includes(q)
+      );
+    }
+
+    return res.json({
+      success: true,
+      businessId: targetBusiness?._id || null,
+      businessName: targetBusiness?.businessName || null,
+      count: connections.length,
+      connections,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 11. Respond to a Service Request (Accept or Reject)
+ */
+export const respondToServiceRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, reason } = req.body; // action: 'accept' | 'reject'
+
+    const myBusinesses = dbStore.collection.businesses.filter((b) => b.ownerId === req.user._id);
+    const myBizIds = myBusinesses.map((b) => b._id);
+
+    const request = dbStore.collection.serviceRequests.find((r) => r._id === id);
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Service request not found.' });
+    }
+
+    if (!req.user.roles.includes('admin') && !myBizIds.includes(request.assignedBusinessId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized. This request is not assigned to your business.',
+      });
+    }
+
+    const connection = dbStore.collection.businessConnections.find((c) => c.requestId === id);
+    const now = new Date().toISOString();
+
+    if (action === 'accept') {
+      request.status = 'accepted';
+      request.updatedAt = now;
+      request.timeline.push({
+        status: 'accepted',
+        timestamp: now,
+        note: `Request accepted by ${request.assignedBusinessName}. Service preparation started.`,
+        actor: req.user.fullName,
+      });
+
+      if (connection) {
+        connection.status = 'accepted';
+        connection.updatedAt = now;
+        connection.statusHistory.push({
+          status: 'accepted',
+          timestamp: now,
+          note: `Business accepted request assignment.`,
+        });
+      }
+
+      // Customer notification
+      dbStore.collection.notifications.push({
+        _id: uuidv4(),
+        userId: request.userId,
+        title: 'Request Accepted!',
+        message: `${request.assignedBusinessName} has accepted your request "${request.title}". They will connect with you shortly.`,
+        type: 'success',
+        link: '/dashboard/user?tab=orders',
+        isRead: false,
+        createdAt: now,
+      });
+
+      dbStore.save();
+      logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'REQUEST_ACCEPTED', 'ServiceRequest', request._id, `Accepted request ${request._id}`);
+      return res.json({ success: true, message: 'Request accepted successfully!', request, connection });
+    }
+
+    if (action === 'reject') {
+      if (!reason || !String(reason).trim()) {
+        return res.status(400).json({ success: false, message: 'A rejection reason is required.' });
+      }
+
+      const prevBizName = request.assignedBusinessName;
+      request.status = 'under_review'; // returned to Under Review so Admin can assign to another provider
+      request.assignedBusinessId = null;
+      request.assignedBusinessName = null;
+      request.updatedAt = now;
+      request.timeline.push({
+        status: 'under_review',
+        timestamp: now,
+        note: `Declined by ${prevBizName}. Reason: ${reason}. Returned to Under Review for Admin reassignment.`,
+        actor: req.user.fullName,
+      });
+
+      if (connection) {
+        connection.status = 'rejected';
+        connection.rejectionReason = String(reason).trim();
+        connection.updatedAt = now;
+        connection.statusHistory.push({
+          status: 'rejected',
+          timestamp: now,
+          note: `Business declined: ${reason}`,
+        });
+      }
+
+      dbStore.save();
+      logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'REQUEST_REJECTED', 'ServiceRequest', request._id, `Declined request ${request._id}. Reason: ${reason}`);
+      return res.json({ success: true, message: 'Request declined.', request, connection });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid action. Use "accept" or "reject".' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * 12. Update Service Request Progress (in_progress or completed)
+ */
+export const updateRequestProgress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, progressNote } = req.body; // status: 'in_progress' | 'completed'
+
+    const myBusinesses = dbStore.collection.businesses.filter((b) => b.ownerId === req.user._id);
+    const myBizIds = myBusinesses.map((b) => b._id);
+
+    const request = dbStore.collection.serviceRequests.find((r) => r._id === id);
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Service request not found.' });
+    }
+
+    if (!req.user.roles.includes('admin') && !myBizIds.includes(request.assignedBusinessId)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized. This request is not assigned to your business.',
+      });
+    }
+
+    const connection = dbStore.collection.businessConnections.find((c) => c.requestId === id);
+    const now = new Date().toISOString();
+
+    request.status = status;
+    request.updatedAt = now;
+    request.timeline.push({
+      status,
+      timestamp: now,
+      note: progressNote || `Progress updated to ${status}.`,
+      actor: req.user.fullName,
+    });
+
+    if (connection) {
+      connection.status = status;
+      connection.updatedAt = now;
+      connection.statusHistory.push({
+        status,
+        timestamp: now,
+        note: progressNote || `Status updated to ${status}`,
+      });
+    }
+
+    // Customer Notification
+    dbStore.collection.notifications.push({
+      _id: uuidv4(),
+      userId: request.userId,
+      title: status === 'completed' ? 'Service Request Completed!' : 'Work In Progress',
+      message: status === 'completed'
+        ? `Your request "${request.title}" has been marked completed by ${request.assignedBusinessName}.`
+        : `Work on "${request.title}" is now in progress. Note: ${progressNote || 'Underway'}`,
+      type: 'info',
+      link: '/dashboard/user?tab=orders',
+      isRead: false,
+      createdAt: now,
+    });
+
+    dbStore.save();
+    logAudit(req.user._id, req.user.fullName, req.user.roles[0], 'REQUEST_PROGRESS_UPDATED', 'ServiceRequest', request._id, `Updated status to ${status}`);
+    return res.json({ success: true, message: `Request updated to ${status}.`, request, connection });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

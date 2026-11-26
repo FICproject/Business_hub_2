@@ -31,11 +31,14 @@ export const marketplaceApi = {
     getProducts: (params) => api.get('/marketplace/products', { params }),
     getProductById: (id) => api.get(`/marketplace/products/${id}`),
     createProduct: (data) => api.post('/marketplace/products', data),
-    getBusinessProducts: () => api.get('/marketplace/business/products'),
+    getBusinessProducts: (params) => api.get('/marketplace/business/products', { params }),
     updateProduct: (id, data) => api.put(`/marketplace/products/${id}`, data),
     deleteProduct: (id) => api.delete(`/marketplace/products/${id}`),
     getServices: () => api.get('/marketplace/services'),
+    getBusinessServices: (params) => api.get('/marketplace/business/services', { params }),
     createService: (data) => api.post('/marketplace/services', data),
+    updateService: (id, data) => api.put(`/marketplace/services/${id}`, data),
+    deleteService: (id) => api.delete(`/marketplace/services/${id}`),
     getCart: () => api.get('/marketplace/cart'),
     addToCart: (data) => api.post('/marketplace/cart/items', data),
     updateCartItem: (data) => api.put('/marketplace/cart/items', data),
@@ -74,9 +77,19 @@ export const jobsApi = {
 };
 // Business Profile & Verification Services
 export const businessApi = {
-    getMyBusiness: () => api.get('/business/me'),
+    getMyBusiness: (params) => api.get('/business/me', { params }),
     saveBusiness: (data) => api.post('/business', data),
     submitVerification: (documents) => api.post('/business/verification', { documents }),
+};
+// Service Requests & Connections Services
+export const requestsApi = {
+    createRequest: (data) => api.post('/requests', data),
+    getMyRequests: (params) => api.get('/requests/my', { params }),
+    getRequestById: (id) => api.get(`/requests/${id}`),
+    getMyBusinessRequests: (params) => api.get('/requests/my-business', { params }),
+    getMyBusinessConnections: (params) => api.get('/requests/my-connections', { params }),
+    respondToRequest: (id, data) => api.post(`/requests/my-business/${id}/respond`, data),
+    updateRequestProgress: (id, data) => api.patch(`/requests/my-business/${id}/progress`, data),
 };
 // Sharing Services
 export const sharingApi = {

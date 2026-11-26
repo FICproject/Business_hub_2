@@ -1,18 +1,51 @@
 import { Router } from 'express';
-import { getPublicProducts, getProductById, createProduct, getBusinessProducts, updateProduct, deleteProduct, getPublicServices, createService, getCart, addToCart, updateCartItem, removeFromCart, createOrder, getMyOrders, getBusinessOrders, updateOrderStatus, getAllOrders, } from './marketplace.controller';
-import { authenticateToken, requireRoles, requireApprovedBusiness, } from '../../middleware/auth.middleware';
+import {
+  getPublicProducts,
+  getProductById,
+  createProduct,
+  getBusinessProducts,
+  updateProduct,
+  deleteProduct,
+  getPublicServices,
+  createService,
+  getBusinessServices,
+  updateService,
+  deleteService,
+  getCart,
+  addToCart,
+  updateCartItem,
+  removeFromCart,
+  createOrder,
+  getMyOrders,
+  getBusinessOrders,
+  updateOrderStatus,
+  getAllOrders,
+} from './marketplace.controller';
+import {
+  authenticateToken,
+  requireRoles,
+  requireApprovedBusiness,
+} from '../../middleware/auth.middleware';
+
 const router = Router();
+
 // Public Product & Service Catalog (Strict Seller Privacy - no owner personal details exposed!)
 router.get('/products', getPublicProducts);
 router.get('/products/:id', getProductById);
 router.get('/services', getPublicServices);
+
 // Verified Business Product Management
 router.post('/products', authenticateToken, requireApprovedBusiness, createProduct);
 router.get('/business/products', authenticateToken, getBusinessProducts);
 router.put('/products/:id', authenticateToken, updateProduct);
 router.delete('/products/:id', authenticateToken, deleteProduct);
+
 // Verified Business Service Management
 router.post('/services', authenticateToken, requireApprovedBusiness, createService);
+router.get('/business/services', authenticateToken, getBusinessServices);
+router.put('/services/:id', authenticateToken, updateService);
+router.delete('/services/:id', authenticateToken, deleteService);
+
 // Shopping Cart (Any Authenticated User / Student)
 router.get('/cart', authenticateToken, getCart);
 router.post('/cart/items', authenticateToken, addToCart);

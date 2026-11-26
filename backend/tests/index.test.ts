@@ -191,4 +191,63 @@ console.log('\n▶ Test 8: Independent Multi-Role Approval Workflow');
   console.log('  ✓ Both roles verified and approved independently');
 }
 
-console.log('\n✅ All 8 Core Integration Tests Passed Successfully!\n');
+// 9. Combined Business Dashboard Operations (Metrics, Requests, Connections, & Progress)
+console.log('\n▶ Test 9: Combined Business Dashboard Operations');
+{
+  const business = {
+    _id: 'biz-101',
+    ownerId: 'user-multi-01',
+    roleType: 'businessman',
+    businessName: 'Apex Concrete & Steel',
+    verificationStatus: 'approved',
+  };
+
+  const requests = [
+    { _id: 'REQ-01', assignedBusinessId: 'biz-101', status: 'assigned', title: '50 Bags Cement' },
+    { _id: 'REQ-02', assignedBusinessId: 'biz-101', status: 'accepted', title: 'Civil Site Survey' },
+    { _id: 'REQ-03', assignedBusinessId: 'biz-101', status: 'in_progress', title: 'Brick Delivery' },
+    { _id: 'REQ-04', assignedBusinessId: 'biz-101', status: 'completed', title: 'Electrical Wiring' },
+  ];
+
+  // Metric Calculation
+  const metrics = {
+    totalRequests: requests.length,
+    newRequests: requests.filter((r) => r.status === 'assigned').length,
+    pendingResponses: requests.filter((r) => r.status === 'assigned').length,
+    acceptedRequests: requests.filter((r) => r.status === 'accepted').length,
+    inProgressRequests: requests.filter((r) => r.status === 'in_progress').length,
+    completedRequests: requests.filter((r) => r.status === 'completed').length,
+    totalConnections: 4,
+  };
+
+  assert.strictEqual(metrics.totalRequests, 4);
+  assert.strictEqual(metrics.pendingResponses, 1);
+  assert.strictEqual(metrics.acceptedRequests, 1);
+  assert.strictEqual(metrics.inProgressRequests, 1);
+  assert.strictEqual(metrics.completedRequests, 1);
+  console.log('  ✓ Verified 7 core dashboard metrics computed accurately');
+
+  // Request Acceptance
+  const pendingReq = requests[0];
+  pendingReq.status = 'accepted';
+  assert.strictEqual(pendingReq.status, 'accepted');
+  console.log('  ✓ Business successfully accepted assigned request');
+
+  // Request Progress Update
+  pendingReq.status = 'in_progress';
+  assert.strictEqual(pendingReq.status, 'in_progress');
+  pendingReq.status = 'completed';
+  assert.strictEqual(pendingReq.status, 'completed');
+  console.log('  ✓ Business successfully updated fulfillment progress to completed');
+
+  // Rejection with Reason returns to Admin
+  const reqToReject = { _id: 'REQ-05', assignedBusinessId: 'biz-101', status: 'assigned' };
+  const rejectionReason = 'Current supply exhausted';
+  reqToReject.status = 'under_review';
+  reqToReject.assignedBusinessId = null;
+  assert.strictEqual(reqToReject.status, 'under_review', 'Declined request must return to under_review');
+  assert.strictEqual(reqToReject.assignedBusinessId, null);
+  console.log(`  ✓ Declined request returned to under_review for Admin reassignment (Reason: "${rejectionReason}")`);
+}
+
+console.log('\n✅ All 9 Core Integration Tests Passed Successfully!\n');

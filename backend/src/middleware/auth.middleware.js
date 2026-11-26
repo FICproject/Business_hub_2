@@ -46,7 +46,16 @@ export const requireApprovedBusiness = (req, res, next) => {
     if (req.user.roles.includes('admin')) {
         return next();
     }
-    const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+    const targetBizId = req.body?.businessId || req.query?.businessId;
+    let business = null;
+    if (targetBizId) {
+        business = dbStore.collection.businesses.find((b) => b._id === targetBizId && b.ownerId === req.user._id);
+    }
+    if (!business) {
+        // Find approved business first
+        business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id && b.verificationStatus === 'approved') ||
+                   dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+    }
     if (!business) {
         return res.status(403).json({
             success: false,

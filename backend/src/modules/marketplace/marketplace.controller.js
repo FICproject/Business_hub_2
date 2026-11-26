@@ -90,11 +90,17 @@ export const getProductById = async (req, res) => {
 };
 export const createProduct = async (req, res) => {
     try {
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+        const { businessId, title, description, category, price, discountPrice, stock, variants, specifications, images } = req.body;
+        let business = null;
+        if (businessId) {
+            business = dbStore.collection.businesses.find((b) => b._id === businessId && b.ownerId === req.user._id);
+        }
+        if (!business) {
+            business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+        }
         if (!business && !req.user.roles.includes('admin')) {
             return res.status(403).json({ success: false, message: 'Business required.' });
         }
-        const { title, description, category, price, discountPrice, stock, variants, specifications, images, } = req.body;
         if (!title || !price || !category) {
             return res.status(400).json({ success: false, message: 'Title, price, and category are required.' });
         }
@@ -129,11 +135,14 @@ export const createProduct = async (req, res) => {
 };
 export const getBusinessProducts = async (req, res) => {
     try {
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
-        if (!business) {
+        const { businessId } = req.query;
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (myBizIds.length === 0 && !req.user.roles.includes('admin')) {
             return res.json({ success: true, data: [] });
         }
-        const products = dbStore.collection.products.filter((p) => p.businessId === business._id);
+        let products = dbStore.collection.products.filter((p) =>
+            businessId ? p.businessId === businessId : myBizIds.includes(p.businessId)
+        );
         return res.json({ success: true, data: products });
     }
     catch (error) {
@@ -146,8 +155,8 @@ export const updateProduct = async (req, res) => {
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
-        if (!req.user.roles.includes('admin') && (!business || product.businessId !== business._id)) {
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (!req.user.roles.includes('admin') && !myBizIds.includes(product.businessId)) {
             return res.status(403).json({ success: false, message: 'Not authorized to modify this product.' });
         }
         Object.assign(product, req.body, { updatedAt: new Date().toISOString() });
@@ -165,8 +174,8 @@ export const deleteProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
         const product = dbStore.collection.products[index];
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
-        if (!req.user.roles.includes('admin') && (!business || product.businessId !== business._id)) {
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (!req.user.roles.includes('admin') && !myBizIds.includes(product.businessId)) {
             return res.status(403).json({ success: false, message: 'Not authorized to delete this product.' });
         }
         dbStore.collection.products.splice(index, 1);
@@ -187,10 +196,32 @@ export const getPublicServices = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+export const getBusinessServices = async (req, res) => {
+    try {
+        const { businessId } = req.query;
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (myBizIds.length === 0 && !req.user.roles.includes('admin')) {
+            return res.json({ success: true, data: [] });
+        }
+        let services = dbStore.collection.services.filter((s) =>
+            businessId ? s.businessId === businessId : myBizIds.includes(s.businessId)
+        );
+        return res.json({ success: true, data: services });
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
 export const createService = async (req, res) => {
     try {
-        const business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
-        const { title, description, category, pricingType, price, serviceArea, availabilitySchedule, images } = req.body;
+        const { businessId, title, description, category, pricingType, price, serviceArea, availabilitySchedule, images } = req.body;
+        let business = null;
+        if (businessId) {
+            business = dbStore.collection.businesses.find((b) => b._id === businessId && b.ownerId === req.user._id);
+        }
+        if (!business) {
+            business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
+        }
         const newService = {
             _id: uuidv4(),
             businessId: business ? business._id : 'admin-system',
@@ -208,6 +239,43 @@ export const createService = async (req, res) => {
         dbStore.collection.services.push(newService);
         dbStore.save();
         return res.status(201).json({ success: true, message: 'Service published!', service: newService });
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+export const updateService = async (req, res) => {
+    try {
+        const service = dbStore.collection.services.find((s) => s._id === req.params.id);
+        if (!service) {
+            return res.status(404).json({ success: false, message: 'Service not found.' });
+        }
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (!req.user.roles.includes('admin') && !myBizIds.includes(service.businessId)) {
+            return res.status(403).json({ success: false, message: 'Not authorized to modify this service.' });
+        }
+        Object.assign(service, req.body, { updatedAt: new Date().toISOString() });
+        dbStore.save();
+        return res.json({ success: true, message: 'Service updated successfully.', service });
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+export const deleteService = async (req, res) => {
+    try {
+        const index = dbStore.collection.services.findIndex((s) => s._id === req.params.id);
+        if (index === -1) {
+            return res.status(404).json({ success: false, message: 'Service not found.' });
+        }
+        const service = dbStore.collection.services[index];
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (!req.user.roles.includes('admin') && !myBizIds.includes(service.businessId)) {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this service.' });
+        }
+        dbStore.collection.services.splice(index, 1);
+        dbStore.save();
+        return res.json({ success: true, message: 'Service deleted.' });
     }
     catch (error) {
         return res.status(500).json({ success: false, message: error.message });

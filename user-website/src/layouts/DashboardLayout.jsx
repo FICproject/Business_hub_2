@@ -86,20 +86,15 @@ export const DashboardLayout = () => {
         { label: 'My Profile', path: '/dashboard/profile', icon: User },
         { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
     ];
-    // 3. BUSINESSMAN / ENTREPRENEUR NAVIGATION
+    // 3. COMMON BUSINESS DASHBOARD NAVIGATION (Businessman & Entrepreneur)
     const businessNav = [
         { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
         { label: 'Business Profile', tab: 'profile', icon: User },
-        { label: 'Verification Status', tab: 'verification', icon: ShieldCheck },
-        { label: 'My Store', tab: 'store', icon: Store },
-        { label: 'Products', tab: 'products', icon: Store },
-        { label: 'Add Product', tab: 'add-product', icon: PlusCircle },
-        { label: 'Services', tab: 'services', icon: Layers },
-        { label: 'Orders & Tracking', tab: 'orders', icon: ShoppingBag },
-        { label: 'Job Postings', tab: 'jobs', icon: Briefcase },
-        { label: 'Share Links', tab: 'sharing', icon: Share2 },
-        { label: 'My Profile', path: '/dashboard/profile', icon: User },
-        { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
+        { label: 'Service Requests', tab: 'requests', icon: FileText },
+        { label: 'Business Connections', tab: 'connections', icon: UsersIcon },
+        { label: 'Products & Services', tab: 'products', icon: Store },
+        { label: 'Notifications', tab: 'notifications', icon: Bell },
+        { label: 'Settings', tab: 'settings', icon: Settings },
     ];
     // 4. NORMAL USER NAVIGATION
     const normalUserNav = [
@@ -128,7 +123,7 @@ export const DashboardLayout = () => {
     }
     else if (activeRole === 'businessman' || activeRole === 'entrepreneur') {
         currentNav = businessNav;
-        roleTitle = 'Business Enterprise';
+        roleTitle = activeRole === 'businessman' ? 'Businessman Portal' : 'Entrepreneur Portal';
         roleBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
         baseRolePath = '/dashboard/business';
     }
