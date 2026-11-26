@@ -5,10 +5,13 @@ import { logAudit } from '../../middleware/audit.middleware';
 import { buildApplicantVerificationSummary } from '../documents/documents.controller';
 export const getUsers = async (req, res) => {
     try {
-        const { role, status, search, page = '1', limit = '10' } = req.query;
+        const { role, status, search, includeAdmin = 'false', page = '1', limit = '10' } = req.query;
         let users = [...dbStore.collection.users];
         if (role) {
             users = users.filter((u) => u.roles.includes(role));
+        } else if (includeAdmin !== 'true') {
+            // General platform user listing excludes internal administrator staff accounts
+            users = users.filter((u) => !u.roles.includes('admin') || u.roles.some((r) => r !== 'admin'));
         }
         if (status) {
             users = users.filter((u) => u.status === status);

@@ -125,6 +125,8 @@ class MongoDataStore {
               if (d && !d.id && d._id) {
                 d.id = d._id;
               }
+
+
               if (key === 'registrationDrafts' && d && !d.draftId && d._id) {
                 d.draftId = d._id;
               }

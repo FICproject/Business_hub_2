@@ -46,6 +46,7 @@ export const getDashboardMetrics = async (req, res) => {
                 orders: isCurrent ? orders.length : Math.round(orders.length * ((idx + 1) / 6)),
             };
         });
+        const platformUsers = users.filter((u) => !u.roles.includes('admin') || u.roles.some((r) => r !== 'admin'));
         const normalUsersCount = users.filter((u) => u.roles.includes('normal') || u.roles.includes('user')).length;
         const roleDistribution = [
             { name: 'Students', value: totalStudents },
@@ -56,7 +57,7 @@ export const getDashboardMetrics = async (req, res) => {
         return res.json({
             success: true,
             metrics: {
-                totalUsers: users.length,
+                totalUsers: platformUsers.length,
                 totalStudents,
                 totalTeachers,
                 totalBusinesses,

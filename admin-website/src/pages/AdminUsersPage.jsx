@@ -56,7 +56,12 @@ export const AdminUsersPage = ({ initialCategory = 'all' }) => {
     ])
       .then(([usersRes, pendingRes]) => {
         if (usersRes.data?.success) {
-          setUsers(usersRes.data.data || []);
+          const raw = usersRes.data.data || [];
+          // Exclude internal admin accounts from platform participant management
+          const platformUsers = raw.filter(
+            (u) => !(u.roles?.length === 1 && u.roles[0] === 'admin')
+          );
+          setUsers(platformUsers);
         }
         if (pendingRes.data?.success) {
           setPendingSummaries(pendingRes.data.data || []);
@@ -397,7 +402,11 @@ export const AdminUsersPage = ({ initialCategory = 'all' }) => {
                               Documents
                             </button>
                           )}
-                          {u.status === 'active' ? (
+                          {u.roles?.includes('admin') ? (
+                            <span className="px-2 py-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                              System Admin
+                            </span>
+                          ) : u.status === 'active' ? (
                             <button
                               onClick={() => handleStatusChange(u._id, 'suspended')}
                               className="px-2.5 py-1 rounded-lg text-[10.5px] font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200"
