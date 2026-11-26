@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
-// Load from root .env or backend/.env or current directory
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
+// Load .env from backend directory
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 export const config = {
