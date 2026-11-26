@@ -18,7 +18,6 @@ import {
   Lock,
   Compass,
 } from 'lucide-react';
-import { Breadcrumb } from '../../components/common/Breadcrumb';
 
 export const AboutPage = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -102,10 +101,7 @@ export const AboutPage = () => {
 
   return (
     <div className="bg-white min-h-screen text-[#0A255C] font-sans pb-20">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb currentPage="About Us" category="Company" />
-
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* =====================================================================
             1. HERO SECTION
         ====================================================================== */}

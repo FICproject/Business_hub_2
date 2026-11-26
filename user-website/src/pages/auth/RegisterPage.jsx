@@ -357,6 +357,9 @@ export const RegisterPage = () => {
         });
         if (res.data?.success) {
           setRegisteredData(res.data);
+          if (res.data.devOtp) {
+            setOtpMessage(`Verification code sent! (Dev OTP: ${res.data.devOtp})`);
+          }
           setShowOtpModal(true);
         }
       }
@@ -396,6 +399,9 @@ export const RegisterPage = () => {
 
       if (res.data?.success) {
         setRegisteredData(res.data);
+        if (res.data.devOtp) {
+          setOtpMessage(`Verification code sent! (Dev OTP: ${res.data.devOtp})`);
+        }
         setShowOtpModal(true);
       }
     } catch (err) {
@@ -416,7 +422,7 @@ export const RegisterPage = () => {
     setLoading(true);
     try {
       const res = await authApi.verifyOtp(
-        { email, mobile, code: trimmed },
+        { otp: trimmed, type: 'email', email, mobile },
         registeredData?.token
       );
       if (res.data?.success) {
@@ -452,9 +458,11 @@ export const RegisterPage = () => {
 
   const handleResendOtp = async () => {
     setError(null);
+    setOtpMessage(null);
     try {
-      await authApi.sendOtp({ email, mobile });
-      setOtpMessage('New 6-digit verification code sent to your registered mobile and email.');
+      const res = await authApi.sendOtp({ target: email, email, mobile, type: 'email' });
+      const devHint = res.data?.devOtp ? ` (Dev OTP: ${res.data.devOtp})` : '';
+      setOtpMessage(`New 6-digit verification code sent to ${email}.${devHint}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP code.');
     }
