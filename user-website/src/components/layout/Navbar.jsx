@@ -102,7 +102,7 @@ export const Navbar = () => {
         }
     };
     const getNavClass = (key) => {
-        const isActive = activeNav === key;
+        const isActive = exploreOpen ? key === 'explore' : activeNav === key;
         return `px-4 xl:px-5 py-2 rounded-full text-xs transition-all duration-150 cursor-pointer ${isActive
             ? 'bg-[#0A255C] text-white shadow-md font-bold'
             : 'text-slate-700 hover:text-[#0A255C] hover:bg-slate-100 font-semibold'}`;
@@ -207,61 +207,55 @@ export const Navbar = () => {
           </Link>
 
           {/* 3. Explore Dropdown */}
-          <div className="relative" ref={exploreRef}>
+          <div ref={exploreRef}>
             <button type="button" onClick={() => {
             setExploreOpen((prev) => !prev);
             setNotificationOpen(false);
             setProfileDropdownOpen(false);
-        }} className={`flex items-center gap-1.5 ${exploreOpen ? 'bg-[#0A255C] text-white shadow-md font-bold' : getNavClass('explore')}`} aria-expanded={exploreOpen} aria-haspopup="true">
+        }} className={`flex items-center gap-1.5 ${getNavClass('explore')}`} aria-expanded={exploreOpen} aria-haspopup="true">
               <span>Explore</span>
               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${exploreOpen || activeNav === 'explore' ? 'text-white' : 'text-slate-500'} ${exploreOpen ? 'rotate-180' : ''}`}/>
             </button>
 
-            {/* Explore Dropdown Card */}
-            {exploreOpen && (<div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[560px] bg-white rounded-3xl shadow-2xl border border-slate-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
-                {/* Dropdown Header */}
-                <div className="px-3 py-2 border-b border-slate-100 mb-2 flex items-center justify-between">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Explore Platform Services
-                  </span>
-                  <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/50">
-                    6 Portals
-                  </span>
-                </div>
+            {/* Explore Horizontal Mega-Menu Card */}
+            {exploreOpen && (<div className="absolute left-0 right-0 top-full mt-2 px-4 sm:px-6 lg:px-8 z-50 pointer-events-none">
+                <div className="max-w-[1220px] mx-auto bg-white rounded-3xl shadow-2xl border border-slate-100 p-4 pointer-events-auto animate-in fade-in zoom-in-95 duration-150">
+                  {/* Dropdown Header */}
+                  <div className="px-2 pb-2.5 border-b border-slate-100 mb-3 flex items-center justify-between">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                      Explore Platform Services
+                    </span>
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/50">
+                      6 Portals
+                    </span>
+                  </div>
 
-                {/* 2-Column Grid with 6 items: Marketplace, Education, Jobs & Careers, Business, Community, Events */}
-                <div className="grid grid-cols-2 gap-2">
-                  {exploreItems.map((item, idx) => {
+                  {/* Single Horizontal Row with 6 items: Marketplace, Education, Jobs & Careers, Business, Community, Events */}
+                  <div className="grid grid-cols-6 gap-2.5">
+                    {exploreItems.map((item, idx) => {
                 const Icon = item.icon;
                 return (<Link key={idx} to={item.link} onClick={() => {
                         setActiveNav('explore');
                         setExploreOpen(false);
-                    }} className="flex items-start gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all duration-150 group cursor-pointer border border-transparent hover:border-slate-100">
-                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 group-hover:shadow-sm transition-all duration-150 mt-0.5`}>
-                          <Icon className="w-5 h-5"/>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs font-bold text-slate-800 group-hover:text-[#0A255C] transition-colors truncate">
-                              {item.title}
-                            </p>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#0A255C] group-hover:translate-x-0.5 transition-all opacity-0 group-hover:opacity-100"/>
+                    }} className="flex flex-col items-center justify-center text-center p-3.5 rounded-2xl hover:bg-slate-50 transition-all duration-150 group cursor-pointer border border-transparent hover:border-slate-200/70">
+                          <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 group-hover:shadow-sm transition-all duration-150`}>
+                            <Icon className="w-5 h-5"/>
                           </div>
-                          <p className="text-[11px] text-slate-500 leading-tight mt-0.5 line-clamp-2">
-                            {item.description}
+                          <p className="text-xs font-bold text-slate-800 group-hover:text-[#0A255C] transition-colors mt-2.5 truncate w-full">
+                            {item.title}
                           </p>
-                        </div>
-                      </Link>);
+                        </Link>);
             })}
-                </div>
+                  </div>
 
-                {/* Dropdown Footer */}
-                <div className="pt-2.5 mt-2.5 border-t border-slate-100 flex items-center justify-between px-2 text-xs">
-                  <span className="text-[11px] text-slate-400 font-medium">All in one ecosystem</span>
-                  <button type="button" onClick={(e) => handleAnchorClick(e, 'explore-services')} className="font-bold text-[#0A255C] hover:text-[#D97706] flex items-center gap-1 transition-colors text-[11px]">
-                    <span>View All Services on Homepage</span>
-                    <ChevronRight className="w-3 h-3"/>
-                  </button>
+                  {/* Dropdown Footer */}
+                  <div className="pt-2.5 mt-3 border-t border-slate-100 flex items-center justify-between px-2 text-xs">
+                    <span className="text-[11px] text-slate-400 font-medium">All in one ecosystem</span>
+                    <button type="button" onClick={(e) => handleAnchorClick(e, 'explore-services')} className="font-bold text-[#0A255C] hover:text-[#D97706] flex items-center gap-1 transition-colors text-[11px]">
+                      <span>View All Services on Homepage</span>
+                      <ChevronRight className="w-3 h-3"/>
+                    </button>
+                  </div>
                 </div>
               </div>)}
           </div>
