@@ -8,8 +8,9 @@ const startServer = async () => {
     await connectDB();
     // Load all collections from MongoDB Atlas
     await dbStore.init();
-    // If MongoDB database is empty, automatically seed initial dataset into MongoDB Atlas
-    if (dbStore.collection.users.length === 0) {
+    // If Administrator account is missing, initialize clean platform essentials
+    const adminExists = dbStore.collection.users.some((u) => u.roles?.includes('admin'));
+    if (!adminExists) {
         await seedData();
     }
     app.listen(config.port, () => {
