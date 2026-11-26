@@ -26,170 +26,55 @@ import {
 import { authApi, categoriesApi } from '../../services/api';
 import { setCredentials } from '../../store';
 import { DocumentVerificationPanel } from '../../components/verification/DocumentVerificationPanel';
+import {
+  DEFAULT_BUSINESSMAN_CATS,
+  DEFAULT_ENTREPRENEUR_CATS,
+  BUSINESS_TYPES,
+  STARTUP_STAGES,
+  BUSINESS_MODELS,
+  STARTUP_REGISTRATION_TYPES,
+} from '../../data/roleCategories';
 
 const VERIFICATION_ROLES = ['teacher', 'businessman', 'entrepreneur'];
 
-// Initial default categories
-const DEFAULT_BUSINESSMAN_CATS = [
-  {
-    id: 'construction_building_materials',
-    name: 'Construction & Building Materials',
-    subcategories: ['Cement', 'Steel', 'Bricks', 'Sand', 'Tiles', 'Paints', 'Roofing Materials', 'Plumbing Materials', 'Electrical Materials', 'Hardware Supplies'],
-  },
-  {
-    id: 'engineering_architecture',
-    name: 'Engineering & Architecture',
-    subcategories: ['Civil Engineers', 'Structural Engineers', 'Architects', 'Surveyors', 'Quantity Surveyors', 'Engineering Consultants'],
-  },
-  {
-    id: 'interior_design_decoration',
-    name: 'Interior Design & Decoration',
-    subcategories: ['Interior Designers', 'Modular Kitchens', 'Furniture', 'False Ceilings', 'Painting', 'Home Decoration'],
-  },
-  {
-    id: 'electrical_plumbing',
-    name: 'Electrical & Plumbing',
-    subcategories: ['Electricians', 'Plumbers', 'Electrical Contractors', 'Lighting Solutions', 'Sanitary Fittings', 'Electrical Equipment'],
-  },
-  {
-    id: 'contractors_construction_services',
-    name: 'Contractors & Construction Services',
-    subcategories: ['Building Contractors', 'Labour Contractors', 'Renovation', 'Waterproofing', 'Demolition', 'Construction Management'],
-  },
-  {
-    id: 'real_estate_property',
-    name: 'Real Estate & Property',
-    subcategories: ['Builders', 'Property Developers', 'Property Dealers', 'Rental Services', 'Property Consultants'],
-  },
-  {
-    id: 'transportation_logistics',
-    name: 'Transportation & Logistics',
-    subcategories: ['Packers and Movers', 'Goods Transport', 'Construction Material Transport', 'Logistics Providers', 'Delivery Services'],
-  },
-  {
-    id: 'it_technology',
-    name: 'IT & Technology',
-    subcategories: ['Software Services', 'Web Development', 'Mobile App Development', 'Hardware Services', 'Computer Repair', 'Networking'],
-  },
-  {
-    id: 'manufacturing_industrial',
-    name: 'Manufacturing & Industrial',
-    subcategories: ['Manufacturers', 'Fabrication', 'Machinery', 'Industrial Equipment', 'Metal Works'],
-  },
-  {
-    id: 'professional_business_services',
-    name: 'Professional & Business Services',
-    subcategories: ['Chartered Accountants', 'Accounting Services', 'Legal Consultants', 'Business Consultants', 'Marketing Agencies'],
-  },
-  {
-    id: 'agriculture_farming',
-    name: 'Agriculture & Farming',
-    subcategories: ['Seeds', 'Fertilizers', 'Agricultural Equipment', 'Irrigation', 'Farming Services'],
-  },
-  {
-    id: 'retail_wholesale',
-    name: 'Retail & Wholesale',
-    subcategories: ['General Stores', 'Wholesalers', 'Distributors', 'Electronics', 'Furniture', 'Hardware Shops'],
-  },
+// Combined Comprehensive Category Taxonomy
+const ALL_BUSINESS_CATS = [
+  ...DEFAULT_BUSINESSMAN_CATS,
+  ...DEFAULT_ENTREPRENEUR_CATS,
 ];
 
-const DEFAULT_ENTREPRENEUR_CATS = [
-  {
-    id: 'tech_it_startups',
-    name: 'Technology & IT Startups',
-    subcategories: ['Software Development', 'SaaS Products', 'Mobile Applications', 'Artificial Intelligence', 'Web Development', 'Cybersecurity', 'Cloud Computing', 'IT Solutions', 'Robotics and IoT'],
-  },
-  {
-    id: 'fintech_financial_services',
-    name: 'FinTech & Financial Services',
-    subcategories: ['Digital Payments', 'Financial Technology', 'Accounting Platforms', 'Financial Management Solutions', 'InsurTech', 'Investment Technology'],
-  },
-  {
-    id: 'ecommerce_online_business',
-    name: 'E-commerce & Online Business',
-    subcategories: ['Online Stores', 'D2C Brands', 'Online Marketplaces', 'Digital Products', 'Dropshipping', 'Subscription-based Businesses'],
-  },
-  {
-    id: 'education_edtech',
-    name: 'Education & EdTech',
-    subcategories: ['Online Learning Platforms', 'Educational Applications', 'Coaching Platforms', 'Skill Development', 'Training Solutions', 'Learning Management Systems'],
-  },
-  {
-    id: 'healthcare_healthtech',
-    name: 'Healthcare & HealthTech',
-    subcategories: ['Healthcare Applications', 'Medical Technology', 'Wellness Platforms', 'Healthcare Services', 'Health Monitoring Solutions', 'Medical Equipment Innovation'],
-  },
-  {
-    id: 'agriculture_agritech',
-    name: 'Agriculture & AgriTech',
-    subcategories: ['Smart Farming', 'Agricultural Marketplaces', 'Farm Management Solutions', 'Food Technology', 'Agricultural Equipment Innovation'],
-  },
-  {
-    id: 'manufacturing_hardware',
-    name: 'Manufacturing & Hardware',
-    subcategories: ['3D Printing & Prototyping', 'Industrial Automation', 'Hardware Devices', 'Electronic Components', 'Robotics & Drones'],
-  },
-  {
-    id: 'cleantech_sustainability',
-    name: 'CleanTech & Sustainability',
-    subcategories: ['Solar & Renewable Energy', 'Waste Management & Recycling', 'Electric Vehicles & Mobility', 'Water Purification & Conservation', 'Green Packaging & Materials'],
-  },
-  {
-    id: 'media_entertainment',
-    name: 'Media, Content & Entertainment',
-    subcategories: ['Digital Media & Publishing', 'Content Creation Platforms', 'Gaming & eSports', 'Streaming & Podcasting Solutions', 'AR & VR Experiences'],
-  },
-  {
-    id: 'professional_business_solutions',
-    name: 'Professional & Business Solutions',
-    subcategories: ['HR & Recruitment Tech', 'LegalTech', 'Supply Chain & Logistics Tech', 'Business Analytics & BI', 'Marketing Tech & Automation'],
-  },
-  {
-    id: 'social_impact_community',
-    name: 'Social Impact & Community Startups',
-    subcategories: ['Non-Profit & NGO Tech', 'Rural Development Solutions', 'Assistive & Accessible Tech', 'Community & Civic Platforms', 'Livelihood & Micro-Enterprise'],
-  },
-  {
-    id: 'other_innovative_startups',
-    name: 'Other Innovative Startups',
-    subcategories: ['DeepTech & Frontier Tech', 'BioTech & Life Sciences', 'SpaceTech & Aerospace', 'Consumer Innovation & Lifestyle', 'Cross-Disciplinary Ventures'],
-  },
-];
-
-const BUSINESS_TYPES = [
-  'Manufacturer',
+const ALL_BUSINESS_TYPES = [
   'Supplier',
+  'Contractor',
+  'Manufacturer',
   'Distributor',
   'Retailer',
   'Wholesaler',
-  'Contractor',
   'Service Provider',
-];
-
-const STARTUP_STAGES = [
-  'Ideation / Concept',
-  'Prototype / MVP',
-  'Early Traction / Pre-Revenue',
-  'Generating Revenue / Scaling',
-  'Growth / Expansion',
-];
-
-const STARTUP_REGISTRATION_TYPES = [
   'Private Limited Company (Pvt Ltd)',
   'Limited Liability Partnership (LLP)',
   'One Person Company (OPC)',
   'Partnership Firm',
   'Sole Proprietorship',
-  'Section 8 / Non-Profit Company',
-  'Trust / Society',
   'Other',
+];
+
+const ALL_BUSINESS_STAGES = [
+  'Established & Revenue Generating',
+  'Scaling & Market Expansion',
+  'Early Traction / Pre-Revenue',
+  'Prototype / MVP in Testing',
+  'Ideation & Early Concept',
 ];
 
 export const RegisterPage = () => {
   const [searchParams] = useSearchParams();
-  const defaultRole = searchParams.get('role') || 'student';
+  const rawRoleParam = (searchParams.get('role') || 'student').toLowerCase();
+  const isBusinessParam = ['business', 'businessman', 'entrepreneur', 'both'].includes(rawRoleParam);
+  const defaultRole = isBusinessParam ? 'business' : rawRoleParam;
+  const defaultTrack = rawRoleParam === 'entrepreneur' ? 'entrepreneur' : rawRoleParam === 'businessman' ? 'businessman' : 'both';
 
-  // Role Selection (student, teacher, businessman, entrepreneur, both, normal)
+  // Role Selection (student, teacher, business, normal)
   const [selectedRole, setSelectedRole] = useState(defaultRole);
 
   // Common Personal Information
@@ -212,12 +97,14 @@ export const RegisterPage = () => {
   // Teacher Specific
   const [hasTeachingQualification, setHasTeachingQualification] = useState(false);
 
-  // Businessman Specific Info
-  const [businessmanCats, setBusinessmanCats] = useState(DEFAULT_BUSINESSMAN_CATS);
+  // Unified Business & Entrepreneur State (Single Common Registration)
+  const [bizTrack, setBizTrack] = useState(defaultTrack); // 'businessman' | 'entrepreneur' | 'both'
+  const [businessCats, setBusinessCats] = useState(ALL_BUSINESS_CATS);
   const [bizName, setBizName] = useState('');
-  const [bizCategory, setBizCategory] = useState(DEFAULT_BUSINESSMAN_CATS[0].name);
-  const [bizSubcategory, setBizSubcategory] = useState(DEFAULT_BUSINESSMAN_CATS[0].subcategories[0]);
-  const [bizType, setBizType] = useState(BUSINESS_TYPES[1]); // 'Supplier'
+  const [bizCategory, setBizCategory] = useState(ALL_BUSINESS_CATS[0].name);
+  const [bizSubcategory, setBizSubcategory] = useState(ALL_BUSINESS_CATS[0].subcategories[0]);
+  const [bizType, setBizType] = useState(ALL_BUSINESS_TYPES[0]);
+  const [bizStage, setBizStage] = useState(ALL_BUSINESS_STAGES[0]);
   const [bizDescription, setBizDescription] = useState('');
   const [bizProductsServices, setBizProductsServices] = useState('');
   const [bizSameAddress, setBizSameAddress] = useState(true);
@@ -231,29 +118,15 @@ export const RegisterPage = () => {
   const [bizAltPhone, setBizAltPhone] = useState('');
   const [bizEmail, setBizEmail] = useState('');
 
-  // Entrepreneur Specific Info
-  const [entrepreneurCats, setEntrepreneurCats] = useState(DEFAULT_ENTREPRENEUR_CATS);
-  const [startupName, setStartupName] = useState('');
-  const [startupCategory, setStartupCategory] = useState(DEFAULT_ENTREPRENEUR_CATS[0].name);
-  const [startupSubcategory, setStartupSubcategory] = useState(DEFAULT_ENTREPRENEUR_CATS[0].subcategories[0]);
-  const [startupStage, setStartupStage] = useState(STARTUP_STAGES[0]);
-  const [isStartupRegistered, setIsStartupRegistered] = useState(false);
+  // Startup Specific Optional Options
+  const [isStartupRegistered, setIsStartupRegistered] = useState(true);
   const [startupRegType, setStartupRegType] = useState(STARTUP_REGISTRATION_TYPES[0]);
   const [startupRegNumber, setStartupRegNumber] = useState('');
   const [startupRegDate, setStartupRegDate] = useState('');
   const [unregisteredDeclarationAccepted, setUnregisteredDeclarationAccepted] = useState(false);
-  const [startupIdeaSummary, setStartupIdeaSummary] = useState('');
-  const [startupLaunchTimeline, setStartupLaunchTimeline] = useState('Within 3-6 months');
-  const [startupDescription, setStartupDescription] = useState('');
   const [startupProblemStatement, setStartupProblemStatement] = useState('');
   const [startupSolution, setStartupSolution] = useState('');
   const [startupTargetMarket, setStartupTargetMarket] = useState('');
-  const [hasBusinessAddress, setHasBusinessAddress] = useState(false);
-  const [officeStreet, setOfficeStreet] = useState('');
-  const [officeCity, setOfficeCity] = useState('');
-  const [officeState, setOfficeState] = useState('');
-  const [officePincode, setOfficePincode] = useState('');
-  const [startupWebsite, setStartupWebsite] = useState('');
   const [startupPitchDeckUrl, setStartupPitchDeckUrl] = useState('');
 
   // Multi-step Registration State
@@ -273,20 +146,21 @@ export const RegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Load Categories from API
+  // Load Categories from API if available
   useEffect(() => {
-    categoriesApi.getCategories({ role: 'businessman' })
+    categoriesApi
+      .getCategories({ role: 'businessman' })
       .then((res) => {
         if (res.data?.success && res.data.categories?.length) {
-          setBusinessmanCats(res.data.categories);
-        }
-      })
-      .catch(() => {});
-
-    categoriesApi.getCategories({ role: 'entrepreneur' })
-      .then((res) => {
-        if (res.data?.success && res.data.categories?.length) {
-          setEntrepreneurCats(res.data.categories);
+          setBusinessCats((prev) => {
+            const combined = [...res.data.categories];
+            prev.forEach((cat) => {
+              if (!combined.some((c) => c.name === cat.name)) {
+                combined.push(cat);
+              }
+            });
+            return combined;
+          });
         }
       })
       .catch(() => {});
@@ -294,18 +168,11 @@ export const RegisterPage = () => {
 
   // Update subcategories when category changes
   useEffect(() => {
-    const found = businessmanCats.find((c) => c.name === bizCategory);
+    const found = businessCats.find((c) => c.name === bizCategory);
     if (found && found.subcategories?.length) {
       setBizSubcategory(found.subcategories[0]);
     }
-  }, [bizCategory, businessmanCats]);
-
-  useEffect(() => {
-    const found = entrepreneurCats.find((c) => c.name === startupCategory);
-    if (found && found.subcategories?.length) {
-      setStartupSubcategory(found.subcategories[0]);
-    }
-  }, [startupCategory, entrepreneurCats]);
+  }, [bizCategory, businessCats]);
 
   // Sync business address with personal if checked
   useEffect(() => {
@@ -317,8 +184,16 @@ export const RegisterPage = () => {
     }
   }, [bizSameAddress, personalStreet, personalCity, personalState, personalPincode]);
 
-  const effectiveRoles =
-    selectedRole === 'both' ? ['businessman', 'entrepreneur'] : [selectedRole];
+  // Determine Effective Roles for the user
+  const effectiveRoles = React.useMemo(() => {
+    if (selectedRole === 'business') {
+      if (bizTrack === 'businessman') return ['businessman'];
+      if (bizTrack === 'entrepreneur') return ['entrepreneur'];
+      return ['businessman', 'entrepreneur'];
+    }
+    return [selectedRole];
+  }, [selectedRole, bizTrack]);
+
   const requiresDocUpload = effectiveRoles.some((r) => VERIFICATION_ROLES.includes(r));
 
   // Age Calculator
@@ -336,11 +211,80 @@ export const RegisterPage = () => {
   const calculatedAge = calculateAge(dob);
   const isEligibleAge = calculatedAge >= 18;
 
+  // Unified Profile Object
+  const buildProfiles = () => {
+    const personalAddress = {
+      street: personalStreet,
+      city: personalCity,
+      state: personalState,
+      postalCode: personalPincode,
+      country: 'India',
+    };
+    const govIdDetails = {
+      idType: govIdType,
+      idNumber: govIdNumber,
+    };
+
+    const unifiedBiz = {
+      businessName: bizName,
+      category: bizCategory,
+      subcategory: bizSubcategory,
+      businessType: bizType,
+      description: bizDescription,
+      productsServices: bizProductsServices,
+      businessAddress: {
+        street: bizSameAddress ? personalStreet : bizStreet,
+        city: bizSameAddress ? personalCity : bizCity,
+        state: bizSameAddress ? personalState : bizState,
+        postalCode: bizSameAddress ? personalPincode : bizPincode,
+        country: 'India',
+      },
+      operatingLocations: bizOperatingLocations,
+      businessWebsite: bizWebsite,
+      businessPhone: bizPhone || mobile,
+      businessAltPhone: bizAltPhone,
+      businessEmail: bizEmail || email,
+      stage: bizStage,
+      isStartupRegistered,
+      registrationType: isStartupRegistered ? startupRegType : '',
+      registrationNumber: isStartupRegistered ? startupRegNumber : '',
+      registrationDate: isStartupRegistered ? startupRegDate : '',
+      unregisteredDeclarationAccepted: !isStartupRegistered ? unregisteredDeclarationAccepted : true,
+      ideaSummary: bizDescription,
+      problemStatement: startupProblemStatement,
+      solutionDescription: startupSolution,
+      targetMarket: startupTargetMarket,
+      hasBusinessAddress: !bizSameAddress,
+      officeAddress: {
+        street: bizSameAddress ? personalStreet : bizStreet,
+        city: bizSameAddress ? personalCity : bizCity,
+        state: bizSameAddress ? personalState : bizState,
+        postalCode: bizSameAddress ? personalPincode : bizPincode,
+        country: 'India',
+      },
+      websiteUrl: bizWebsite,
+      pitchDeckUrl: startupPitchDeckUrl,
+    };
+
+    const isBusiness = selectedRole === 'business';
+    const businessmanProfile = isBusiness ? { ...unifiedBiz } : null;
+    const entrepreneurProfile = isBusiness
+      ? {
+          startupName: bizName,
+          ...unifiedBiz,
+        }
+      : null;
+
+    return { personalAddress, govIdDetails, businessmanProfile, entrepreneurProfile };
+  };
+
   const handleStep1Submit = async (e) => {
     e.preventDefault();
     setError(null);
     if (!isEligibleAge) {
-      setError(`Registration rejected. You must be at least 18 years old to join Business Hub. Current age calculated: ${calculatedAge} years.`);
+      setError(
+        `Registration rejected. You must be at least 18 years old to join Business Hub. Current age calculated: ${calculatedAge} years.`
+      );
       return;
     }
     if (password !== confirmPassword) {
@@ -352,86 +296,22 @@ export const RegisterPage = () => {
       return;
     }
 
-    // Role-specific validations
-    if (effectiveRoles.includes('entrepreneur')) {
+    if (selectedRole === 'business' && (bizTrack === 'entrepreneur' || bizTrack === 'both')) {
       if (!isStartupRegistered && !unregisteredDeclarationAccepted) {
-        setError('For unregistered startups, the founder declaration acknowledging early stage/unregistered status is mandatory.');
+        setError(
+          'For unregistered early-stage startups, the founder declaration acknowledging unregistered status is required.'
+        );
         return;
       }
     }
 
     setLoading(true);
     try {
-      const personalAddress = {
-        street: personalStreet,
-        city: personalCity,
-        state: personalState,
-        postalCode: personalPincode,
-        country: 'India',
-      };
-      const govIdDetails = {
-        idType: govIdType,
-        idNumber: govIdNumber,
-      };
-
-      const businessmanProfile = effectiveRoles.includes('businessman')
-        ? {
-            businessName: bizName,
-            category: bizCategory,
-            subcategory: bizSubcategory,
-            businessType: bizType,
-            description: bizDescription,
-            productsServices: bizProductsServices,
-            businessAddress: {
-              street: bizSameAddress ? personalStreet : bizStreet,
-              city: bizSameAddress ? personalCity : bizCity,
-              state: bizSameAddress ? personalState : bizState,
-              postalCode: bizSameAddress ? personalPincode : bizPincode,
-              country: 'India',
-            },
-            operatingLocations: bizOperatingLocations,
-            businessWebsite: bizWebsite,
-            businessPhone: bizPhone || mobile,
-            businessAltPhone: bizAltPhone,
-            businessEmail: bizEmail || email,
-          }
-        : null;
-
-      const entrepreneurProfile = effectiveRoles.includes('entrepreneur')
-        ? {
-            startupName,
-            category: startupCategory,
-            subcategory: startupSubcategory,
-            stage: startupStage,
-            isStartupRegistered,
-            registrationType: isStartupRegistered ? startupRegType : '',
-            registrationNumber: isStartupRegistered ? startupRegNumber : '',
-            registrationDate: isStartupRegistered ? startupRegDate : '',
-            unregisteredDeclarationAccepted: !isStartupRegistered ? unregisteredDeclarationAccepted : true,
-            ideaSummary: startupIdeaSummary,
-            targetLaunchTimeline: startupLaunchTimeline,
-            description: startupDescription,
-            problemStatement: startupProblemStatement,
-            solutionDescription: startupSolution,
-            targetMarket: startupTargetMarket,
-            hasBusinessAddress,
-            officeAddress: hasBusinessAddress
-              ? {
-                  street: officeStreet,
-                  city: officeCity,
-                  state: officeState,
-                  postalCode: officePincode,
-                  country: 'India',
-                }
-              : null,
-            websiteUrl: startupWebsite,
-            pitchDeckUrl: startupPitchDeckUrl,
-          }
-        : null;
+      const { personalAddress, govIdDetails, businessmanProfile, entrepreneurProfile } = buildProfiles();
 
       const applicationContext = {
         isStartupRegistered: Boolean(isStartupRegistered),
-        hasBusinessAddress: Boolean(hasBusinessAddress),
+        hasBusinessAddress: !bizSameAddress,
         unregisteredDeclarationAccepted: Boolean(unregisteredDeclarationAccepted),
         hasTeachingQualification: Boolean(hasTeachingQualification),
         businessmanProfile,
@@ -441,7 +321,6 @@ export const RegisterPage = () => {
       };
 
       if (requiresDocUpload) {
-        // Initialize registration draft
         const res = await authApi.initRegistration({
           fullName,
           email,
@@ -465,7 +344,6 @@ export const RegisterPage = () => {
           window.scrollTo(0, 0);
         }
       } else {
-        // Direct registration for Student or Normal User
         const res = await authApi.register({
           fullName,
           email,
@@ -498,72 +376,7 @@ export const RegisterPage = () => {
 
     setLoading(true);
     try {
-      const personalAddress = {
-        street: personalStreet,
-        city: personalCity,
-        state: personalState,
-        postalCode: personalPincode,
-        country: 'India',
-      };
-      const govIdDetails = {
-        idType: govIdType,
-        idNumber: govIdNumber,
-      };
-
-      const businessmanProfile = effectiveRoles.includes('businessman')
-        ? {
-            businessName: bizName,
-            category: bizCategory,
-            subcategory: bizSubcategory,
-            businessType: bizType,
-            description: bizDescription,
-            productsServices: bizProductsServices,
-            businessAddress: {
-              street: bizSameAddress ? personalStreet : bizStreet,
-              city: bizSameAddress ? personalCity : bizCity,
-              state: bizSameAddress ? personalState : bizState,
-              postalCode: bizSameAddress ? personalPincode : bizPincode,
-              country: 'India',
-            },
-            operatingLocations: bizOperatingLocations,
-            businessWebsite: bizWebsite,
-            businessPhone: bizPhone || mobile,
-            businessAltPhone: bizAltPhone,
-            businessEmail: bizEmail || email,
-          }
-        : null;
-
-      const entrepreneurProfile = effectiveRoles.includes('entrepreneur')
-        ? {
-            startupName,
-            category: startupCategory,
-            subcategory: startupSubcategory,
-            stage: startupStage,
-            isStartupRegistered,
-            registrationType: isStartupRegistered ? startupRegType : '',
-            registrationNumber: isStartupRegistered ? startupRegNumber : '',
-            registrationDate: isStartupRegistered ? startupRegDate : '',
-            unregisteredDeclarationAccepted: !isStartupRegistered ? unregisteredDeclarationAccepted : true,
-            ideaSummary: startupIdeaSummary,
-            targetLaunchTimeline: startupLaunchTimeline,
-            description: startupDescription,
-            problemStatement: startupProblemStatement,
-            solutionDescription: startupSolution,
-            targetMarket: startupTargetMarket,
-            hasBusinessAddress,
-            officeAddress: hasBusinessAddress
-              ? {
-                  street: officeStreet,
-                  city: officeCity,
-                  state: officeState,
-                  postalCode: officePincode,
-                  country: 'India',
-                }
-              : null,
-            websiteUrl: startupWebsite,
-            pitchDeckUrl: startupPitchDeckUrl,
-          }
-        : null;
+      const { personalAddress, govIdDetails, businessmanProfile, entrepreneurProfile } = buildProfiles();
 
       const res = await authApi.register({
         fullName,
@@ -602,20 +415,36 @@ export const RegisterPage = () => {
     }
     setLoading(true);
     try {
-      await authApi.verifyOtp({ otp: trimmed, type: 'email' }, registeredData?.token);
-      dispatch(setCredentials({ user: { ...registeredData.user, isEmailVerified: true }, token: registeredData.token }));
-
-      if (effectiveRoles.includes('teacher')) {
-        navigate('/dashboard/teacher?tab=verification');
-      } else if (effectiveRoles.includes('businessman') || effectiveRoles.includes('entrepreneur')) {
-        navigate('/dashboard/business?tab=verification');
-      } else if (effectiveRoles.includes('normal') || effectiveRoles.includes('user')) {
-        navigate('/dashboard/user');
-      } else {
-        navigate('/dashboard/student');
+      const res = await authApi.verifyOtp(
+        { email, mobile, code: trimmed },
+        registeredData?.token
+      );
+      if (res.data?.success) {
+        setOtpMessage('Verification successful! Signing into your portal...');
+        dispatch(
+          setCredentials({
+            user: res.data.user || registeredData.user,
+            token: res.data.token || registeredData.token,
+          })
+        );
+        setTimeout(() => {
+          if (effectiveRoles.includes('teacher')) {
+            navigate('/dashboard/teacher');
+          } else if (
+            effectiveRoles.includes('businessman') ||
+            effectiveRoles.includes('entrepreneur') ||
+            effectiveRoles.includes('business')
+          ) {
+            navigate('/dashboard/business');
+          } else if (effectiveRoles.includes('normal') || effectiveRoles.includes('user')) {
+            navigate('/dashboard/user');
+          } else {
+            navigate('/dashboard/student');
+          }
+        }, 1200);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid or expired OTP code.');
+      setError(err.response?.data?.message || 'Invalid or expired OTP code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -623,34 +452,53 @@ export const RegisterPage = () => {
 
   const handleResendOtp = async () => {
     setError(null);
-    setOtpMessage(null);
     try {
-      const res = await authApi.sendOtp({ target: email, type: 'email' });
-      setOtpMessage(res.data?.message || 'A new verification code has been sent.');
+      await authApi.sendOtp({ email, mobile });
+      setOtpMessage('New 6-digit verification code sent to your registered mobile and email.');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP code.');
     }
   };
 
+  // 4 Unified Roles in the Selection Grid
   const categories = [
-    { role: 'student', label: 'Student', icon: GraduationCap, desc: 'Free courses & live classes' },
-    { role: 'teacher', label: 'Teacher', icon: Award, desc: 'Teaching & verified tutor portal' },
-    { role: 'businessman', label: 'Businessman', icon: Building2, desc: 'Established enterprise, materials & contractors' },
-    { role: 'entrepreneur', label: 'Entrepreneur', icon: Rocket, desc: 'Innovative startups (registered or unregistered)' },
-    { role: 'both', label: 'Businessman & Entrepreneur', icon: Layers, desc: 'Apply for both established business and startup venture' },
-    { role: 'normal', label: 'Normal User', icon: User, desc: 'Service requests & consumer marketplace' },
+    {
+      role: 'student',
+      label: 'Student',
+      icon: GraduationCap,
+      desc: 'Free courses, learning materials & live classes',
+    },
+    {
+      role: 'teacher',
+      label: 'Teacher',
+      icon: Award,
+      desc: 'Teaching & verified tutor workspace',
+    },
+    {
+      role: 'business',
+      label: 'Business / Entrepreneur',
+      icon: Building2,
+      desc: 'One common registration for established enterprises, suppliers, contractors & innovative startups',
+    },
+    {
+      role: 'normal',
+      label: 'Normal User',
+      icon: User,
+      desc: 'Service requests, consumer shopping & community',
+    },
   ];
 
-  const activeCategoryObj = categories.find((c) => c.role === selectedRole) || categories[0];
+  const activeCategoryObj = categories.find((c) => c.role === selectedRole) || categories[2];
   const ActiveRoleIcon = activeCategoryObj.icon;
+
+  const currentCategoryObj = businessCats.find((c) => c.name === bizCategory);
+  const availableSubcategories = currentCategoryObj?.subcategories || [];
 
   return (
     <div className="min-h-[90vh] flex items-center justify-center px-4 py-10 bg-slate-50">
       <div
         className={`w-full ${
-          step === 2 || ['businessman', 'entrepreneur', 'both'].includes(selectedRole)
-            ? 'max-w-4xl'
-            : 'max-w-xl'
+          step === 2 || selectedRole === 'business' ? 'max-w-4xl' : 'max-w-xl'
         } bg-white rounded-3xl border border-slate-200/80 shadow-xl p-6 sm:p-10 space-y-6 transition-all`}
       >
         {/* Header */}
@@ -664,7 +512,7 @@ export const RegisterPage = () => {
           <p className="text-xs text-slate-500 max-w-lg mx-auto">
             {step === 2
               ? `Upload role-specific verification documents for your ${effectiveRoles.join(' & ')} application`
-              : 'Join India\'s premier platform connecting clients, established businesses, innovative startups, and professionals.'}
+              : "Join India's premier platform connecting clients, established businesses, innovative startups, and professionals."}
           </p>
         </div>
 
@@ -703,12 +551,12 @@ export const RegisterPage = () => {
         {/* STEP 1: Registration Form */}
         {step === 1 && (
           <form onSubmit={handleStep1Submit} className="space-y-6">
-            {/* User Role Selection Grid */}
+            {/* User Role Selection Grid: 4 Clean, Unified Options */}
             <div>
               <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">
                 Select Your Role on Business Hub
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {categories.map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = selectedRole === cat.role;
@@ -717,51 +565,46 @@ export const RegisterPage = () => {
                       key={cat.role}
                       type="button"
                       onClick={() => setSelectedRole(cat.role)}
-                      className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                      className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                         isSelected
                           ? 'border-teal-500 bg-teal-50/70 shadow-sm ring-1 ring-teal-500'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                          isSelected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
+                      <div className="space-y-2">
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                            isSelected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">{cat.label}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{cat.desc}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-900">{cat.label}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{cat.desc}</p>
-                      </div>
+                      {isSelected && (
+                        <span className="text-[10px] font-extrabold text-teal-700 mt-2 block">
+                          ✓ Selected
+                        </span>
+                      )}
                     </button>
                   );
                 })}
               </div>
-
-              {selectedRole === 'both' && (
-                <div className="mt-3 p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-800 text-xs flex items-start gap-2">
-                  <Layers className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-bold">Dual Role Registration Selected</p>
-                    <p className="text-[11px] text-violet-700">
-                      You can register both an established business and an early-stage startup venture. Each role will be independently reviewed and approved by the Admin.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* SECTION A: Personal Information */}
             <div className="space-y-4 pt-2 border-t border-slate-100">
               <h3 className="text-sm font-extrabold text-navy-900 flex items-center gap-2">
                 <User className="w-4 h-4 text-teal-600" />
-                Personal Information
+                Personal Information (Applicant / Owner)
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
@@ -772,7 +615,7 @@ export const RegisterPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
                   <input
                     type="email"
                     required
@@ -786,7 +629,7 @@ export const RegisterPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Number</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Number *</label>
                   <input
                     type="tel"
                     required
@@ -798,7 +641,7 @@ export const RegisterPage = () => {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700 uppercase">Date of Birth</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase">Date of Birth *</label>
                     <span className={`text-[11px] font-bold ${isEligibleAge ? 'text-teal-600' : 'text-red-500'}`}>
                       Age: {calculatedAge} yrs {isEligibleAge ? '✓ (18+)' : '✗ (Must be 18+)'}
                     </span>
@@ -815,12 +658,14 @@ export const RegisterPage = () => {
                 </div>
               </div>
 
-              {/* Personal Address (for Businessmen, Entrepreneurs, Teachers) */}
+              {/* Personal Address & Gov ID for Verifiable Roles */}
               {requiresDocUpload && (
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                    <label className="text-xs font-bold text-slate-700 uppercase">Personal Residential Address</label>
+                    <label className="text-xs font-bold text-slate-700 uppercase">
+                      Personal Residential Address *
+                    </label>
                   </div>
                   <input
                     type="text"
@@ -860,7 +705,9 @@ export const RegisterPage = () => {
                   {/* Gov Identity Proof */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Government ID Proof Type</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Government ID Proof Type *
+                      </label>
                       <select
                         value={govIdType}
                         onChange={(e) => setGovIdType(e.target.value)}
@@ -874,7 +721,9 @@ export const RegisterPage = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Government ID Number</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Government ID Number *
+                      </label>
                       <input
                         type="text"
                         required={requiresDocUpload}
@@ -889,39 +738,111 @@ export const RegisterPage = () => {
               )}
             </div>
 
-            {/* SECTION B: Businessman Business Information */}
-            {(selectedRole === 'businessman' || selectedRole === 'both') && (
-              <div className="space-y-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-extrabold text-navy-900 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-indigo-600" />
-                    Businessman Business Profile
-                  </h3>
-                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    Established Enterprise
+            {/* SECTION B: UNIFIED BUSINESS & STARTUP PROFILE (Same common form for both) */}
+            {selectedRole === 'business' && (
+              <div className="space-y-5 pt-4 border-t border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-extrabold text-navy-900 flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-blue-600" />
+                      Business &amp; Startup Profile
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Unified commercial registration for established businesses, suppliers, contractors, and startups
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 self-start sm:self-auto">
+                    Commercial Portal
                   </span>
                 </div>
 
+                {/* Focus Classification Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                    Enterprise Classification &amp; Track
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setBizTrack('businessman')}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        bizTrack === 'businessman'
+                          ? 'border-blue-500 bg-blue-50/70 text-blue-900 font-bold shadow-xs ring-1 ring-blue-500'
+                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
+                        <span className="text-xs font-bold">Established Business</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Contractor, supplier, materials, distributor, or manufacturer
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBizTrack('entrepreneur')}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        bizTrack === 'entrepreneur'
+                          ? 'border-blue-500 bg-blue-50/70 text-blue-900 font-bold shadow-xs ring-1 ring-blue-500'
+                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Rocket className="w-4 h-4 text-purple-600 shrink-0" />
+                        <span className="text-xs font-bold">Startup Venture</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Tech, SaaS, FinTech, D2C, or innovative early-stage concept
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBizTrack('both')}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        bizTrack === 'both'
+                          ? 'border-blue-500 bg-blue-50/70 text-blue-900 font-bold shadow-xs ring-1 ring-blue-500'
+                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-teal-600 shrink-0" />
+                        <span className="text-xs font-bold">Both (Business &amp; Startup)</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Combined established business and innovative venture
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Business Name & Type */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Business Name</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Business / Venture Name *
+                    </label>
                     <input
                       type="text"
                       required
                       value={bizName}
                       onChange={(e) => setBizName(e.target.value)}
-                      placeholder="e.g. Apex Steel &amp; Construction Supplies"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="e.g. Apex Steel & Construction or BuildFlow AI"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Business Type</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Legal Entity / Business Type *
+                    </label>
                     <select
                       value={bizType}
                       onChange={(e) => setBizType(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {BUSINESS_TYPES.map((t) => (
+                      {ALL_BUSINESS_TYPES.map((t) => (
                         <option key={t} value={t}>
                           {t}
                         </option>
@@ -930,16 +851,18 @@ export const RegisterPage = () => {
                   </div>
                 </div>
 
-                {/* 12 Categories and Dynamic Subcategories */}
+                {/* Category & Subcategory */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Business Category (12 Options)</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Primary Industry Category *
+                    </label>
                     <select
                       value={bizCategory}
                       onChange={(e) => setBizCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {businessmanCats.map((cat) => (
+                      {businessCats.map((cat) => (
                         <option key={cat.id || cat.name} value={cat.name}>
                           {cat.name}
                         </option>
@@ -947,15 +870,15 @@ export const RegisterPage = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Subcategory</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Specialized Subcategory *
+                    </label>
                     <select
                       value={bizSubcategory}
                       onChange={(e) => setBizSubcategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {(
-                        businessmanCats.find((c) => c.name === bizCategory)?.subcategories || []
-                      ).map((sub) => (
+                      {availableSubcategories.map((sub) => (
                         <option key={sub} value={sub}>
                           {sub}
                         </option>
@@ -964,56 +887,84 @@ export const RegisterPage = () => {
                   </div>
                 </div>
 
+                {/* Operating Stage */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Business Description</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Current Operating Stage *
+                  </label>
+                  <select
+                    value={bizStage}
+                    onChange={(e) => setBizStage(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {ALL_BUSINESS_STAGES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Description & Products */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Business / Startup Description *
+                  </label>
                   <textarea
                     rows={2}
                     required
                     value={bizDescription}
                     onChange={(e) => setBizDescription(e.target.value)}
-                    placeholder="Brief description of your business operations, certifications, and history..."
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Brief description of your business operations, services, products, or technology..."
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Products / Services Offered</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Products &amp; Services Handled (Comma-separated) *
+                  </label>
                   <input
                     type="text"
                     required
                     value={bizProductsServices}
                     onChange={(e) => setBizProductsServices(e.target.value)}
-                    placeholder="e.g. TMT Steel Bars, Grade 53 Cement, Structural Fabrication, Ready Mix Concrete"
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g. Steel Bars, Cement, Civil Consulting, Heavy Machinery, Web App Development"
+                    className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* Business Address */}
-                <div className="space-y-2">
+                {/* Business Address & Operating Locations */}
+                <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-700 uppercase">Business Physical Address</label>
+                    <label className="text-xs font-bold text-slate-700 uppercase">
+                      Business Registered / Operational Address
+                    </label>
                     <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={bizSameAddress}
                         onChange={(e) => setBizSameAddress(e.target.checked)}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
+                        className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
                       />
-                      <span>Same as Residential Address</span>
+                      <span>Same as personal residential address</span>
                     </label>
                   </div>
+
                   {!bizSameAddress && (
                     <div className="space-y-2">
                       <input
                         type="text"
+                        required={!bizSameAddress}
                         value={bizStreet}
                         onChange={(e) => setBizStreet(e.target.value)}
-                        placeholder="Business Commercial Street / Unit"
+                        placeholder="Business / Office Street Address"
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
                       />
                       <div className="grid grid-cols-3 gap-2">
                         <input
                           type="text"
+                          required={!bizSameAddress}
                           value={bizCity}
                           onChange={(e) => setBizCity(e.target.value)}
                           placeholder="City"
@@ -1021,6 +972,7 @@ export const RegisterPage = () => {
                         />
                         <input
                           type="text"
+                          required={!bizSameAddress}
                           value={bizState}
                           onChange={(e) => setBizState(e.target.value)}
                           placeholder="State"
@@ -1028,6 +980,7 @@ export const RegisterPage = () => {
                         />
                         <input
                           type="text"
+                          required={!bizSameAddress}
                           value={bizPincode}
                           onChange={(e) => setBizPincode(e.target.value)}
                           placeholder="Pincode"
@@ -1036,36 +989,42 @@ export const RegisterPage = () => {
                       </div>
                     </div>
                   )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Operating Locations / Service Areas *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={bizOperatingLocations}
+                        onChange={(e) => setBizOperatingLocations(e.target.value)}
+                        placeholder="e.g. Mumbai, Navi Mumbai, Pune, Entire Maharashtra, Pan-India"
+                        className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Business Website / Portfolio (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={bizWebsite}
+                        onChange={(e) => setBizWebsite(e.target.value)}
+                        placeholder="https://apexenterprise.in"
+                        className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Operating Locations & Contact */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Operating Locations / Service Pincodes</label>
-                    <input
-                      type="text"
-                      required
-                      value={bizOperatingLocations}
-                      onChange={(e) => setBizOperatingLocations(e.target.value)}
-                      placeholder="e.g. 560001, 560034, Bangalore Urban, Entire Karnataka"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Business Website (Optional)</label>
-                    <input
-                      type="url"
-                      value={bizWebsite}
-                      onChange={(e) => setBizWebsite(e.target.value)}
-                      placeholder="https://apexsteel.com"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                </div>
-
+                {/* Contact details */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Business Phone</label>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                      Business Phone
+                    </label>
                     <input
                       type="tel"
                       value={bizPhone}
@@ -1075,7 +1034,9 @@ export const RegisterPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Alternate Phone (Opt)</label>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                      Alternate Phone (Opt)
+                    </label>
                     <input
                       type="tel"
                       value={bizAltPhone}
@@ -1085,7 +1046,9 @@ export const RegisterPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Business Email (Opt)</label>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                      Business Email (Opt)
+                    </label>
                     <input
                       type="email"
                       value={bizEmail}
@@ -1095,162 +1058,43 @@ export const RegisterPage = () => {
                     />
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* SECTION C: Entrepreneur Startup Information */}
-            {(selectedRole === 'entrepreneur' || selectedRole === 'both') && (
-              <div className="space-y-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-extrabold text-navy-900 flex items-center gap-2">
-                    <Rocket className="w-4 h-4 text-purple-600" />
-                    Entrepreneur Startup Venture
-                  </h3>
-                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                    Innovative Startup
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Startup / Business Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={startupName}
-                      onChange={(e) => setStartupName(e.target.value)}
-                      placeholder="e.g. BuildFlow AI or KisanTech Logistics"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Current Venture Stage</label>
-                    <select
-                      value={startupStage}
-                      onChange={(e) => setStartupStage(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      {STARTUP_STAGES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Entrepreneur Categories & Subcategories */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Startup Domain / Category</label>
-                    <select
-                      value={startupCategory}
-                      onChange={(e) => setStartupCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      {entrepreneurCats.map((cat) => (
-                        <option key={cat.id || cat.name} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Specialized Subcategory</label>
-                    <select
-                      value={startupSubcategory}
-                      onChange={(e) => setStartupSubcategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      {(
-                        entrepreneurCats.find((c) => c.name === startupCategory)?.subcategories || []
-                      ).map((sub) => (
-                        <option key={sub} value={sub}>
-                          {sub}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Registered vs Unregistered Startup Switch */}
-                <div className="p-4 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-purple-950 uppercase">
-                      Is your startup officially registered?
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsStartupRegistered(false)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-                          !isStartupRegistered
-                            ? 'bg-purple-600 text-white shadow-xs'
-                            : 'bg-white text-slate-600 border border-slate-200'
-                        }`}
-                      >
-                        Unregistered / Early Stage
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsStartupRegistered(true)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-                          isStartupRegistered
-                            ? 'bg-purple-600 text-white shadow-xs'
-                            : 'bg-white text-slate-600 border border-slate-200'
-                        }`}
-                      >
-                        Registered Entity
-                      </button>
-                    </div>
-                  </div>
-
-                  {isStartupRegistered ? (
-                    <div className="space-y-3 pt-2">
-                      <p className="text-[11px] text-purple-800 font-medium">
-                        Enter legal entity details (Company incorporation document will be requested in document upload step):
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">Registration Type</label>
-                          <select
-                            value={startupRegType}
-                            onChange={(e) => setStartupRegType(e.target.value)}
-                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-medium"
-                          >
-                            {STARTUP_REGISTRATION_TYPES.map((t) => (
-                              <option key={t} value={t}>
-                                {t}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">CIN / LLPIN / Reg No.</label>
-                          <input
-                            type="text"
-                            required={isStartupRegistered}
-                            value={startupRegNumber}
-                            onChange={(e) => setStartupRegNumber(e.target.value)}
-                            placeholder="U72900KA2024PTC123456"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">Registration Date</label>
-                          <input
-                            type="date"
-                            value={startupRegDate}
-                            onChange={(e) => setStartupRegDate(e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs"
-                          />
-                        </div>
+                {/* Startup & Innovation Track Options (If startup or both selected) */}
+                {(bizTrack === 'entrepreneur' || bizTrack === 'both') && (
+                  <div className="p-4 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-purple-950 uppercase">
+                        Startup Legal Registration Status
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsStartupRegistered(false)}
+                          className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                            !isStartupRegistered
+                              ? 'bg-purple-600 text-white shadow-xs'
+                              : 'bg-white text-slate-600 border border-slate-200'
+                          }`}
+                        >
+                          Unregistered / Early Stage
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsStartupRegistered(true)}
+                          className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                            isStartupRegistered
+                              ? 'bg-purple-600 text-white shadow-xs'
+                              : 'bg-white text-slate-600 border border-slate-200'
+                          }`}
+                        >
+                          Registered Entity
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-3 pt-2">
-                      <div className="p-3 rounded-xl bg-white border border-purple-200/80 space-y-2">
-                        <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+
+                    {!isStartupRegistered && (
+                      <div className="p-3 bg-white rounded-xl border border-purple-200 text-xs text-purple-900 space-y-2">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={unregisteredDeclarationAccepted}
@@ -1258,147 +1102,46 @@ export const RegisterPage = () => {
                             className="mt-0.5 rounded text-purple-600 focus:ring-purple-500 w-4 h-4 shrink-0"
                           />
                           <span className="font-semibold leading-relaxed">
-                            <strong>Mandatory Founder Declaration:</strong> I declare that my startup is in early stage / ideation and is not yet formally incorporated. I confirm all submitted ideas and information are truthful. (Company incorporation documents will NOT be required).
+                            <strong>Mandatory Founder Declaration:</strong> I declare that my startup is in early
+                            stage / ideation and is not yet formally incorporated. I confirm all submitted ideas and
+                            information are truthful. (Company incorporation documents will NOT be required).
                           </span>
                         </label>
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">Core Concept Summary</label>
-                          <input
-                            type="text"
-                            value={startupIdeaSummary}
-                            onChange={(e) => setStartupIdeaSummary(e.target.value)}
-                            placeholder="e.g. AI-driven logistics aggregator for rural farmers"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">Target Launch Timeline</label>
-                          <input
-                            type="text"
-                            value={startupLaunchTimeline}
-                            onChange={(e) => setStartupLaunchTimeline(e.target.value)}
-                            placeholder="e.g. Q2 2027 or MVP ready in 4 months"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs"
-                          />
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          Pitch Deck / Presentation Link (Optional)
+                        </label>
+                        <input
+                          type="url"
+                          value={startupPitchDeckUrl}
+                          onChange={(e) => setStartupPitchDeckUrl(e.target.value)}
+                          placeholder="https://drive.google.com/... or DocSend link"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+                        />
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Problem, Solution, Market */}
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Problem Statement</label>
-                    <textarea
-                      rows={2}
-                      required
-                      value={startupProblemStatement}
-                      onChange={(e) => setStartupProblemStatement(e.target.value)}
-                      placeholder="What critical market inefficiency or customer pain point does your venture solve?"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Solution / Product Description</label>
-                    <textarea
-                      rows={2}
-                      required
-                      value={startupSolution}
-                      onChange={(e) => setStartupSolution(e.target.value)}
-                      placeholder="Describe your innovative technology, product, or service offering..."
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Target Market &amp; Audience</label>
-                    <input
-                      type="text"
-                      required
-                      value={startupTargetMarket}
-                      onChange={(e) => setStartupTargetMarket(e.target.value)}
-                      placeholder="e.g. Tier-2 MSMEs, Civil Contractors, B2B procurement heads"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Separate Office / Co-working Space Checkbox */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hasBusinessAddress}
-                      onChange={(e) => setHasBusinessAddress(e.target.checked)}
-                      className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4"
-                    />
-                    <span>Operating from a separate office or co-working space? (Optional)</span>
-                  </label>
-                  {hasBusinessAddress && (
-                    <div className="space-y-2 pt-1">
-                      <input
-                        type="text"
-                        value={officeStreet}
-                        onChange={(e) => setOfficeStreet(e.target.value)}
-                        placeholder="Incubator / Co-working / Office Space Address"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
-                      />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          Target Customer Market (Optional)
+                        </label>
                         <input
                           type="text"
-                          value={officeCity}
-                          onChange={(e) => setOfficeCity(e.target.value)}
-                          placeholder="City"
-                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
-                        />
-                        <input
-                          type="text"
-                          value={officeState}
-                          onChange={(e) => setOfficeState(e.target.value)}
-                          placeholder="State"
-                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
-                        />
-                        <input
-                          type="text"
-                          value={officePincode}
-                          onChange={(e) => setOfficePincode(e.target.value)}
-                          placeholder="Pincode"
-                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                          value={startupTargetMarket}
+                          onChange={(e) => setStartupTargetMarket(e.target.value)}
+                          placeholder="e.g. B2B Contractors, Tier-2 MSMEs, Builders"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
                         />
                       </div>
                     </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Startup Website / App URL (Opt)</label>
-                    <input
-                      type="url"
-                      value={startupWebsite}
-                      onChange={(e) => setStartupWebsite(e.target.value)}
-                      placeholder="https://myventure.io"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs"
-                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Pitch Deck / Presentation Link (Opt)</label>
-                    <input
-                      type="url"
-                      value={startupPitchDeckUrl}
-                      onChange={(e) => setStartupPitchDeckUrl(e.target.value)}
-                      placeholder="https://drive.google.com/... or DocSend link"
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
-            {/* SECTION D: Teacher Specific Qualification */}
+            {/* SECTION C: Teacher Specific Qualification */}
             {selectedRole === 'teacher' && (
               <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2">
                 <label className="flex items-center gap-2.5 text-xs text-slate-800 font-semibold cursor-pointer">
@@ -1416,10 +1159,10 @@ export const RegisterPage = () => {
               </div>
             )}
 
-            {/* SECTION E: Passwords */}
+            {/* SECTION D: Passwords */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
                 <input
                   type="password"
                   required
@@ -1430,7 +1173,7 @@ export const RegisterPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm Password</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm Password *</label>
                 <input
                   type="password"
                   required
@@ -1449,130 +1192,182 @@ export const RegisterPage = () => {
                 id="terms"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 rounded text-teal-600 focus:ring-teal-500 w-4 h-4 shrink-0"
+                className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 mt-0.5 w-4 h-4"
               />
-              <label htmlFor="terms" className="text-xs text-slate-600 leading-snug">
-                I certify that I am at least 18 years old and I accept the{' '}
-                <span className="text-teal-600 font-bold hover:underline cursor-pointer">Terms of Service</span> and{' '}
-                <span className="text-teal-600 font-bold hover:underline cursor-pointer">Privacy Policy</span>.
+              <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer select-none">
+                I agree to the{' '}
+                <Link to="/terms" className="font-bold text-teal-600 hover:underline">
+                  Terms of Service
+                </Link>{' '}
+                and acknowledge the{' '}
+                <Link to="/privacy-policy" className="font-bold text-teal-600 hover:underline">
+                  Privacy Policy
+                </Link>
+                . I certify that I am at least 18 years of age.
               </label>
             </div>
 
+            {/* Submit Action */}
             <button
               type="submit"
-              disabled={loading || !isEligibleAge}
-              className="w-full py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-extrabold text-sm shadow-md transition-all flex items-center justify-center gap-2"
             >
-              {loading
-                ? 'Validating Profile...'
-                : requiresDocUpload
-                ? 'Continue to Mandatory Document Uploads'
-                : 'Continue to OTP Verification'}
-              {!loading && <ArrowRight className="w-4 h-4" />}
+              {loading ? (
+                'Processing Registration...'
+              ) : requiresDocUpload ? (
+                <>
+                  <span>Continue to Step 2: Upload Mandatory Documents</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
         )}
 
-        {/* STEP 2: Role-Specific Document Verification Upload */}
+        {/* STEP 2: Mandatory Document Uploads (For Business / Teacher) */}
         {step === 2 && checklistData && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in">
+            <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 text-xs flex items-center justify-between">
+              <div>
+                <p className="font-bold text-sm">
+                  Document Requirements Checklist ({effectiveRoles.join(' & ')})
+                </p>
+                <p className="text-sky-700 mt-0.5">
+                  Identity proof, business registration, address verification, and owner photo are required before
+                  submitting for approval.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="px-3 py-1.5 rounded-xl border border-sky-300 text-sky-800 hover:bg-white text-xs font-bold"
+              >
+                ← Back to Details
+              </button>
+            </div>
+
+            {/* Document Verification Slots */}
             <DocumentVerificationPanel
               checklistData={checklistData}
               customToken={draftToken}
               onChecklistUpdated={(updated) => setChecklistData(updated)}
               roles={effectiveRoles}
-              isPostSubmission={false}
             />
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200">
+            {/* Final Submission Button */}
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center justify-center gap-2"
+                className="px-5 py-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Profile Details</span>
+                ← Back to Details
               </button>
 
               <button
                 type="button"
+                disabled={loading || !checklistData.summary?.canSubmitApplication}
                 onClick={handleFinalSubmitWithDocs}
-                disabled={loading || !checklistData?.summary?.canSubmitApplication}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                className={`px-8 py-3.5 rounded-2xl text-xs font-black shadow-md transition-all flex items-center gap-2 ${
+                  checklistData.summary?.canSubmitApplication
+                    ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>
-                  {loading
-                    ? 'Submitting Application...'
-                    : 'Submit Application for Admin Approval'}
-                </span>
+                {loading ? (
+                  'Submitting Application...'
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Submit Application for Admin Approval</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
         )}
 
+        {/* Footer Link */}
         <p className="text-center text-xs text-slate-500">
-          Already have an account?{' '}
-          <Link to="/login" className="font-bold text-teal-600 hover:text-teal-700">
-            Sign In
+          Already registered?{' '}
+          <Link to="/login" className="font-bold text-teal-600 hover:text-teal-700 hover:underline">
+            Sign in to your account
           </Link>
         </p>
+      </div>
 
-        {/* OTP Verification Modal */}
-        {showOtpModal && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
-              <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-                <KeyRound className="w-6 h-6" />
-              </div>
-              <div className="text-center space-y-1">
-                <h3 className="text-xl font-extrabold text-navy-900">Verify OTP Code</h3>
-                <p className="text-xs text-slate-500">
-                  Enter the 6-digit verification code sent to <span className="font-bold text-slate-700">{email}</span>
-                </p>
-                {requiresDocUpload && (
-                  <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded-lg font-medium">
-                    Your documents have been submitted! Your account status is <strong>Pending Admin Approval</strong>.
-                  </p>
-                )}
-                {otpMessage && (
-                  <p className="text-[11px] text-teal-700 bg-teal-50 border border-teal-200 p-2 rounded-lg font-medium">
-                    {otpMessage}
-                  </p>
-                )}
-              </div>
+      {/* OTP Verification Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
+              <KeyRound className="w-6 h-6" />
+            </div>
 
-              <div>
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="••••••"
-                  className="w-full text-center tracking-[0.5em] text-2xl font-extrabold py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
+            <div className="text-center space-y-1">
+              <h3 className="text-xl font-black text-navy-950">Verify Your Mobile &amp; Email</h3>
+              <p className="text-xs text-slate-500">
+                Enter the 6-digit verification code sent to <strong>{mobile}</strong> and <strong>{email}</strong>
+              </p>
+            </div>
+
+            {otpMessage && (
+              <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-800 text-xs text-center font-semibold">
+                {otpMessage}
               </div>
+            )}
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs text-center font-semibold">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <input
+                type="text"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="1 2 3 4 5 6"
+                className="w-full text-center text-2xl font-black tracking-widest py-3 rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
 
               <button
                 type="button"
-                onClick={handleVerifyOtp}
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-sm shadow-md transition-all"
+                onClick={handleVerifyOtp}
+                className="w-full py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-extrabold text-sm shadow-md transition-all"
               >
-                {loading ? 'Verifying...' : 'Confirm OTP & Continue'}
+                {loading ? 'Verifying...' : 'Verify Code & Complete Sign Up'}
               </button>
 
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                className="w-full text-xs font-bold text-teal-600 hover:text-teal-700"
-              >
-                Resend verification code
-              </button>
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="font-bold text-teal-600 hover:underline"
+                >
+                  Resend Code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOtpModal(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

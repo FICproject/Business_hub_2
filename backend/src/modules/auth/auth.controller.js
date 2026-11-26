@@ -78,7 +78,13 @@ export const initRegistration = async (req, res) => {
             return res.status(400).json({ success: false, message: 'An account with this mobile number already exists.' });
         }
 
-        const userRoles = Array.isArray(roles) ? roles : [roles];
+        let userRoles = Array.isArray(roles) ? [...roles] : [roles];
+        if (userRoles.includes('business')) {
+            userRoles = userRoles.filter((r) => r !== 'business');
+            if (!userRoles.includes('businessman') && !userRoles.includes('entrepreneur')) {
+                userRoles.push('businessman', 'entrepreneur');
+            }
+        }
         if (!dbStore.collection.registrationDrafts) {
             dbStore.collection.registrationDrafts = [];
         }
@@ -179,7 +185,13 @@ export const register = async (req, res) => {
             return res.status(400).json({ success: false, message: 'An account with this mobile number already exists.' });
         }
 
-        const userRoles = Array.isArray(roles) ? roles : [roles];
+        let userRoles = Array.isArray(roles) ? [...roles] : [roles];
+        if (userRoles.includes('business')) {
+            userRoles = userRoles.filter((r) => r !== 'business');
+            if (!userRoles.includes('businessman') && !userRoles.includes('entrepreneur')) {
+                userRoles.push('businessman', 'entrepreneur');
+            }
+        }
         const needsDocVerification = userRoles.some((r) => VERIFICATION_ROLES.includes(r));
 
         let draft = null;
@@ -282,20 +294,20 @@ export const register = async (req, res) => {
 
         // Businessman Business Profile
         if (userRoles.includes('businessman')) {
-            const bProfile = effectiveContext.businessmanProfile || businessmanProfile || {};
+            const bProfile = effectiveContext.businessmanProfile || businessmanProfile || effectiveContext.entrepreneurProfile || entrepreneurProfile || {};
             const newBusinessmanBiz = {
                 _id: uuidv4(),
                 ownerId: newUser._id,
                 roleType: 'businessman',
-                businessName: bProfile.businessName || `${fullName}'s Business Enterprise`,
+                businessName: bProfile.businessName || bProfile.startupName || `${fullName}'s Business Enterprise`,
                 category: bProfile.category || 'Construction & Building Materials',
                 subcategory: bProfile.subcategory || 'General',
                 businessType: bProfile.businessType || 'Supplier',
                 description: bProfile.description || 'Established business enterprise awaiting admin verification.',
                 productsServices: bProfile.productsServices || '',
-                address: bProfile.businessAddress || bProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
+                address: bProfile.businessAddress || bProfile.officeAddress || bProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
                 operatingLocations: bProfile.operatingLocations || '',
-                website: bProfile.businessWebsite || bProfile.website || '',
+                website: bProfile.businessWebsite || bProfile.websiteUrl || bProfile.website || '',
                 phone: bProfile.businessPhone || bProfile.phone || mobile,
                 altPhone: bProfile.businessAltPhone || bProfile.altPhone || '',
                 email: (bProfile.businessEmail || bProfile.email || email).toLowerCase(),
@@ -310,13 +322,13 @@ export const register = async (req, res) => {
 
         // Entrepreneur Startup Profile
         if (userRoles.includes('entrepreneur')) {
-            const eProfile = effectiveContext.entrepreneurProfile || entrepreneurProfile || {};
+            const eProfile = effectiveContext.entrepreneurProfile || entrepreneurProfile || effectiveContext.businessmanProfile || businessmanProfile || {};
             const isRegistered = Boolean(eProfile.isStartupRegistered || effectiveContext.isStartupRegistered);
             const newEntrepreneurStartup = {
                 _id: uuidv4(),
                 ownerId: newUser._id,
                 roleType: 'entrepreneur',
-                businessName: eProfile.startupName || `${fullName}'s Startup Innovation`,
+                businessName: eProfile.startupName || eProfile.businessName || `${fullName}'s Startup Innovation`,
                 category: eProfile.category || 'Technology & IT Startups',
                 subcategory: eProfile.subcategory || 'Software Development',
                 businessType: isRegistered ? 'registered_startup' : 'unregistered_startup',
@@ -326,15 +338,15 @@ export const register = async (req, res) => {
                 registrationNumber: eProfile.registrationNumber || '',
                 registrationDate: eProfile.registrationDate || '',
                 unregisteredDeclarationAccepted: Boolean(eProfile.unregisteredDeclarationAccepted || effectiveContext.unregisteredDeclarationAccepted),
-                ideaSummary: eProfile.ideaSummary || '',
+                ideaSummary: eProfile.ideaSummary || eProfile.description || '',
                 targetLaunchTimeline: eProfile.targetLaunchTimeline || '',
                 description: eProfile.description || 'Emerging startup concept awaiting admin verification.',
                 problemStatement: eProfile.problemStatement || '',
                 solutionDescription: eProfile.solutionDescription || '',
                 targetMarket: eProfile.targetMarket || '',
                 hasBusinessAddress: Boolean(eProfile.hasBusinessAddress || effectiveContext.hasBusinessAddress),
-                address: eProfile.officeAddress || eProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
-                website: eProfile.websiteUrl || eProfile.website || '',
+                address: eProfile.officeAddress || eProfile.businessAddress || eProfile.address || { street: '', city: '', state: '', postalCode: '', country: 'India' },
+                website: eProfile.websiteUrl || eProfile.businessWebsite || eProfile.website || '',
                 pitchDeckUrl: eProfile.pitchDeckUrl || '',
                 phone: mobile,
                 email: email.toLowerCase(),

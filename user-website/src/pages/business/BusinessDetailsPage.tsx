@@ -67,7 +67,7 @@ export const BusinessDetailsPage: React.FC = () => {
               ) : (
                 <>
                   <Link
-                    to="/register?role=businessman"
+                    to="/register?role=business"
                     className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-sm shadow-xl hover:scale-105 transition-all"
                   >
                     <span>Register Your Business</span>
@@ -274,7 +274,7 @@ export const BusinessDetailsPage: React.FC = () => {
               </div>
 
               <Link
-                to="/register?role=businessman"
+                to="/register?role=business"
                 className="w-full py-3.5 rounded-2xl bg-[#0A255C] hover:bg-[#071B42] text-white text-xs font-bold text-center block transition-all shadow-md"
               >
                 Apply for Merchant Verification
@@ -353,7 +353,7 @@ export const BusinessDetailsPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
             <Link
-              to="/register?role=businessman"
+              to="/register?role=business"
               className="px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-xs shadow-lg hover:scale-105 transition-all"
             >
               Register Your Business Now

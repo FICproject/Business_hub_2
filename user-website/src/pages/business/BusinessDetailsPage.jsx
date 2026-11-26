@@ -40,7 +40,7 @@ export const BusinessDetailsPage = () => {
                   <span>Go to My Business Dashboard</span>
                   <ArrowRight className="w-4 h-4 font-bold"/>
                 </Link>) : (<>
-                  <Link to="/register?role=businessman" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-sm shadow-xl hover:scale-105 transition-all">
+                  <Link to="/register?role=business" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-sm shadow-xl hover:scale-105 transition-all">
                     <span>Register Your Business</span>
                     <ArrowRight className="w-4 h-4 font-bold"/>
                   </Link>
@@ -246,7 +246,7 @@ export const BusinessDetailsPage = () => {
                 </div>
               </div>
 
-              <Link to="/register?role=businessman" className="w-full py-3.5 rounded-2xl bg-[#0A255C] hover:bg-[#071B42] text-white text-xs font-bold text-center block transition-all shadow-md">
+              <Link to="/register?role=business" className="w-full py-3.5 rounded-2xl bg-[#0A255C] hover:bg-[#071B42] text-white text-xs font-bold text-center block transition-all shadow-md">
                 Apply for Merchant Verification
               </Link>
             </div>
@@ -322,7 +322,7 @@ export const BusinessDetailsPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            <Link to="/register?role=businessman" className="px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-xs shadow-lg hover:scale-105 transition-all">
+            <Link to="/register?role=business" className="px-8 py-3.5 rounded-full bg-[#FFB800] hover:bg-[#FFAE00] text-[#0A255C] font-black text-xs shadow-lg hover:scale-105 transition-all">
               Register Your Business Now
             </Link>
           </div>
