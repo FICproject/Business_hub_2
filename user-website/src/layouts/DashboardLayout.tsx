@@ -161,22 +161,74 @@ export const DashboardLayout = () => {
   let roleBadge = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
   let baseRolePath = '/dashboard/student';
 
-  if (activeRole === 'teacher') {
+  if (location.pathname.startsWith('/dashboard/teacher') || activeRole === 'teacher') {
     currentNav = teacherNav;
     roleTitle = 'Teacher Workspace';
     roleBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
     baseRolePath = '/dashboard/teacher';
-  } else if (activeRole === 'businessman' || activeRole === 'entrepreneur') {
+  } else if (location.pathname.startsWith('/dashboard/business') || activeRole === 'businessman' || activeRole === 'entrepreneur' || (activeRole as any) === 'business') {
     currentNav = businessNav;
-    roleTitle = 'Business Enterprise';
+    roleTitle = 'Business Portal';
     roleBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
     baseRolePath = '/dashboard/business';
-  } else if (activeRole === 'normal' || activeRole === 'user') {
+  } else if (location.pathname.startsWith('/dashboard/user') || activeRole === 'normal' || (activeRole as any) === 'user') {
     currentNav = normalUserNav;
     roleTitle = 'Member Dashboard';
     roleBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
     baseRolePath = '/dashboard/user';
   }
+
+  // Check if current role requires mandatory verification approval
+  const isVerifiableRole =
+    location.pathname.startsWith('/dashboard/teacher') ||
+    location.pathname.startsWith('/dashboard/business') ||
+    activeRole === 'teacher' ||
+    activeRole === 'businessman' ||
+    activeRole === 'entrepreneur' ||
+    (activeRole as any) === 'business';
+
+  const isBusinessRole =
+    location.pathname.startsWith('/dashboard/business') ||
+    activeRole === 'businessman' ||
+    activeRole === 'entrepreneur' ||
+    (activeRole as any) === 'business';
+
+  const isBusinessApproved =
+    user?.roleApprovals?.businessman === 'approved' ||
+    user?.roleApprovals?.entrepreneur === 'approved' ||
+    user?.roleApprovals?.business === 'approved' ||
+    (user?.verificationStatus === 'approved' && user?.status !== 'pending');
+
+  const isTeacherApproved =
+    user?.roleApprovals?.teacher === 'approved' ||
+    (user?.verificationStatus === 'approved' && user?.status !== 'pending');
+
+  const isRoleApproved = isBusinessRole
+    ? isBusinessApproved
+    : activeRole === 'teacher'
+    ? isTeacherApproved
+    : true;
+
+  const isApprovalGated = isVerifiableRole && !isRoleApproved;
+
+  // Distinct portal tabs: combine businessman & entrepreneur into a single 'business' portal
+  const availablePortals = React.useMemo(() => {
+    const roles = user?.roles || [];
+    const portals: { id: string; label: string; path: string }[] = [];
+    if (roles.includes('student')) {
+      portals.push({ id: 'student', label: 'Student', path: '/dashboard/student' });
+    }
+    if (roles.includes('teacher')) {
+      portals.push({ id: 'teacher', label: 'Teacher', path: '/dashboard/teacher' });
+    }
+    if (roles.some((r: string) => r === 'businessman' || r === 'entrepreneur' || r === 'business')) {
+      portals.push({ id: 'business', label: 'Business', path: '/dashboard/business' });
+    }
+    if (roles.some((r: string) => r === 'normal' || r === 'user')) {
+      portals.push({ id: 'user', label: 'Member', path: '/dashboard/user' });
+    }
+    return portals;
+  }, [user?.roles]);
 
   // Active Tab handling from URL search params
   const searchParams = new URLSearchParams(location.search);
@@ -270,31 +322,47 @@ export const DashboardLayout = () => {
             </div>
 
             {/* Multi-role switcher */}
-            {user?.roles && user.roles.length > 1 && (
+            {availablePortals && availablePortals.length > 1 && (
               <div className="pt-2 border-t border-white/10">
                 <label className="text-[11px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
                   Switch Active Portal:
                 </label>
                 <div className="flex flex-wrap gap-1">
-                  {user.roles.map((r: string) => (
-                    <button
-                      key={r}
-                      onClick={() => {
-                        dispatch(setActiveRole(r as any));
-                        if (r === 'teacher') navigate('/dashboard/teacher');
-                        else if (r === 'businessman' || r === 'entrepreneur') navigate('/dashboard/business');
-                        else if (r === 'normal' || r === 'user') navigate('/dashboard/user');
-                        else navigate('/dashboard/student');
-                      }}
-                      className={`px-2.5 py-1 rounded text-xs font-semibold capitalize transition-all ${
-                        activeRole === r
-                          ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
-                          : 'bg-navy-900 text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
+                  {availablePortals.map((portal) => {
+                    const isActive =
+                      portal.id === 'business'
+                        ? location.pathname.startsWith('/dashboard/business') ||
+                          activeRole === 'businessman' ||
+                          activeRole === 'entrepreneur' ||
+                          (activeRole as any) === 'business'
+                        : portal.id === 'teacher'
+                        ? location.pathname.startsWith('/dashboard/teacher') || activeRole === 'teacher'
+                        : portal.id === 'user'
+                        ? location.pathname.startsWith('/dashboard/user') || activeRole === 'normal' || (activeRole as any) === 'user'
+                        : location.pathname.startsWith('/dashboard/student') || activeRole === 'student';
+                    return (
+                      <button
+                        key={portal.id}
+                        onClick={() => {
+                          const targetRole =
+                            portal.id === 'business'
+                              ? user?.roles?.includes('businessman')
+                                ? 'businessman'
+                                : 'entrepreneur'
+                              : portal.id;
+                          dispatch(setActiveRole(targetRole as any));
+                          navigate(portal.path);
+                        }}
+                        className={`px-2.5 py-1 rounded text-xs font-semibold capitalize transition-all ${
+                          isActive
+                            ? 'bg-amber-500 text-navy-950 font-extrabold shadow-sm'
+                            : 'bg-navy-900 text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        {portal.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

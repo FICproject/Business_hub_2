@@ -207,12 +207,12 @@ export const BusinessDashboardPage = () => {
     marketingUpdates: false,
   });
 
-  // Load All Business Data for the selected role
-  const loadDashboardData = async (roleTypeToLoad = currentRoleType) => {
+  // Load All Business Data
+  const loadDashboardData = async () => {
     try {
       setRefreshing(true);
       // 1. Fetch business profiles
-      const bizRes = await businessApi.getMyBusiness({ roleType: roleTypeToLoad });
+      const bizRes = await businessApi.getMyBusiness();
       let activeBiz = null;
       if (bizRes.data.success) {
         setBusinessProfiles(bizRes.data.businesses || []);
@@ -256,7 +256,6 @@ export const BusinessDashboardPage = () => {
       try {
         const reqRes = await requestsApi.getMyBusinessRequests({
           businessId: bizId,
-          roleType: roleTypeToLoad,
         });
         if (reqRes.data.success) {
           setRequests(reqRes.data.requests || []);
@@ -272,7 +271,6 @@ export const BusinessDashboardPage = () => {
       try {
         const connRes = await requestsApi.getMyBusinessConnections({
           businessId: bizId,
-          roleType: roleTypeToLoad,
         });
         if (connRes.data.success) {
           setConnections(connRes.data.connections || []);
@@ -322,15 +320,8 @@ export const BusinessDashboardPage = () => {
   };
 
   useEffect(() => {
-    loadDashboardData(currentRoleType);
-  }, [currentRoleType]);
-
-  // Handle Role Switch for Dual-Role approved users
-  const handleSwitchProfile = (targetRole) => {
-    if (targetRole === currentRoleType) return;
-    setCurrentRoleType(targetRole);
-    dispatch(setActiveRole(targetRole));
-  };
+    loadDashboardData();
+  }, []);
 
   // Actions on Service Requests
   const handleAcceptRequest = async (requestId) => {
@@ -658,16 +649,25 @@ export const BusinessDashboardPage = () => {
     return notificationsList;
   }, [notificationsList, notifFilter]);
 
-  // Available categories based on active role type
-  const activeTaxonomy =
-    currentRoleType === 'entrepreneur' ? DEFAULT_ENTREPRENEUR_CATS : DEFAULT_BUSINESSMAN_CATS;
+  // Available categories: combine both taxonomies for common business dashboard
+  const activeTaxonomy = useMemo(() => {
+    return [
+      ...DEFAULT_BUSINESSMAN_CATS,
+      ...DEFAULT_ENTREPRENEUR_CATS.filter(
+        (ec) => !DEFAULT_BUSINESSMAN_CATS.some((bc) => bc.name.toLowerCase() === ec.name.toLowerCase())
+      ),
+    ];
+  }, []);
 
   const currentCategoryObj = activeTaxonomy.find((c) => c.name === profileForm.category);
   const availableSubcategories = currentCategoryObj?.subcategories || [];
 
   const isApproved =
     business?.verificationStatus === 'approved' ||
-    user?.roleApprovals?.[currentRoleType] === 'approved';
+    user?.roleApprovals?.businessman === 'approved' ||
+    user?.roleApprovals?.entrepreneur === 'approved' ||
+    user?.roleApprovals?.business === 'approved' ||
+    (user?.verificationStatus === 'approved' && user?.status !== 'pending');
 
   if (loading) {
     return (
@@ -680,24 +680,17 @@ export const BusinessDashboardPage = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. TOP HEADER & MULTI-ROLE SWITCHER */}
+      {/* 1. TOP HEADER */}
       <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
-                {currentRoleType === 'entrepreneur' ? (
-                  <Rocket className="w-6 h-6" />
-                ) : (
-                  <Building2 className="w-6 h-6" />
-                )}
+              <span className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                <Building2 className="w-6 h-6" />
               </span>
               <div>
                 <h1 className="text-2xl font-black text-navy-950 tracking-tight flex items-center gap-2">
                   <span>Business Dashboard</span>
-                  <span className="text-xs font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                    {currentRoleType === 'entrepreneur' ? 'Entrepreneur' : 'Businessman'}
-                  </span>
                 </h1>
                 <p className="text-xs text-slate-500">
                   Manage assigned service requests, business connections, product catalogs, and verified profile.
@@ -710,7 +703,7 @@ export const BusinessDashboardPage = () => {
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-xs font-extrabold text-navy-950 truncate max-w-[200px]">
-                {business?.businessName || (currentRoleType === 'entrepreneur' ? 'My Startup' : 'My Business')}
+                {business?.businessName || 'My Business'}
               </p>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span
@@ -725,7 +718,7 @@ export const BusinessDashboardPage = () => {
             </div>
 
             <button
-              onClick={() => loadDashboardData(currentRoleType)}
+              onClick={() => loadDashboardData()}
               disabled={refreshing}
               className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-navy-950 transition-colors"
               title="Refresh Data"
@@ -734,53 +727,6 @@ export const BusinessDashboardPage = () => {
             </button>
           </div>
         </div>
-
-        {/* ROLE SWITCHER: Only show if user has BOTH roles approved */}
-        {hasBothApprovedRoles && (
-          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 p-4 rounded-2xl border border-blue-100/80">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
-              <div>
-                <p className="text-xs font-black text-navy-950 uppercase tracking-wide">
-                  Active Business Profile Switcher
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  You have verified profiles for both roles. Toggle to manage each enterprise independently.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleSwitchProfile('businessman')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  currentRoleType === 'businessman'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-extrabold'
-                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>Businessman Profile</span>
-                {currentRoleType === 'businessman' && <Check className="w-3.5 h-3.5 ml-1" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSwitchProfile('entrepreneur')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  currentRoleType === 'entrepreneur'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-extrabold'
-                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                <Rocket className="w-3.5 h-3.5" />
-                <span>Entrepreneur Profile</span>
-                {currentRoleType === 'entrepreneur' && <Check className="w-3.5 h-3.5 ml-1" />}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 2. TAB CONTENT ROUTER */}
@@ -799,11 +745,11 @@ export const BusinessDashboardPage = () => {
       {activeTab === 'profile' && (
         <ProfileModule
           business={business}
-          currentRoleType={currentRoleType}
+          user={user}
           isApproved={isApproved}
           docChecklist={docChecklist}
           onEditOpen={() => setEditProfileOpen(true)}
-          onRefresh={() => loadDashboardData(currentRoleType)}
+          onRefresh={() => loadDashboardData()}
         />
       )}
 
@@ -1160,7 +1106,7 @@ export const BusinessDashboardPage = () => {
               <div className="space-y-1">
                 <h3 className="text-xl font-black text-navy-950 flex items-center gap-2">
                   <Edit3 className="w-5 h-5 text-blue-600" />
-                  Edit {currentRoleType === 'entrepreneur' ? 'Entrepreneur Startup' : 'Businessman Enterprise'} Profile
+                  Edit Business Profile
                 </h3>
                 <p className="text-xs text-slate-500">
                   Update your official profile information displayed to clients and verified by platform admins.
@@ -1179,7 +1125,7 @@ export const BusinessDashboardPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">
-                    {currentRoleType === 'entrepreneur' ? 'Startup / Venture Name *' : 'Business / Enterprise Name *'}
+                    Business / Startup Name *
                   </label>
                   <input
                     type="text"
@@ -1192,7 +1138,7 @@ export const BusinessDashboardPage = () => {
 
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">
-                    {currentRoleType === 'entrepreneur' ? 'Startup Category *' : 'Business Category *'}
+                    Category *
                   </label>
                   <select
                     value={profileForm.category}
@@ -1236,7 +1182,7 @@ export const BusinessDashboardPage = () => {
 
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">
-                    {currentRoleType === 'entrepreneur' ? 'Registration / Entity Type' : 'Business Type *'}
+                    Business Type / Entity Registration *
                   </label>
                   <select
                     value={profileForm.businessType}
@@ -1244,7 +1190,7 @@ export const BusinessDashboardPage = () => {
                     className="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option value="">Select Type</option>
-                    {(currentRoleType === 'entrepreneur' ? STARTUP_REGISTRATION_TYPES : BUSINESS_TYPES).map(
+                    {[...BUSINESS_TYPES, ...STARTUP_REGISTRATION_TYPES.filter((t) => !BUSINESS_TYPES.includes(t))].map(
                       (t, idx) => (
                         <option key={idx} value={t}>
                           {t}
@@ -1255,102 +1201,100 @@ export const BusinessDashboardPage = () => {
                 </div>
               </div>
 
-              {/* Dynamic Entrepreneur Fields */}
-              {currentRoleType === 'entrepreneur' && (
-                <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-4">
-                  <h4 className="font-extrabold uppercase text-indigo-900 text-[11px] flex items-center gap-1.5">
-                    <Rocket className="w-4 h-4 text-indigo-600" />
-                    Startup Specific Innovation Profile
-                  </h4>
+              {/* Startup & Innovation Fields (Optional / If Applicable) */}
+              <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-4">
+                <h4 className="font-extrabold uppercase text-indigo-900 text-[11px] flex items-center gap-1.5">
+                  <Rocket className="w-4 h-4 text-indigo-600" />
+                  Startup & Innovation Profile (Optional / If Applicable)
+                </h4>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Startup Stage</label>
-                      <select
-                        value={profileForm.stage}
-                        onChange={(e) => setProfileForm({ ...profileForm, stage: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      >
-                        <option value="">Select Stage</option>
-                        {STARTUP_STAGES.map((s, idx) => (
-                          <option key={idx} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Business Model</label>
-                      <select
-                        value={profileForm.businessModel}
-                        onChange={(e) => setProfileForm({ ...profileForm, businessModel: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      >
-                        <option value="">Select Model</option>
-                        {BUSINESS_MODELS.map((m, idx) => (
-                          <option key={idx} value={m}>
-                            {m}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Startup Stage</label>
+                    <select
+                      value={profileForm.stage}
+                      onChange={(e) => setProfileForm({ ...profileForm, stage: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                      <option value="">Select Stage</option>
+                      {STARTUP_STAGES.map((s, idx) => (
+                        <option key={idx} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Problem Statement</label>
-                      <textarea
-                        rows={2}
-                        value={profileForm.problemStatement}
-                        onChange={(e) => setProfileForm({ ...profileForm, problemStatement: e.target.value })}
-                        placeholder="What problem does your startup solve?"
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Solution Description</label>
-                      <textarea
-                        rows={2}
-                        value={profileForm.solutionDescription}
-                        onChange={(e) => setProfileForm({ ...profileForm, solutionDescription: e.target.value })}
-                        placeholder="How does your product/technology solve it?"
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Target Market</label>
-                      <input
-                        type="text"
-                        value={profileForm.targetMarket}
-                        onChange={(e) => setProfileForm({ ...profileForm, targetMarket: e.target.value })}
-                        placeholder="e.g. Tier 1 Cities, MSMEs, Gen-Z"
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Pitch Deck Link / URL</label>
-                      <input
-                        type="url"
-                        value={profileForm.pitchDeckUrl}
-                        onChange={(e) => setProfileForm({ ...profileForm, pitchDeckUrl: e.target.value })}
-                        placeholder="https://drive.google.com/..."
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Business Model</label>
+                    <select
+                      value={profileForm.businessModel}
+                      onChange={(e) => setProfileForm({ ...profileForm, businessModel: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                      <option value="">Select Model</option>
+                      {BUSINESS_MODELS.map((m, idx) => (
+                        <option key={idx} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Problem Statement</label>
+                    <textarea
+                      rows={2}
+                      value={profileForm.problemStatement}
+                      onChange={(e) => setProfileForm({ ...profileForm, problemStatement: e.target.value })}
+                      placeholder="What problem does your enterprise or venture solve?"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Solution Description</label>
+                    <textarea
+                      rows={2}
+                      value={profileForm.solutionDescription}
+                      onChange={(e) => setProfileForm({ ...profileForm, solutionDescription: e.target.value })}
+                      placeholder="How does your solution/product address it?"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Target Market</label>
+                    <input
+                      type="text"
+                      value={profileForm.targetMarket}
+                      onChange={(e) => setProfileForm({ ...profileForm, targetMarket: e.target.value })}
+                      placeholder="e.g. MSMEs, Regional Builders, Consumers"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Pitch Deck Link / URL</label>
+                    <input
+                      type="url"
+                      value={profileForm.pitchDeckUrl}
+                      onChange={(e) => setProfileForm({ ...profileForm, pitchDeckUrl: e.target.value })}
+                      placeholder="https://drive.google.com/..."
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Description & Products/Services */}
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">
-                  {currentRoleType === 'entrepreneur' ? 'Startup Overview / Mission' : 'Business Description'}
+                  Business Description / Company Story
                 </label>
                 <textarea
                   rows={3}
@@ -1377,7 +1321,7 @@ export const BusinessDashboardPage = () => {
               {/* Address & Operating Locations */}
               <div className="space-y-3 pt-2 border-t border-slate-100">
                 <h4 className="font-extrabold uppercase text-slate-400 text-[10px]">
-                  {currentRoleType === 'entrepreneur' ? 'Startup Base & Coverage' : 'Business Address & Locations'}
+                  Business Address & Locations
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1934,7 +1878,7 @@ const OverviewModule = ({ metrics, requests, connections, business, currentRoleT
 
           <div className="p-4 rounded-2xl bg-gradient-to-br from-navy-950 to-slate-900 text-white space-y-2 mt-4">
             <p className="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider">
-              {currentRoleType === 'entrepreneur' ? 'Startup Ecosystem' : 'Contractor Network'}
+              Business & Enterprise Network
             </p>
             <p className="text-xs text-slate-300 leading-snug">
               Every request assigned to you has been verified by the Business Hub Admin team. Respond promptly to build
@@ -2026,8 +1970,11 @@ const OverviewModule = ({ metrics, requests, connections, business, currentRoleT
 /* -------------------------------------------------------------------------- */
 /* MODULE B: BUSINESS PROFILE                                                 */
 /* -------------------------------------------------------------------------- */
-const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, onEditOpen, onRefresh }) => {
-  const isEntrepreneur = currentRoleType === 'entrepreneur';
+const ProfileModule = ({ business, user, isApproved, docChecklist, onEditOpen, onRefresh }) => {
+  const isEntrepreneur =
+    business?.roleType === 'entrepreneur' ||
+    business?.businessType === 'unregistered_startup' ||
+    Boolean(business?.stage || business?.businessModel);
   const addr = business?.address || {};
 
   return (
@@ -2037,12 +1984,12 @@ const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, on
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black text-xl shadow-md">
-              {business?.businessName?.charAt(0) || (isEntrepreneur ? 'E' : 'B')}
+              {business?.businessName?.charAt(0) || 'B'}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-black text-navy-950">
-                  {business?.businessName || (isEntrepreneur ? 'My Startup' : 'My Business')}
+                  {business?.businessName || 'My Business'}
                 </h2>
                 <span
                   className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
@@ -2078,7 +2025,7 @@ const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, on
             <div className="space-y-1.5">
               <div>
                 <span className="text-slate-400 block text-[10px]">
-                  {isEntrepreneur ? 'Registration Type' : 'Business Type'}
+                  Business / Entity Type
                 </span>
                 <span className="font-bold text-navy-950">{business?.businessType || 'Standard Registered'}</span>
               </div>
@@ -2097,7 +2044,7 @@ const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, on
             </div>
           </div>
 
-          {/* 2. Entrepreneur specific fields or Businessman trade fields */}
+          {/* 2. Operations & Innovation */}
           {isEntrepreneur ? (
             <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-3">
               <h4 className="font-extrabold uppercase text-indigo-900 text-[10px] flex items-center gap-1.5">
@@ -2182,7 +2129,7 @@ const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, on
         {/* Overview Description */}
         <div className="space-y-2">
           <h4 className="font-extrabold uppercase text-slate-400 text-[10px]">
-            {isEntrepreneur ? 'Startup Mission & Description' : 'Business Description'}
+            Business Description & Overview
           </h4>
           <p className="text-xs text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 leading-relaxed whitespace-pre-line">
             {business?.description || 'No description entered yet. Click "Edit Profile Details" to add your company story.'}
@@ -2244,7 +2191,9 @@ const ProfileModule = ({ business, currentRoleType, isApproved, docChecklist, on
         {docChecklist ? (
           <DocumentVerificationPanel
             checklistData={docChecklist}
-            roles={[currentRoleType]}
+            roles={
+              user?.roles?.filter((r) => r === 'businessman' || r === 'entrepreneur') || ['businessman']
+            }
             isPostSubmission={true}
             onChecklistUpdated={onRefresh}
           />
