@@ -67,6 +67,31 @@ const ALL_BUSINESS_STAGES = [
   'Ideation & Early Concept',
 ];
 
+export const STUDENT_YEAR_OPTIONS = [
+  '1st Year',
+  '2nd Year',
+  '3rd Year',
+  '4th Year / Final Year',
+  '5th Year (Dual / Integrated)',
+  'Recent Graduate / Passed Out',
+  'Postgraduate / Masters (1st Year)',
+  'Postgraduate / Masters (2nd Year)',
+  'Doctorate / Ph.D Scholar',
+  'Higher Secondary / Class 11-12',
+  'Diploma / Vocational Program',
+];
+
+export const POPULAR_COURSES = [
+  'B.Tech / B.E (Engineering)',
+  'B.Sc (Computer Science / IT)',
+  'BCA (Computer Applications)',
+  'B.Com (Commerce & Finance)',
+  'BBA (Business Administration)',
+  'MBA / PGDM',
+  'MCA / M.Tech',
+  'Diploma in Engineering',
+];
+
 export const RegisterPage = () => {
   const [searchParams] = useSearchParams();
   const rawRoleParam = (searchParams.get('role') || 'student').toLowerCase();
@@ -96,6 +121,12 @@ export const RegisterPage = () => {
 
   // Teacher Specific
   const [hasTeachingQualification, setHasTeachingQualification] = useState(false);
+
+  // Student Specific Academic Details
+  const [studentCourse, setStudentCourse] = useState('');
+  const [studentYear, setStudentYear] = useState('1st Year');
+  const [studentInstitution, setStudentInstitution] = useState('');
+  const [studentSpecialization, setStudentSpecialization] = useState('');
 
   // Unified Business & Entrepreneur State (Single Common Registration)
   const [bizTrack, setBizTrack] = useState(defaultTrack); // 'businessman' | 'entrepreneur' | 'both'
@@ -305,9 +336,37 @@ export const RegisterPage = () => {
       }
     }
 
+    if (selectedRole === 'student') {
+      if (!studentCourse.trim()) {
+        setError('Please enter what you are currently studying (Course / Degree / Program).');
+        return;
+      }
+      if (!studentInstitution.trim()) {
+        setError('Please enter your college, university, or institute name.');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const { personalAddress, govIdDetails, businessmanProfile, entrepreneurProfile } = buildProfiles();
+
+      const studentDetails =
+        selectedRole === 'student'
+          ? {
+              course: studentCourse.trim(),
+              currentCourse: studentCourse.trim(),
+              year: studentYear,
+              currentYear: studentYear,
+              institution: studentInstitution.trim(),
+              specialization: studentSpecialization.trim() || undefined,
+            }
+          : undefined;
+
+      const education =
+        selectedRole === 'student'
+          ? `${studentCourse.trim()} (${studentYear})${studentInstitution.trim() ? ` • ${studentInstitution.trim()}` : ''}`
+          : undefined;
 
       const applicationContext = {
         isStartupRegistered: Boolean(isStartupRegistered),
@@ -318,6 +377,7 @@ export const RegisterPage = () => {
         entrepreneurProfile,
         personalAddress,
         govIdDetails,
+        studentDetails,
       };
 
       if (requiresDocUpload) {
@@ -333,6 +393,8 @@ export const RegisterPage = () => {
           govIdDetails,
           businessmanProfile,
           entrepreneurProfile,
+          studentDetails,
+          education,
           applicationContext,
         });
 
@@ -354,6 +416,8 @@ export const RegisterPage = () => {
           termsAccepted,
           personalAddress,
           govIdDetails,
+          studentDetails,
+          education,
         });
         if (res.data?.success) {
           setRegisteredData(res.data);
@@ -1178,6 +1242,113 @@ export const RegisterPage = () => {
                 <p className="text-[11px] text-amber-700">
                   Checking this adds Teaching Qualification Certificate to your mandatory upload list.
                 </p>
+              </div>
+            )}
+
+            {/* SECTION: Student Academic & Current Study Details */}
+            {selectedRole === 'student' && (
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-teal-50/60 via-slate-50 to-blue-50/40 border border-teal-200/80 space-y-4">
+                <div className="flex items-center gap-2.5 border-b border-teal-200/60 pb-3">
+                  <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-navy-900">
+                      Current Academic &amp; Course Details
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Specify what you are currently studying and your current academic year for tailored learning &amp; job recommendations.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3.5">
+                  {/* Current Course */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      What are you currently studying? (Course / Degree / Class) *
+                    </label>
+                    <input
+                      type="text"
+                      required={selectedRole === 'student'}
+                      value={studentCourse}
+                      onChange={(e) => setStudentCourse(e.target.value)}
+                      placeholder="e.g. B.Tech Computer Science, B.Sc, B.Com, BCA, MBA, Class 12, etc."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+                    />
+
+                    {/* Quick Course Suggestions */}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase mr-1">
+                        Quick Select:
+                      </span>
+                      {POPULAR_COURSES.map((course) => (
+                        <button
+                          key={course}
+                          type="button"
+                          onClick={() => setStudentCourse(course)}
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all border ${
+                            studentCourse === course
+                              ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-700'
+                          }`}
+                        >
+                          {course}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Current Year */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Current Year of Study *
+                      </label>
+                      <select
+                        required={selectedRole === 'student'}
+                        value={studentYear}
+                        onChange={(e) => setStudentYear(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+                      >
+                        {STUDENT_YEAR_OPTIONS.map((yr) => (
+                          <option key={yr} value={yr}>
+                            {yr}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Specialization / Stream */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Specialization / Stream (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={studentSpecialization}
+                        onChange={(e) => setStudentSpecialization(e.target.value)}
+                        placeholder="e.g. AI & Data Science, Finance, Mechanical"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* College / University Name */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      College / University / School Name *
+                    </label>
+                    <input
+                      type="text"
+                      required={selectedRole === 'student'}
+                      value={studentInstitution}
+                      onChange={(e) => setStudentInstitution(e.target.value)}
+                      placeholder="e.g. Delhi University / Anna University / Stanford / National School"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+                    />
+                  </div>
+                </div>
               </div>
             )}
 

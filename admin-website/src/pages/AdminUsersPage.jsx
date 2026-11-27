@@ -314,6 +314,12 @@ export const AdminUsersPage = ({ initialCategory = 'all' }) => {
                           <div>
                             <p className="font-bold text-slate-900 text-xs">{u.fullName}</p>
                             <p className="text-[11px] text-slate-400">ID: {u._id.substring(0, 8)}</p>
+                            {(u.studentDetails || u.education) && (
+                              <p className="text-[10px] text-blue-600 font-semibold mt-0.5">
+                                🎓 {u.studentDetails?.course || u.education}
+                                {u.studentDetails?.year ? ` (${u.studentDetails.year})` : ''}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

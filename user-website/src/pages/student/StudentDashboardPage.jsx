@@ -298,7 +298,16 @@ export const StudentDashboardPage = () => {
                 <Sparkles className="w-3.5 h-3.5" />
                 Student Learning Center • 100% Free Education
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold">{user?.fullName || 'Welcome, Student'}</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold flex flex-wrap items-center gap-3">
+                <span>{user?.fullName || 'Welcome, Student'}</span>
+                {(user?.studentDetails?.course || user?.education) && (
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/10 text-teal-300 border border-teal-500/30 flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    {user?.studentDetails?.course || user?.education}
+                    {user?.studentDetails?.year ? ` (${user.studentDetails.year})` : ''}
+                  </span>
+                )}
+              </h1>
               <p className="text-xs sm:text-sm text-teal-100 max-w-xl">
                 Explore free accredited courses, join real-time interactive WebRTC masterclasses, and earn verified credentials.
               </p>

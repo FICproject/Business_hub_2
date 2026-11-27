@@ -54,6 +54,8 @@ export const initRegistration = async (req, res) => {
             govIdDetails,
             businessmanProfile,
             entrepreneurProfile,
+            studentDetails,
+            education,
             applicationContext,
         } = req.body;
         if (!fullName || !email || !mobile || !dob || !password || !roles) {
@@ -98,6 +100,7 @@ export const initRegistration = async (req, res) => {
             entrepreneurProfile: entrepreneurProfile || applicationContext?.entrepreneurProfile,
             personalAddress: personalAddress || applicationContext?.personalAddress,
             govIdDetails: govIdDetails || applicationContext?.govIdDetails,
+            studentDetails: studentDetails || applicationContext?.studentDetails,
         };
 
         let draft = dbStore.collection.registrationDrafts.find(
@@ -161,6 +164,8 @@ export const register = async (req, res) => {
             govIdDetails,
             businessmanProfile,
             entrepreneurProfile,
+            studentDetails,
+            education,
             applicationContext,
         } = req.body;
         // Validate required fields
@@ -242,6 +247,8 @@ export const register = async (req, res) => {
             ...(draft ? draft.applicationContext : {}),
             ...(applicationContext || {}),
         };
+        const effectiveStudentDetails = studentDetails || effectiveContext.studentDetails || null;
+        const effectiveEducation = education || (effectiveStudentDetails?.course ? `${effectiveStudentDetails.course} (${effectiveStudentDetails.year || ''})${effectiveStudentDetails.institution ? ` • ${effectiveStudentDetails.institution}` : ''}` : null);
 
         const newUser = {
             _id: uuidv4(),
@@ -259,6 +266,8 @@ export const register = async (req, res) => {
             verificationStatus: needsDocVerification ? 'pending_approval' : 'approved',
             personalAddress: personalAddress || effectiveContext.personalAddress || null,
             govIdDetails: govIdDetails || effectiveContext.govIdDetails || null,
+            studentDetails: effectiveStudentDetails,
+            education: effectiveEducation,
             applicationContext: effectiveContext,
             createdAt: now,
             updatedAt: now,
