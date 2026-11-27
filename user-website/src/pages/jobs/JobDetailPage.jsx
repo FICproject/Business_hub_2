@@ -4,22 +4,16 @@ import { useSelector } from 'react-redux';
 import { Building, Share2, CheckCircle2, ArrowLeft, Send, } from 'lucide-react';
 import { jobsApi } from '../../services/api';
 import { ShareModal } from '../../components/sharing/ShareModal';
+import { StudentJobApplicationModal } from '../../components/jobs/StudentJobApplicationModal';
+
 export const JobDetailPage = () => {
     const { id } = useParams();
     const { user, isAuthenticated } = useSelector((state) => state.auth);
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isShareOpen, setIsShareOpen] = useState(false);
-    // Application Modal
     const [applyModalOpen, setApplyModalOpen] = useState(false);
-    const [fullName, setFullName] = useState(user?.fullName || '');
-    const [email, setEmail] = useState(user?.email || '');
-    const [phone, setPhone] = useState(user?.mobile || '');
-    const [resumeUrl, setResumeUrl] = useState('');
-    const [coverLetter, setCoverLetter] = useState('');
     const [applied, setApplied] = useState(false);
-    const [applyLoading, setApplyLoading] = useState(false);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         if (id) {
@@ -179,77 +173,13 @@ export const JobDetailPage = () => {
         </div>
       </div>
 
-      {/* Instant Application Modal */}
-      {applyModalOpen && (<div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-2.5 py-1 rounded-md">
-                Direct Submission
-              </span>
-              <h3 className="text-xl font-extrabold text-navy-900 mt-1">Apply for {job.title}</h3>
-              <p className="text-xs text-slate-500">Your profile and resume will be securely transmitted to {job.businessName}.</p>
-            </div>
-
-            {error && (<div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
-                {error}
-              </div>)}
-
-            {applied ? (<div className="p-6 bg-teal-50 border border-teal-200 rounded-2xl text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-teal-600 mx-auto"/>
-                <h4 className="font-extrabold text-navy-900 text-base">Application Submitted!</h4>
-                <p className="text-xs text-slate-600">
-                  You can track your interview status directly from your Student / User Dashboard under "My Applications".
-                </p>
-                <div className="pt-2 flex justify-center gap-3">
-                  <Link to="/dashboard/student" className="px-5 py-2.5 bg-teal-600 text-white font-bold text-xs rounded-xl shadow-md">
-                    View in Dashboard
-                  </Link>
-                  <button onClick={() => {
-                    setApplyModalOpen(false);
-                    setApplied(false);
-                }} className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl">
-                    Done
-                  </button>
-                </div>
-              </div>) : (<form onSubmit={handleApply} className="space-y-4 text-left">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name</label>
-                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"/>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label>
-                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"/>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Phone Number</label>
-                  <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"/>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Resume Link (PDF / Portfolio URL)</label>
-                  <input type="url" required value={resumeUrl} onChange={(e) => setResumeUrl(e.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"/>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Cover Letter / Note</label>
-                  <textarea rows={3} value={coverLetter} onChange={(e) => setCoverLetter(e.target.value)} placeholder="Why are you a great match for this role?" className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <button type="submit" disabled={applyLoading} className="flex-grow py-3 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5">
-                    {applyLoading ? 'Submitting...' : 'Submit Application'}
-                    {!applyLoading && <Send className="w-3.5 h-3.5"/>}
-                  </button>
-                  <button type="button" onClick={() => setApplyModalOpen(false)} className="py-3 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">
-                    Cancel
-                  </button>
-                </div>
-              </form>)}
-          </div>
-        </div>)}
+      {/* Comprehensive Student Job Application Modal (PRD Section 1 & 2) */}
+      <StudentJobApplicationModal
+        job={job}
+        isOpen={applyModalOpen}
+        onClose={() => setApplyModalOpen(false)}
+        onSuccess={() => setApplied(true)}
+      />
 
       {/* Share Modal */}
       <ShareModal isOpen={isShareOpen} onClose={() => setIsShareOpen(false)} targetType="job" targetId={job._id} title={job.title}/>

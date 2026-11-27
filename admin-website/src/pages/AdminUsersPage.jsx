@@ -59,7 +59,7 @@ export const AdminUsersPage = ({ initialCategory = 'all' }) => {
           const raw = usersRes.data.data || [];
           // Exclude internal admin accounts from platform participant management
           const platformUsers = raw.filter(
-            (u) => !(u.roles?.length === 1 && u.roles[0] === 'admin')
+            (u) => !u.roles?.includes('admin')
           );
           setUsers(platformUsers);
         }

@@ -38,6 +38,7 @@ import { StatCard } from '../../components/dashboard/StatCard';
 import { ProfileCompletion } from '../../components/dashboard/ProfileCompletion';
 import { SavedItemsView } from '../../components/dashboard/SavedItemsView';
 import { JobApplicationsView } from '../../components/dashboard/JobApplicationsView';
+import { StudentJobApplicationModal } from '../../components/jobs/StudentJobApplicationModal';
 
 export const StudentDashboardPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -1320,6 +1321,16 @@ export const StudentDashboardPage = () => {
           </div>
         </div>
       )}
+      {/* Student Job Application Modal (PRD Section 1 & 2) */}
+      <StudentJobApplicationModal
+        job={applyModalJob}
+        isOpen={Boolean(applyModalJob)}
+        onClose={() => setApplyModalJob(null)}
+        onSuccess={() => {
+          setApplyModalJob(null);
+          loadData();
+        }}
+      />
     </div>
   );
 };

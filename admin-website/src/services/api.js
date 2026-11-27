@@ -35,10 +35,12 @@ export const adminApi = {
     getTeacherPayments: () => api.get('/education/teacher-payments'),
     approveTeacherPayment: (data) => api.post('/education/teacher-payments/approve', data),
     markPaymentPaid: (id, transactionRef) => api.put(`/education/teacher-payments/${id}/pay`, { transactionRef }),
-    // Jobs
+    // Jobs & Applications
     getJobs: () => api.get('/jobs'),
     deleteJob: (id) => api.delete(`/jobs/${id}`),
     updateJobStatus: (id, status) => api.put(`/jobs/${id}/status`, { status }),
+    getJobApplications: (params) => api.get('/jobs/applications/all', { params }),
+    getJobApplicationById: (id) => api.get(`/jobs/applications/${id}`),
     // Education & Moderation
     getCourses: () => api.get('/education/courses'),
     reviewCourse: (id, data) => api.put(`/education/courses/${id}/review`, data),

@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { getCourses, getCourseById, createCourse, enrollCourse, getMyEnrollments, updateCourseProgress, getLiveClasses, createLiveClass, joinLiveClass, getStudyMaterials, uploadStudyMaterial, getTuitions, createTuition, getTeacherPayments, approveTeacherPayment, markTeacherPaymentPaid, deleteCourse, deleteLiveClass, deleteStudyMaterial, } from './education.controller';
+import { authenticateToken, requireRoles, requireApprovedTeacher, } from '../../middleware/auth.middleware';
 import {
   getCourses,
   getCourseById,
@@ -40,6 +42,7 @@ import {
 } from '../../middleware/auth.middleware';
 
 const router = Router();
+// Courses (100% Free)
 
 // ============================================================================
 // 1. FREE COURSES & CURRICULUM
@@ -54,6 +57,7 @@ router.get('/teacher/students', authenticateToken, requireApprovedTeacher, getTe
 router.post('/courses/:courseId/enroll', authenticateToken, enrollCourse);
 router.get('/enrollments/my', authenticateToken, getMyEnrollments);
 router.put('/courses/:courseId/progress', authenticateToken, updateCourseProgress);
+// Live Classes
 
 // ============================================================================
 // 2. STUDY MATERIALS & NOTES
@@ -70,6 +74,13 @@ router.get('/live-classes', getLiveClasses);
 router.post('/live-classes', authenticateToken, requireApprovedTeacher, createLiveClass);
 router.post('/live-classes/:id/register', authenticateToken, registerForLiveClass);
 router.post('/live-classes/:id/join', authenticateToken, joinLiveClass);
+// Study Materials (Notes)
+router.get('/materials', getStudyMaterials);
+router.post('/materials', authenticateToken, requireApprovedTeacher, uploadStudyMaterial);
+// Tuition
+router.get('/tuitions', getTuitions);
+router.post('/tuitions', authenticateToken, requireApprovedTeacher, createTuition);
+// Teacher Compensation
 router.post('/live-classes/:id/end', authenticateToken, endLiveClass);
 router.get('/live-classes/:id/roster', authenticateToken, getClassRoster);
 
@@ -87,6 +98,7 @@ router.delete('/categories/:id', authenticateToken, requireRoles('admin'), delet
 router.get('/teacher-payments', authenticateToken, getTeacherPayments);
 router.post('/teacher-payments/approve', authenticateToken, requireRoles('admin'), approveTeacherPayment);
 router.put('/teacher-payments/:id/pay', authenticateToken, requireRoles('admin'), markTeacherPaymentPaid);
+// Admin Moderation
 
 // ============================================================================
 // 6. ADMIN MODERATION ACTIONS

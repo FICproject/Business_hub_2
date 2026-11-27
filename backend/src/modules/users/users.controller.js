@@ -11,7 +11,7 @@ export const getUsers = async (req, res) => {
             users = users.filter((u) => u.roles.includes(role));
         } else if (includeAdmin !== 'true') {
             // General platform user listing excludes internal administrator staff accounts
-            users = users.filter((u) => !u.roles.includes('admin') || u.roles.some((r) => r !== 'admin'));
+            users = users.filter((u) => !u.roles.includes('admin'));
         }
         if (status) {
             users = users.filter((u) => u.status === status);
