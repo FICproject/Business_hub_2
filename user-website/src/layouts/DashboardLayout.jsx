@@ -54,33 +54,36 @@ export const DashboardLayout = () => {
             console.error(err);
         }
     };
-    // 1. STUDENT NAVIGATION
+    // 1. STUDENT NAVIGATION (PRD Section 6)
     const studentNav = [
-        { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+        { label: 'Dashboard', tab: 'overview', icon: LayoutDashboard },
+        { label: 'Explore Courses', tab: 'browse', icon: Layers },
         { label: 'My Courses', tab: 'courses', icon: GraduationCap },
-        { label: 'Browse Courses', tab: 'browse', icon: Layers },
-        { label: 'Live Classes', tab: 'live-classes', icon: Video },
         { label: 'Study Materials', tab: 'materials', icon: FileText },
-        { label: 'My Certificates', tab: 'certificates', icon: Award },
+        { label: 'Live Classes', tab: 'live-classes', icon: Video },
+        { label: 'My Schedule', tab: 'schedule', icon: Calendar },
+        { label: 'Attendance', tab: 'attendance', icon: CheckCircle },
+        { label: 'Learning Progress', tab: 'progress', icon: Award },
         { label: 'Job Opportunities', tab: 'jobs', icon: Briefcase },
         { label: 'My Applications', tab: 'applications', icon: CheckCircle },
         { label: 'Community', tab: 'community', icon: UsersIcon },
         { label: 'Events', tab: 'events', icon: Calendar },
         { label: 'Saved Items', tab: 'saved', icon: Bookmark },
+        { label: 'Notifications', tab: 'notifications', icon: Bell },
         { label: 'My Profile', path: '/dashboard/profile', icon: User },
         { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
     ];
-    // 2. TEACHER NAVIGATION
+    // 2. TEACHER NAVIGATION (PRD Section 2)
     const teacherNav = [
-        { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
-        { label: 'Verification Docs', tab: 'verification', icon: ShieldCheck },
+        { label: 'Dashboard', tab: 'overview', icon: LayoutDashboard },
         { label: 'My Courses', tab: 'courses', icon: GraduationCap },
-        { label: 'Create Course', tab: 'create-course', icon: PlusCircle },
-        { label: 'Live Class Management', tab: 'live-classes', icon: Video },
-        { label: 'Schedule Classes', tab: 'schedule-class', icon: Clock },
         { label: 'Study Materials', tab: 'materials', icon: FileText },
+        { label: 'Live Classes', tab: 'live-classes', icon: Video },
+        { label: 'My Students', tab: 'students', icon: UsersIcon },
         { label: 'Attendance', tab: 'attendance', icon: CheckCircle },
-        { label: 'Stipend Management', tab: 'stipends', icon: DollarSign },
+        { label: 'Teacher Payments', tab: 'payments', icon: DollarSign },
+        { label: 'Verification Docs', tab: 'verification', icon: ShieldCheck },
+        { label: 'Notifications', tab: 'notifications', icon: Bell },
         { label: 'Community', tab: 'community', icon: UsersIcon },
         { label: 'Events', tab: 'events', icon: Calendar },
         { label: 'My Profile', path: '/dashboard/profile', icon: User },

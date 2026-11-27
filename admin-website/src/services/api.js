@@ -41,11 +41,18 @@ export const adminApi = {
     updateJobStatus: (id, status) => api.put(`/jobs/${id}/status`, { status }),
     // Education & Moderation
     getCourses: () => api.get('/education/courses'),
+    reviewCourse: (id, data) => api.put(`/education/courses/${id}/review`, data),
+    updateCourse: (id, data) => api.put(`/education/courses/${id}`, data),
     deleteCourse: (id) => api.delete(`/education/courses/${id}`),
     getLiveClasses: () => api.get('/education/live-classes'),
+    getClassRoster: (id) => api.get(`/education/live-classes/${id}/roster`),
     deleteLiveClass: (id) => api.delete(`/education/live-classes/${id}`),
     getMaterials: () => api.get('/education/materials'),
     deleteMaterial: (id) => api.delete(`/education/materials/${id}`),
+    getEducationCategories: () => api.get('/education/categories'),
+    createEducationCategory: (data) => api.post('/education/categories', data),
+    updateEducationCategory: (id, data) => api.put(`/education/categories/${id}`, data),
+    deleteEducationCategory: (id) => api.delete(`/education/categories/${id}`),
     // Referrals & Sharing
     getAllSharedLinks: () => api.get('/sharing/admin/all'),
     // Quotation Management (Centralized Coordination)

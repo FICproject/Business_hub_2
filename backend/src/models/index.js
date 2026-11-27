@@ -242,6 +242,35 @@ export const Quotation = mongoose.models.Quotation || mongoose.model('Quotation'
   totalAmount: { type: Number },
 }));
 
+// 31. Live Class Registration Model
+export const LiveClassRegistration = mongoose.models.LiveClassRegistration || mongoose.model('LiveClassRegistration', createSchema({
+  liveClassId: { type: String, required: true, index: true },
+  studentId: { type: String, required: true, index: true },
+  status: { type: String, default: 'registered', index: true },
+}));
+
+// 32. Live Class Attendance Model
+export const LiveClassAttendance = mongoose.models.LiveClassAttendance || mongoose.model('LiveClassAttendance', createSchema({
+  liveClassId: { type: String, required: true, index: true },
+  studentId: { type: String, required: true, index: true },
+  status: { type: String, default: 'present', index: true },
+}));
+
+// 33. Lesson Progress Model
+export const LessonProgress = mongoose.models.LessonProgress || mongoose.model('LessonProgress', createSchema({
+  courseId: { type: String, required: true, index: true },
+  lessonId: { type: String, required: true, index: true },
+  studentId: { type: String, required: true, index: true },
+  isCompleted: { type: Boolean, default: false, index: true },
+}));
+
+// 34. Education Category Model
+export const EducationCategory = mongoose.models.EducationCategory || mongoose.model('EducationCategory', createSchema({
+  name: { type: String, required: true, index: true },
+  slug: { type: String, required: true, index: true },
+  isActive: { type: Boolean, default: true, index: true },
+}));
+
 // Model Registry Dictionary
 export const modelsMap = {
   users: User,
@@ -258,6 +287,9 @@ export const modelsMap = {
   courses: Course,
   enrollments: Enrollment,
   liveClasses: LiveClass,
+  attendances: LiveClassAttendance,
+  liveClassRegistrations: LiveClassRegistration,
+  lessonProgress: LessonProgress,
   materials: StudyMaterial,
   tuitions: Tuition,
   teacherPayments: TeacherPayment,
@@ -275,5 +307,6 @@ export const modelsMap = {
   categories: Category,
   serviceCategories: ServiceCategory,
   materialCategories: MaterialCategory,
+  educationCategories: EducationCategory,
   platformSettings: PlatformSetting,
 };
