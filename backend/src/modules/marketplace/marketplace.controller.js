@@ -9,9 +9,19 @@ const sanitizeProductForPublic = (p) => {
         slug: p.slug,
         description: p.description,
         category: p.category,
+        subcategory: p.subcategory || '',
         price: p.price,
         discountPrice: p.discountPrice,
+        priceType: p.priceType || 'fixed', // 'fixed' | 'range' | 'rfq'
+        minPrice: p.minPrice,
+        maxPrice: p.maxPrice,
         stock: p.stock,
+        minOrderQty: p.minOrderQty || 1,
+        unit: p.unit || 'Units',
+        brand: p.brand || '',
+        availability: p.availability || 'in_stock',
+        deliveryLocations: p.deliveryLocations || '',
+        additionalInfo: p.additionalInfo || '',
         variants: p.variants || [],
         specifications: p.specifications || [],
         images: p.images || [],
@@ -19,21 +29,32 @@ const sanitizeProductForPublic = (p) => {
         rating: p.rating || 4.8,
         reviewsCount: p.reviewsCount || 12,
         createdAt: p.createdAt,
-        // Note: owner name, personal phone, personal address, ownerId are completely omitted!
+        // STRICT SELLER PRIVACY: owner name, company name, phone, email, address, ownerId OMITTED!
     };
 };
 const sanitizeServiceForPublic = (s) => {
     return {
         _id: s._id,
-        title: s.title,
+        name: s.name || s.title,
+        title: s.title || s.name,
         description: s.description,
         category: s.category,
-        pricingType: s.pricingType,
+        subcategory: s.subcategory || '',
+        pricingType: s.pricingType || 'fixed', // 'fixed' | 'starting_from' | 'range' | 'rfq'
         price: s.price,
-        serviceArea: s.serviceArea,
+        minPrice: s.minPrice,
+        maxPrice: s.maxPrice,
+        serviceArea: s.serviceArea || s.locations || 'All Locations',
+        locations: s.locations || s.serviceArea || 'All Locations',
+        coveragePincodes: s.coveragePincodes || '',
+        estimatedCompletionTime: s.estimatedCompletionTime || '3-5 business days',
+        availability: s.availability || 'available',
+        additionalInfo: s.additionalInfo || '',
+        specifications: s.specifications || [],
         availabilitySchedule: s.availabilitySchedule,
         images: s.images || [],
         createdAt: s.createdAt,
+        // STRICT SELLER PRIVACY: owner name, company name, phone, email, address, ownerId OMITTED!
     };
 };
 // 1. PRODUCTS
@@ -90,7 +111,29 @@ export const getProductById = async (req, res) => {
 };
 export const createProduct = async (req, res) => {
     try {
-        const { businessId, title, description, category, price, discountPrice, stock, variants, specifications, images } = req.body;
+        const {
+            businessId,
+            title,
+            description,
+            category,
+            subcategory,
+            price,
+            discountPrice,
+            priceType = 'fixed',
+            minPrice,
+            maxPrice,
+            stock,
+            minOrderQty = 1,
+            unit = 'Units',
+            brand,
+            availability = 'in_stock',
+            deliveryLocations,
+            additionalInfo,
+            variants,
+            specifications,
+            images,
+        } = req.body;
+
         let business = null;
         if (businessId) {
             business = dbStore.collection.businesses.find((b) => b._id === businessId && b.ownerId === req.user._id);
@@ -99,21 +142,33 @@ export const createProduct = async (req, res) => {
             business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
         }
         if (!business && !req.user.roles.includes('admin')) {
-            return res.status(403).json({ success: false, message: 'Business required.' });
+            return res.status(403).json({ success: false, message: 'Approved business required.' });
         }
-        if (!title || !price || !category) {
-            return res.status(400).json({ success: false, message: 'Title, price, and category are required.' });
+        if (!title || !category) {
+            return res.status(400).json({ success: false, message: 'Title and category are required.' });
         }
+        const parsedPrice = price ? parseFloat(price) : (minPrice ? parseFloat(minPrice) : 0);
         const newProduct = {
             _id: uuidv4(),
             businessId: business ? business._id : 'admin-system',
+            roleType: business ? business.roleType : 'businessman',
             title,
             slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
             description: description || '',
             category,
-            price: parseFloat(price),
+            subcategory: subcategory || '',
+            price: parsedPrice,
             discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
+            priceType: priceType || 'fixed',
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
             stock: parseInt(stock || '10', 10),
+            minOrderQty: parseInt(minOrderQty || '1', 10),
+            unit: unit || 'Units',
+            brand: brand || '',
+            availability: availability || 'in_stock',
+            deliveryLocations: deliveryLocations || '',
+            additionalInfo: additionalInfo || '',
             variants: variants || [],
             specifications: specifications || [],
             images: images && images.length > 0 ? images : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80'],
@@ -135,7 +190,7 @@ export const createProduct = async (req, res) => {
 };
 export const getBusinessProducts = async (req, res) => {
     try {
-        const { businessId } = req.query;
+        const { businessId, status } = req.query;
         const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
         if (myBizIds.length === 0 && !req.user.roles.includes('admin')) {
             return res.json({ success: true, data: [] });
@@ -143,6 +198,9 @@ export const getBusinessProducts = async (req, res) => {
         let products = dbStore.collection.products.filter((p) =>
             businessId ? p.businessId === businessId : myBizIds.includes(p.businessId)
         );
+        if (status && status !== 'all') {
+            products = products.filter((p) => p.status === status);
+        }
         return res.json({ success: true, data: products });
     }
     catch (error) {
@@ -189,8 +247,27 @@ export const deleteProduct = async (req, res) => {
 // 2. SERVICES
 export const getPublicServices = async (req, res) => {
     try {
-        const services = dbStore.collection.services.filter((s) => s.status === 'approved');
-        return res.json({ success: true, data: services.map(sanitizeServiceForPublic) });
+        const { category, search, sort } = req.query;
+        let services = dbStore.collection.services.filter((s) => s.status === 'approved');
+        if (category && category !== 'all') {
+            services = services.filter((s) => s.category?.toLowerCase() === category.toLowerCase());
+        }
+        if (search) {
+            const q = search.toLowerCase();
+            services = services.filter((s) =>
+                (s.title || s.name || '').toLowerCase().includes(q) ||
+                (s.description || '').toLowerCase().includes(q) ||
+                (s.category || '').toLowerCase().includes(q)
+            );
+        }
+        if (sort === 'price_asc') {
+            services.sort((a, b) => (a.price || 0) - (b.price || 0));
+        } else if (sort === 'price_desc') {
+            services.sort((a, b) => (b.price || 0) - (a.price || 0));
+        } else {
+            services.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+        return res.json({ success: true, count: services.length, data: services.map(sanitizeServiceForPublic) });
     }
     catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -198,7 +275,7 @@ export const getPublicServices = async (req, res) => {
 };
 export const getBusinessServices = async (req, res) => {
     try {
-        const { businessId } = req.query;
+        const { businessId, status } = req.query;
         const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
         if (myBizIds.length === 0 && !req.user.roles.includes('admin')) {
             return res.json({ success: true, data: [] });
@@ -206,6 +283,9 @@ export const getBusinessServices = async (req, res) => {
         let services = dbStore.collection.services.filter((s) =>
             businessId ? s.businessId === businessId : myBizIds.includes(s.businessId)
         );
+        if (status && status !== 'all') {
+            services = services.filter((s) => s.status === status);
+        }
         return res.json({ success: true, data: services });
     }
     catch (error) {
@@ -214,7 +294,28 @@ export const getBusinessServices = async (req, res) => {
 };
 export const createService = async (req, res) => {
     try {
-        const { businessId, title, description, category, pricingType, price, serviceArea, availabilitySchedule, images } = req.body;
+        const {
+            businessId,
+            title,
+            name,
+            description,
+            category,
+            subcategory,
+            pricingType = 'fixed',
+            price,
+            minPrice,
+            maxPrice,
+            serviceArea,
+            locations,
+            coveragePincodes,
+            estimatedCompletionTime,
+            availability = 'available',
+            additionalInfo,
+            specifications,
+            availabilitySchedule,
+            images,
+        } = req.body;
+
         let business = null;
         if (businessId) {
             business = dbStore.collection.businesses.find((b) => b._id === businessId && b.ownerId === req.user._id);
@@ -222,25 +323,101 @@ export const createService = async (req, res) => {
         if (!business) {
             business = dbStore.collection.businesses.find((b) => b.ownerId === req.user._id);
         }
+        const serviceName = title || name;
+        if (!serviceName || !category) {
+            return res.status(400).json({ success: false, message: 'Service name and category are required.' });
+        }
         const newService = {
             _id: uuidv4(),
             businessId: business ? business._id : 'admin-system',
-            title,
-            description,
+            roleType: business ? business.roleType : 'businessman',
+            title: serviceName,
+            name: serviceName,
+            description: description || '',
             category,
+            subcategory: subcategory || '',
             pricingType: pricingType || 'fixed',
-            price: price ? parseFloat(price) : undefined,
-            serviceArea: serviceArea || 'Worldwide / Online',
+            price: price ? parseFloat(price) : (minPrice ? parseFloat(minPrice) : undefined),
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            serviceArea: serviceArea || locations || 'All Locations',
+            locations: locations || serviceArea || 'All Locations',
+            coveragePincodes: coveragePincodes || '',
+            estimatedCompletionTime: estimatedCompletionTime || '3-5 business days',
+            availability: availability || 'available',
+            additionalInfo: additionalInfo || '',
+            specifications: specifications || [],
             availabilitySchedule: availabilitySchedule || 'Mon - Fri, 9am - 6pm',
-            images: images || ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80'],
+            images: images && images.length > 0 ? images : ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80'],
             status: 'approved',
             createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
         dbStore.collection.services.push(newService);
         dbStore.save();
         return res.status(201).json({ success: true, message: 'Service published!', service: newService });
     }
     catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Toggle Listing Status (Activate / Deactivate) for Product or Service
+export const toggleListingStatus = async (req, res) => {
+    try {
+        const { type, id } = req.params; // type: 'products' | 'services'
+        const { status } = req.body; // 'approved' (active) | 'inactive'
+
+        const collection = type === 'services' ? dbStore.collection.services : dbStore.collection.products;
+        const item = collection.find((i) => i._id === id);
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Listing not found.' });
+        }
+
+        const myBizIds = dbStore.collection.businesses.filter(b => b.ownerId === req.user._id).map(b => b._id);
+        if (!req.user.roles.includes('admin') && !myBizIds.includes(item.businessId)) {
+            return res.status(403).json({ success: false, message: 'Not authorized.' });
+        }
+
+        item.status = status || (item.status === 'approved' ? 'inactive' : 'approved');
+        item.updatedAt = new Date().toISOString();
+        dbStore.save();
+
+        return res.json({ success: true, message: `Listing status updated to ${item.status}.`, status: item.status, item });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Admin Listing Review (Approve / Reject)
+export const adminReviewListing = async (req, res) => {
+    try {
+        const { type, id } = req.params;
+        const { status, rejectionReason } = req.body; // status: 'approved' | 'rejected'
+
+        const collection = type === 'services' ? dbStore.collection.services : dbStore.collection.products;
+        const item = collection.find((i) => i._id === id);
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Listing not found.' });
+        }
+
+        item.status = status || 'approved';
+        if (rejectionReason) item.rejectionReason = rejectionReason;
+        item.updatedAt = new Date().toISOString();
+        dbStore.save();
+
+        logAudit(
+            req.user._id,
+            req.user.fullName,
+            'admin',
+            'MARKETPLACE_LISTING_REVIEWED',
+            type === 'services' ? 'Service' : 'Product',
+            id,
+            `Admin ${status} listing "${item.title || item.name}"`
+        );
+
+        return res.json({ success: true, message: `Listing has been ${status}.`, item });
+    } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ShoppingBag, Star, Share2, Check, ShieldCheck, Truck, ArrowLeft, } from 'lucide-react';
+import { ShoppingBag, Star, Share2, Check, ShieldCheck, Truck, ArrowLeft, FileText, Send, MapPin, Package } from 'lucide-react';
 import { marketplaceApi } from '../../services/api';
 import { setCart } from '../../store';
 import { ShareModal } from '../../components/sharing/ShareModal';
+import { RequestQuotationModal } from '../../components/quotations/RequestQuotationModal';
 export const ProductDetailPage = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
@@ -13,6 +14,7 @@ export const ProductDetailPage = () => {
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
     const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isRfqOpen, setIsRfqOpen] = useState(false);
     const [addedToast, setAddedToast] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -178,13 +180,24 @@ export const ProductDetailPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button onClick={() => handleAddToCart(false)} className="py-3.5 px-6 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm transition-all flex items-center justify-center gap-2 border border-teal-200/80">
-                <ShoppingBag className="w-4 h-4"/> Add to Cart
+            <div className="pt-4 space-y-3">
+              <button
+                type="button"
+                onClick={() => setIsRfqOpen(true)}
+                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Request Official Quotation (RFQ)</span>
               </button>
-              <button onClick={() => handleAddToCart(true)} className="py-3.5 px-6 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
-                Buy Now
-              </button>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onClick={() => handleAddToCart(false)} className="py-3 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-200">
+                  <ShoppingBag className="w-4 h-4"/> Add to Cart
+                </button>
+                <button onClick={() => handleAddToCart(true)} className="py-3 px-6 rounded-xl bg-navy-950 hover:bg-navy-900 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                  Buy Now
+                </button>
+              </div>
             </div>
           </div>
 
@@ -215,5 +228,13 @@ export const ProductDetailPage = () => {
 
       {/* Share Modal */}
       <ShareModal isOpen={isShareOpen} onClose={() => setIsShareOpen(false)} targetType="product" targetId={product._id} title={product.title}/>
+
+      {/* Request Quotation Modal */}
+      <RequestQuotationModal
+        isOpen={isRfqOpen}
+        onClose={() => setIsRfqOpen(false)}
+        item={product}
+        type="product"
+      />
     </div>);
 };

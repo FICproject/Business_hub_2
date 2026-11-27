@@ -14,6 +14,7 @@ import adminRoutes from './modules/admin/admin.routes';
 import requestsRoutes from './modules/requests/requests.routes';
 import categoriesRoutes from './modules/categories/categories.routes';
 import documentsRoutes from './modules/documents/documents.routes';
+import quotationsRoutes from './modules/quotations/quotations.routes';
 import { seedData } from './utils/seed';
 import { dbStore } from './services/storage';
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/shared-links', sharingRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/requests', requestsRoutes);
+app.use('/api/quotations', quotationsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/search', (req, res, next) => {

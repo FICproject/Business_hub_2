@@ -47,6 +47,8 @@ export const marketplaceApi = {
     getMyOrders: () => api.get('/marketplace/orders/my-orders'),
     getBusinessOrders: () => api.get('/marketplace/orders/business'),
     updateOrderStatus: (id, status) => api.put(`/marketplace/orders/${id}/status`, { orderStatus: status }),
+    toggleProductStatus: (id, status) => api.patch(`/marketplace/products/${id}/status`, { status }),
+    toggleServiceStatus: (id, status) => api.patch(`/marketplace/services/${id}/status`, { status }),
 };
 // Education Services
 export const educationApi = {
@@ -103,6 +105,24 @@ export const notificationsApi = {
     markAsRead: (id) => api.put(`/notifications/${id}/read`),
     markAllAsRead: () => api.put('/notifications/read-all'),
 };
+// Quotations Services (Marketplace Centralized Quotation System)
+export const quotationsApi = {
+    // Requester
+    submitRequest: (data) => api.post('/quotations/requests', data),
+    getMyRequests: (params) => api.get('/quotations/my-requests', { params }),
+    getRequestById: (id) => api.get(`/quotations/requests/${id}`),
+    getVisibleQuotations: (id) => api.get(`/quotations/requests/${id}/quotations`),
+    selectQuotation: (id, quotationId) => api.post(`/quotations/requests/${id}/select`, { quotationId }),
+    submitDecision: (id, decision, reason) => api.post(`/quotations/requests/${id}/decision`, { decision, reason }),
+    cancelRequest: (id) => api.post(`/quotations/requests/${id}/cancel`),
+
+    // Business
+    getInvitations: (params) => api.get('/quotations/business/invitations', { params }),
+    respondToInvitation: (id, data) => api.post(`/quotations/business/invitations/${id}/respond`, data),
+    submitQuotation: (data) => api.post('/quotations/business/submit', data),
+    getMySubmittedQuotations: () => api.get('/quotations/business/my-quotations'),
+};
+
 // Users & Profile Services
 export const usersApi = {
     getProfile: () => api.get('/auth/me'),

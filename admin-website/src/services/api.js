@@ -48,6 +48,16 @@ export const adminApi = {
     deleteMaterial: (id) => api.delete(`/education/materials/${id}`),
     // Referrals & Sharing
     getAllSharedLinks: () => api.get('/sharing/admin/all'),
+    // Quotation Management (Centralized Coordination)
+    getQuotationRequests: (params) => api.get('/quotations/admin/requests', { params }),
+    getQuotationRequestById: (id) => api.get(`/quotations/admin/requests/${id}`),
+    matchCompaniesForRequest: (id, params) => api.get(`/quotations/admin/requests/${id}/match-companies`, { params }),
+    inviteCompaniesToRequest: (id, data) => api.post(`/quotations/admin/requests/${id}/invite`, data),
+    updateQuotationVisibility: (id, data) => api.put(`/quotations/admin/requests/${id}/visibility`, data),
+    adminSelectQuotation: (id, quotationId) => api.post(`/quotations/admin/requests/${id}/select-quotation`, { quotationId }),
+    confirmQuotationSelection: (id) => api.post(`/quotations/admin/requests/${id}/confirm-selection`),
+    reopenQuotationRequest: (id) => api.post(`/quotations/admin/requests/${id}/reopen`),
+    updateQuotationRequestStatus: (id, data) => api.put(`/quotations/admin/requests/${id}/status`, data),
     // Service Requests & Workflows (Business Hub Core)
     getServiceRequests: (params) => api.get('/requests', { params }),
     getServiceRequestById: (id) => api.get(`/requests/${id}`),

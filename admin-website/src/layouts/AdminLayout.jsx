@@ -59,6 +59,7 @@ export const AdminLayout = () => {
     ];
     const mainNavItems = [
         { label: 'Dashboard', path: '/', icon: Home, isActiveMatch: (p) => p === '/' },
+        { label: 'Quotation Management', path: '/quotations', icon: Layers },
         { label: 'Service Requests', path: '/requests', icon: FileText },
         { label: 'Connections', path: '/requests/connections', icon: Handshake },
         { label: 'Business Management', path: '/businesses', icon: Building2 },

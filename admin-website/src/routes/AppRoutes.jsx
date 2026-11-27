@@ -19,6 +19,8 @@ import { AdminRequestsPage } from '../pages/AdminRequestsPage';
 import { AdminRequestDetailsPage } from '../pages/AdminRequestDetailsPage';
 import { AdminConnectionsPage } from '../pages/AdminConnectionsPage';
 import { AdminCategoriesPage } from '../pages/AdminCategoriesPage';
+import { AdminQuotationsPage } from '../pages/AdminQuotationsPage';
+import { AdminQuotationDetailsPage } from '../pages/AdminQuotationDetailsPage';
 const ProtectedAdminRoute = ({ children }) => {
     const { isAuthenticated } = useSelector((state) => state.adminAuth);
     if (!isAuthenticated) {
@@ -56,6 +58,10 @@ export const AppRoutes = () => {
 
         <Route path="businesses" element={<AdminBusinessesPage />}/>
         
+        {/* Centralized Quotation Management System */}
+        <Route path="quotations" element={<AdminQuotationsPage />}/>
+        <Route path="quotations/:id" element={<AdminQuotationDetailsPage />}/>
+
         {/* Core Service Requests & Business Connections */}
         <Route path="requests" element={<AdminRequestsPage initialTab="all"/>}/>
         <Route path="requests/connections" element={<AdminConnectionsPage initialTab="all"/>}/>

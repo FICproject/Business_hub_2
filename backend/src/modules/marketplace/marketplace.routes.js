@@ -20,6 +20,8 @@ import {
   getBusinessOrders,
   updateOrderStatus,
   getAllOrders,
+  toggleListingStatus,
+  adminReviewListing,
 } from './marketplace.controller';
 import {
   authenticateToken,
@@ -39,12 +41,17 @@ router.post('/products', authenticateToken, requireApprovedBusiness, createProdu
 router.get('/business/products', authenticateToken, getBusinessProducts);
 router.put('/products/:id', authenticateToken, updateProduct);
 router.delete('/products/:id', authenticateToken, deleteProduct);
+router.patch('/products/:id/status', authenticateToken, toggleListingStatus);
 
 // Verified Business Service Management
 router.post('/services', authenticateToken, requireApprovedBusiness, createService);
 router.get('/business/services', authenticateToken, getBusinessServices);
 router.put('/services/:id', authenticateToken, updateService);
 router.delete('/services/:id', authenticateToken, deleteService);
+router.patch('/services/:id/status', authenticateToken, toggleListingStatus);
+
+// Admin Listing Moderation
+router.put('/admin/listings/:type/:id/review', authenticateToken, requireRoles('admin'), adminReviewListing);
 
 // Shopping Cart (Any Authenticated User / Student)
 router.get('/cart', authenticateToken, getCart);

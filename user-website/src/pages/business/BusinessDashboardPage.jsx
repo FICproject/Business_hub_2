@@ -66,6 +66,9 @@ import {
   STARTUP_REGISTRATION_TYPES,
 } from '../../data/roleCategories';
 import { DocumentVerificationPanel } from '../../components/verification/DocumentVerificationPanel';
+import { BusinessProductsServicesModule } from '../../components/business/BusinessProductsServicesModule';
+import { BusinessQuotationsModule } from '../../components/quotations/BusinessQuotationsModule';
+import { RequesterQuotationsModule } from '../../components/quotations/RequesterQuotationsModule';
 
 export const BusinessDashboardPage = () => {
   const dispatch = useDispatch();
@@ -137,6 +140,7 @@ export const BusinessDashboardPage = () => {
   const [connSearch, setConnSearch] = useState('');
   const [catalogSubTab, setCatalogSubTab] = useState('products'); // 'products' | 'services'
   const [notifFilter, setNotifFilter] = useState('all'); // 'all' | 'unread'
+  const [quotationsMode, setQuotationsMode] = useState('incoming'); // 'incoming' | 'my_requests'
 
   // Modals state
   const [viewRequestModal, setViewRequestModal] = useState(null);
@@ -792,63 +796,48 @@ export const BusinessDashboardPage = () => {
         />
       )}
 
+      {activeTab === 'quotations' && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+            <button
+              type="button"
+              onClick={() => setQuotationsMode('incoming')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                quotationsMode === 'incoming'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                  : 'text-slate-600 hover:text-navy-950'
+              }`}
+            >
+              Vendor RFQs (Incoming from Admin)
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuotationsMode('my_requests')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                quotationsMode === 'my_requests'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                  : 'text-slate-600 hover:text-navy-950'
+              }`}
+            >
+              My Quotation Requests (As Buyer)
+            </button>
+          </div>
+
+          {quotationsMode === 'incoming' ? (
+            <BusinessQuotationsModule business={business} isApproved={isApproved} />
+          ) : (
+            <RequesterQuotationsModule />
+          )}
+        </div>
+      )}
+
       {activeTab === 'products' && (
-        <ProductsServicesModule
+        <BusinessProductsServicesModule
           products={products}
           services={services}
           isApproved={isApproved}
-          subTab={catalogSubTab}
-          setSubTab={setCatalogSubTab}
-          onOpenAddProduct={() => {
-            setEditingProduct(null);
-            setProdForm({
-              title: '',
-              category: 'Construction Materials',
-              price: '',
-              stock: '10',
-              description: '',
-              image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
-            });
-            setProdModalOpen(true);
-          }}
-          onOpenEditProduct={(prod) => {
-            setEditingProduct(prod);
-            setProdForm({
-              title: prod.title,
-              category: prod.category,
-              price: String(prod.price),
-              stock: String(prod.stock),
-              description: prod.description || '',
-              image: prod.images?.[0] || '',
-            });
-            setProdModalOpen(true);
-          }}
-          onDeleteProduct={handleDeleteProduct}
-          onOpenAddService={() => {
-            setEditingService(null);
-            setServForm({
-              name: '',
-              category: 'Engineering & Architecture',
-              pricingType: 'fixed',
-              price: '',
-              serviceArea: 'Regional / On-site',
-              description: '',
-            });
-            setServModalOpen(true);
-          }}
-          onOpenEditService={(serv) => {
-            setEditingService(serv);
-            setServForm({
-              name: serv.name || serv.title,
-              category: serv.category,
-              pricingType: serv.pricingType || 'fixed',
-              price: serv.price ? String(serv.price) : '',
-              serviceArea: serv.serviceArea || '',
-              description: serv.description || '',
-            });
-            setServModalOpen(true);
-          }}
-          onDeleteService={handleDeleteService}
+          business={business}
+          onRefresh={() => loadDashboardData(currentRoleType)}
         />
       )}
 

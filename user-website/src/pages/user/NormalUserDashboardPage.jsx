@@ -9,6 +9,7 @@ import { SavedItemsView } from '../../components/dashboard/SavedItemsView';
 import { JobApplicationsView } from '../../components/dashboard/JobApplicationsView';
 import { CommunityView } from '../../components/dashboard/CommunityView';
 import { EventsView } from '../../components/dashboard/EventsView';
+import { RequesterQuotationsModule } from '../../components/quotations/RequesterQuotationsModule';
 export const NormalUserDashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -229,6 +230,9 @@ export const NormalUserDashboardPage = () => {
             </div>
           </div>
         </div>)}
+
+      {/* QUOTATIONS TAB */}
+      {activeTab === 'quotations' && <RequesterQuotationsModule />}
 
       {/* 2. MARKETPLACE TAB */}
       {activeTab === 'marketplace' && (<div className="space-y-6">

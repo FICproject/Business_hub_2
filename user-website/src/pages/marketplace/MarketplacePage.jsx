@@ -1,11 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ShoppingBag, Search, Star, Share2, Check, ShieldCheck, ArrowRight, Layers, Sparkles, Package, Cpu, Headphones, Laptop, Briefcase, Lock, } from 'lucide-react';
+import {
+  ShoppingBag,
+  Search,
+  Star,
+  Share2,
+  Check,
+  ShieldCheck,
+  ArrowRight,
+  Layers,
+  Sparkles,
+  Package,
+  Cpu,
+  Headphones,
+  Laptop,
+  Briefcase,
+  Lock,
+  FileText,
+  MapPin,
+  Clock,
+  Eye,
+  Send,
+} from 'lucide-react';
 import { marketplaceApi } from '../../services/api';
 import { setCart } from '../../store';
 import { ShareModal } from '../../components/sharing/ShareModal';
 import { Breadcrumb } from '../../components/common/Breadcrumb';
+import { RequestQuotationModal } from '../../components/quotations/RequestQuotationModal';
 export const MarketplacePage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const initialTab = searchParams.get('tab') === 'services' ? 'services' : 'products';
@@ -20,6 +42,8 @@ export const MarketplacePage = () => {
     const [loading, setLoading] = useState(true);
     // Share modal state
     const [shareItem, setShareItem] = useState(null);
+    // RFQ modal state
+    const [rfqItem, setRfqItem] = useState(null);
     // Cart toast notification
     const [addedToast, setAddedToast] = useState(null);
     const navigate = useNavigate();
@@ -304,11 +328,11 @@ export const MarketplacePage = () => {
                   Reset Filters
                 </button>
               </div>) : (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map((p) => (<div key={p._id} onClick={() => navigate(`/marketplace/products/${p._id}`)} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer relative">
+                {products.map((p) => (<div key={p._id} onClick={() => navigate(`/marketplace/products/${p._id}`)} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer relative">
                     <div className="relative h-48 bg-slate-50 overflow-hidden">
                       <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
                       <span className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded">
-                        Stock: {p.stock}
+                        Stock: {p.stock} {p.unit || 'Units'}
                       </span>
                       <button type="button" onClick={(e) => {
                         e.stopPropagation();
@@ -318,23 +342,60 @@ export const MarketplacePage = () => {
                       </button>
                     </div>
 
-                    <div className="p-5 flex flex-col flex-1">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">
-                        {p.category}
-                      </span>
-                      <h3 className="font-bold text-[#0A255C] text-sm group-hover:text-amber-600 transition-colors line-clamp-1">
+                    <div className="p-5 flex flex-col flex-1 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+                          {p.category}
+                        </span>
+                        {p.deliveryLocations && (
+                          <span className="text-[10px] text-slate-500 font-medium truncate max-w-[120px]" title={p.deliveryLocations}>
+                            📍 {p.deliveryLocations}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="font-bold text-[#0A255C] text-sm group-hover:text-blue-600 transition-colors line-clamp-1">
                         {p.title}
                       </h3>
-                      <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">{p.description}</p>
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{p.description}</p>
 
-                      <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                         <div>
-                          <p className="text-base font-extrabold text-[#0A255C]">${p.price.toFixed(2)}</p>
+                          <span className="text-[10px] text-slate-400 block uppercase font-bold">Price</span>
+                          <p className="text-base font-black text-[#0A255C]">
+                            {p.priceType === 'rfq'
+                              ? 'RFQ Required'
+                              : p.priceType === 'range'
+                              ? `₹${p.minPrice} - ₹${p.maxPrice}`
+                              : `₹${p.price}`}
+                          </p>
                         </div>
+                      </div>
 
-                        <button type="button" onClick={(e) => handleAddToCart(e, p._id, p.title)} className="px-3.5 py-1.5 rounded-xl bg-slate-100 group-hover:bg-[#0A255C] text-[#0A255C] group-hover:text-white font-bold text-xs transition-colors flex items-center gap-1">
-                          <ShoppingBag className="w-3.5 h-3.5"/>
-                          <span>Add</span>
+                      {/* Prominent Action Buttons */}
+                      <div className="pt-2 grid grid-cols-2 gap-2 mt-auto">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRfqItem({ item: p, type: 'product' });
+                          }}
+                          className="py-2 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Quote</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/marketplace/products/${p._id}`);
+                          }}
+                          className="py-2 px-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Details</span>
                         </button>
                       </div>
                     </div>
@@ -349,7 +410,7 @@ export const MarketplacePage = () => {
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-[#0A255C]">Professional Services</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                  Hire verified development, consulting, marketing &amp; design experts
+                  Hire verified engineering, contracting, architectural, and commercial services
                 </p>
               </div>
             </div>
@@ -361,27 +422,51 @@ export const MarketplacePage = () => {
                   Verified providers are currently updating their commercial service offerings.
                 </p>
               </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {services.map((s) => (<div key={s._id} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md">
+                {services.map((s) => (<div key={s._id} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md">
                           {s.category}
                         </span>
                         <span className="text-sm font-black text-[#0A255C]">
-                          {s.price ? `$${s.price}` : 'Quote Based'}{' '}
-                          <span className="text-[11px] font-normal text-slate-400 capitalize">({s.pricingType})</span>
+                          {s.pricingType === 'rfq'
+                            ? 'RFQ Required'
+                            : s.pricingType === 'starting_from'
+                            ? `From ₹${s.price}`
+                            : s.pricingType === 'range'
+                            ? `₹${s.minPrice} - ₹${s.maxPrice}`
+                            : s.price ? `₹${s.price}` : 'Quote Based'}
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-bold text-[#0A255C] mb-2">{s.title}</h3>
-                      <p className="text-xs text-slate-600 leading-relaxed mb-4">{s.description}</p>
+                      <h3 className="text-base font-extrabold text-[#0A255C] line-clamp-1">{s.title || s.name}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{s.description}</p>
+
+                      <div className="pt-2 border-t border-slate-100 space-y-1 text-xs text-slate-500">
+                        <p className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <span>Coverage: {s.serviceArea || s.locations || 'All Regions'}</span>
+                        </p>
+                        {s.estimatedCompletionTime && (
+                          <p className="flex items-center gap-1.5 text-slate-400">
+                            <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                            <span>Timeline: {s.estimatedCompletionTime}</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">Area: {s.serviceArea || 'Global Online'}</span>
-                      <button type="button" onClick={() => navigate('/contact')} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0A255C] hover:text-[#D97706] transition-colors">
-                        <span>Inquire Service</span>
-                        <ArrowRight className="w-3.5 h-3.5"/>
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+                        Admin Verified
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setRfqItem({ item: s, type: 'service' })}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm shadow-blue-500/20 transition-all"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Request Quotation</span>
                       </button>
                     </div>
                   </div>))}
@@ -409,5 +494,19 @@ export const MarketplacePage = () => {
 
       {/* Share Modal */}
       {shareItem && (<ShareModal isOpen={!!shareItem} onClose={() => setShareItem(null)} targetType={shareItem.type} targetId={shareItem.id} title={shareItem.title}/>)}
+
+      {/* Request Quotation Modal */}
+      {rfqItem && (
+        <RequestQuotationModal
+          isOpen={!!rfqItem}
+          onClose={() => setRfqItem(null)}
+          item={rfqItem.item}
+          type={rfqItem.type}
+          onSuccess={() => {
+            setAddedToast('Quotation request submitted to Central Admin!');
+            setTimeout(() => setAddedToast(null), 4000);
+          }}
+        />
+      )}
     </div>);
 };

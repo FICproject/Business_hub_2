@@ -210,12 +210,47 @@ export const PlatformSetting = mongoose.models.PlatformSetting || mongoose.model
   key: { type: String, default: 'default_settings', unique: true, index: true },
 }));
 
+// 28. Quotation Request Model
+export const QuotationRequest = mongoose.models.QuotationRequest || mongoose.model('QuotationRequest', createSchema({
+  requesterId: { type: String, required: true, index: true },
+  listingId: { type: String, index: true },
+  listingType: { type: String, index: true },
+  category: { type: String, index: true },
+  status: { type: String, default: 'new', index: true },
+  selectionMode: { type: String, default: 'ADMIN' },
+  requesterCanViewAllQuotations: { type: Boolean, default: false },
+  requesterCanSelectQuotation: { type: Boolean, default: false },
+  selectedQuotationId: { type: String, index: true },
+  selectedBusinessId: { type: String, index: true },
+}));
+
+// 29. Quotation Invitation Model
+export const QuotationInvitation = mongoose.models.QuotationInvitation || mongoose.model('QuotationInvitation', createSchema({
+  requestId: { type: String, required: true, index: true },
+  businessId: { type: String, required: true, index: true },
+  ownerId: { type: String, index: true },
+  status: { type: String, default: 'sent', index: true },
+}));
+
+// 30. Quotation Model
+export const Quotation = mongoose.models.Quotation || mongoose.model('Quotation', createSchema({
+  requestId: { type: String, required: true, index: true },
+  invitationId: { type: String, index: true },
+  businessId: { type: String, required: true, index: true },
+  ownerId: { type: String, index: true },
+  status: { type: String, default: 'submitted', index: true },
+  totalAmount: { type: Number },
+}));
+
 // Model Registry Dictionary
 export const modelsMap = {
   users: User,
   businesses: Business,
   serviceRequests: ServiceRequest,
   businessConnections: BusinessConnection,
+  quotationRequests: QuotationRequest,
+  quotationInvitations: QuotationInvitation,
+  quotations: Quotation,
   products: Product,
   services: Service,
   orders: Order,
