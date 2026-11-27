@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { getCourses, getCourseById, createCourse, enrollCourse, getMyEnrollments, updateCourseProgress, getLiveClasses, createLiveClass, joinLiveClass, getStudyMaterials, uploadStudyMaterial, getTuitions, createTuition, getTeacherPayments, approveTeacherPayment, markTeacherPaymentPaid, deleteCourse, deleteLiveClass, deleteStudyMaterial, } from './education.controller';
-import { authenticateToken, requireRoles, requireApprovedTeacher, } from '../../middleware/auth.middleware';
+import { authenticateToken, requireRoles, requireApprovedTeacher } from '../../middleware/auth.middleware';
 import {
   getCourses,
   getCourseById,
@@ -35,11 +34,6 @@ import {
   createTuition,
   getTeacherStudents,
 } from './education.controller';
-import {
-  authenticateToken,
-  requireRoles,
-  requireApprovedTeacher,
-} from '../../middleware/auth.middleware';
 
 const router = Router();
 // Courses (100% Free)
