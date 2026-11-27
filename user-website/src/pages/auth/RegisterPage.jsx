@@ -581,12 +581,8 @@ export const RegisterPage = () => {
   const availableSubcategories = currentCategoryObj?.subcategories || [];
 
   return (
-    <div className="min-h-[90vh] flex items-center justify-center px-4 py-10 bg-slate-50">
-      <div
-        className={`w-full ${
-          step === 2 || selectedRole === 'business' ? 'max-w-4xl' : 'max-w-xl'
-        } bg-white rounded-3xl border border-slate-200/80 shadow-xl p-6 sm:p-10 space-y-6 transition-all`}
-      >
+    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex justify-center bg-slate-50">
+      <div className="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl border border-slate-200/80 shadow-xl p-6 sm:p-10 space-y-6 transition-all">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mx-auto shadow-md shadow-teal-500/20">
@@ -642,7 +638,7 @@ export const RegisterPage = () => {
               <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">
                 Select Your Role on Business Hub
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                 {categories.map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = selectedRole === cat.role;
@@ -651,27 +647,27 @@ export const RegisterPage = () => {
                       key={cat.role}
                       type="button"
                       onClick={() => setSelectedRole(cat.role)}
-                      className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between min-h-[140px] ${
                         isSelected
-                          ? 'border-teal-500 bg-teal-50/70 shadow-sm ring-1 ring-teal-500'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                          ? 'border-teal-500 bg-teal-50/70 shadow-sm ring-2 ring-teal-500/40'
+                          : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/60'
                       }`}
                     >
                       <div className="space-y-2">
                         <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                            isSelected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                            isSelected ? 'bg-teal-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600'
                           }`}
                         >
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
                           <p className="text-xs font-bold text-slate-900">{cat.label}</p>
-                          <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{cat.desc}</p>
+                          <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{cat.desc}</p>
                         </div>
                       </div>
                       {isSelected && (
-                        <span className="text-[10px] font-extrabold text-teal-700 mt-2 block">
+                        <span className="text-[11px] font-extrabold text-teal-700 mt-3 flex items-center gap-1">
                           ✓ Selected
                         </span>
                       )}
