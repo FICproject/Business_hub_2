@@ -92,7 +92,7 @@ export const AdminUsersPage = ({ initialCategory = 'all' }) => {
     { key: 'teachers', label: 'Teachers', icon: UserCheck },
     { key: 'businessmen', label: 'Businessmen', icon: Briefcase },
     { key: 'entrepreneurs', label: 'Entrepreneurs', icon: Rocket },
-    { key: 'normal-users', label: 'Normal Users', icon: User },
+    { key: 'normal-users', label: 'General Users', icon: User },
     { key: 'pending', label: 'Pending Verifications', icon: Clock },
     { key: 'blocked-suspended', label: 'Blocked / Suspended', icon: Ban },
   ];

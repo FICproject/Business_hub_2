@@ -140,7 +140,7 @@ export const DashboardLayout = () => {
     { label: 'Settings', path: '/dashboard/profile?tab=settings', icon: Settings },
   ];
 
-  // 4. NORMAL USER NAVIGATION
+  // 4. GENERAL USER NAVIGATION
   const normalUserNav = [
     { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
     { label: 'My Profile', path: '/dashboard/profile', icon: User },
@@ -173,7 +173,7 @@ export const DashboardLayout = () => {
     baseRolePath = '/dashboard/business';
   } else if (location.pathname.startsWith('/dashboard/user') || activeRole === 'normal' || (activeRole as any) === 'user') {
     currentNav = normalUserNav;
-    roleTitle = 'Member Dashboard';
+    roleTitle = 'General User Portal';
     roleBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
     baseRolePath = '/dashboard/user';
   }
@@ -225,7 +225,7 @@ export const DashboardLayout = () => {
       portals.push({ id: 'business', label: 'Business', path: '/dashboard/business' });
     }
     if (roles.some((r: string) => r === 'normal' || r === 'user')) {
-      portals.push({ id: 'user', label: 'Member', path: '/dashboard/user' });
+      portals.push({ id: 'user', label: 'General User', path: '/dashboard/user' });
     }
     return portals;
   }, [user?.roles]);

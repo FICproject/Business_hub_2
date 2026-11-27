@@ -504,7 +504,7 @@ export const RegisterPage = () => {
     },
     {
       role: 'normal',
-      label: 'Normal User',
+      label: 'General User',
       icon: User,
       desc: 'Service requests, consumer shopping & community',
     },

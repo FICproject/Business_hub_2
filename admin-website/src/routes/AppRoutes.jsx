@@ -43,7 +43,7 @@ export const AppRoutes = () => {
             - Teachers
             - Businessmen
             - Entrepreneurs
-            - Normal Users
+            - General Users
             - Pending Verifications
             - Blocked / Suspended Users
         */}

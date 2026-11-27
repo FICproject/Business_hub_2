@@ -23,7 +23,7 @@ export const AdminLayout = () => {
     // - Teachers
     // - Businessmen
     // - Entrepreneurs
-    // - Normal Users
+    // - General Users
     // - Pending Verifications
     // - Blocked / Suspended Users
     const userSubItems = [
@@ -32,7 +32,7 @@ export const AdminLayout = () => {
         { label: 'Teachers', path: '/users/teachers', icon: UserCheck },
         { label: 'Businessmen', path: '/users/businessmen', icon: Briefcase },
         { label: 'Entrepreneurs', path: '/users/entrepreneurs', icon: Rocket },
-        { label: 'Normal Users', path: '/users/normal-users', icon: User },
+        { label: 'General Users', path: '/users/normal-users', icon: User },
         { label: 'Pending Verifications', path: '/users/pending', icon: Clock },
         { label: 'Blocked / Suspended', path: '/users/blocked-suspended', icon: Ban },
     ];

@@ -11,7 +11,7 @@
 2. **Online Education & Live Masterclasses** (100% Free courses, WebRTC virtual classrooms, PDF study notes, and tuition)
 3. **Jobs & Career Opportunities** (Direct listings from verified employers with internal application tracking)
 4. **Clean Link Sharing & Click Analytics** (Privacy-preserving link generator, zero MLM commission pyramid wallets)
-5. **Role-Specific Dashboards** (Student, Teacher, Businessman, Entrepreneur, Normal User)
+5. **Role-Specific Dashboards** (Student, Teacher, Businessman, Entrepreneur, General User)
 6. **Centralized Admin Management** (RBAC, Business Approvals, Teacher Compensation, Audit Logging, and System Metrics)
 
 ---
@@ -66,7 +66,7 @@ The database comes pre-seeded with realistic demonstration accounts:
 | **📚 Student** | `student@businesshub.com` | `student12345` | Free Course Enrollment, Live Classrooms, Jobs, Orders |
 | **🏢 Businessman** | `business@businesshub.com` | `business12345` | Apex Global Technologies (Approved), Product & Job Publishing |
 | **🚀 Entrepreneur**| `entrepreneur@businesshub.com` | `business12345` | NextGen Robotics (Pending Verification), Startup Workspace |
-| **👤 Normal User** | `user@businesshub.com` | `user12345` | Marketplace Purchasing, Link Sharing, Career Exploration |
+| **👤 General User** | `user@businesshub.com` | `user12345` | Marketplace Purchasing, Link Sharing, Career Exploration |
 
 *(Note: In the login screen on the Users Website, one-click demo test account buttons are available for instant testing without typing).*
 

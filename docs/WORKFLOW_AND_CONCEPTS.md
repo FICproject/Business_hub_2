@@ -51,7 +51,7 @@ Business Hub enforces strict **Role-Based Access Control (RBAC)** alongside a ma
 | **🏢 Businessman / Entrepreneur** | Commerce, Selling & Recruitment | Sets up digital storefronts, manages product variants, submits service quotes, fulfills orders, posts verified jobs. | Business Portal (`/business`, `/dashboard/business`) |
 | **🎓 Teacher** | Educational Content & Live Mentorship | Publishes free courses, schedules WebRTC live video classrooms, uploads PDF study notes, tracks stipend approvals. | Teacher Portal (`/teacher`, `/dashboard/teacher`) |
 | **📚 Student** | Skill Building & Career Advancement | Enrolls in free certified courses, joins live streaming classrooms, downloads study notes, applies for jobs. | Student Dashboard (`/education`, `/dashboard/student`) |
-| **👤 Normal User** | Shopping & Discovery | Purchases products, browses services and career opportunities, generates clean share links. | Public Portals (`/marketplace`, `/jobs`, `/cart`) |
+| **👤 General User** | Shopping & Discovery | Purchases products, browses services and career opportunities, generates clean share links. | Public Portals (`/marketplace`, `/jobs`, `/cart`) |
 
 ---
 
@@ -66,7 +66,7 @@ flowchart TD
     Start([User Visits /register]) --> FillForm["Enter Full Name, Email, Mobile, Password & Date of Birth (DOB)"]
     FillForm --> AgeCheck{"Age >= 18?"}
     AgeCheck -- "No (Under 18)" --> Reject["Client & Backend Middleware Block Registration (400 Bad Request)"]
-    AgeCheck -- "Yes (18+)" --> ChooseRole["Select Role: Student, Teacher, Businessman, Entrepreneur, Normal User"]
+    AgeCheck -- "Yes (18+)" --> ChooseRole["Select Role: Student, Teacher, Businessman, Entrepreneur, General User"]
     ChooseRole --> OTP["Generate 6-Digit Email/Mobile OTP"]
     OTP --> VerifyOTP{"OTP Matches?"}
     VerifyOTP -- "No" --> RetryOTP["Prompt Resend or Correction"]

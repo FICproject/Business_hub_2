@@ -52,7 +52,7 @@ export const getDashboardMetrics = async (req, res) => {
             { name: 'Students', value: totalStudents },
             { name: 'Teachers', value: totalTeachers },
             { name: 'Businesses', value: totalBusinesses },
-            { name: 'Normal Users', value: normalUsersCount },
+            { name: 'General Users', value: normalUsersCount },
         ];
         return res.json({
             success: true,

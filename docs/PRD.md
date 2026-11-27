@@ -6,7 +6,7 @@
 - Education & Skill Development (100% Free Courses, Free Live Classes with WebRTC, Downloadable PDF Notes, Flexible Tuition)
 - Jobs & Career Opportunities Portal
 - Clean Link Sharing & Referral Tracking (No financial commissions or pyramid wallet gimmicks)
-- Role-Specific Dashboards (Student, Teacher, Businessman, Entrepreneur, Normal User)
+- Role-Specific Dashboards (Student, Teacher, Businessman, Entrepreneur, General User)
 - Centralized High-Security Admin Control Panel (RBAC, Business Approvals, Teacher Compensation, Audit Logging, System Analytics)
 
 ## 2. User Personas & Role-Based Access Control (RBAC)
@@ -17,7 +17,7 @@ All users must be verified to be at least 18 years old.
 2. **Student**: Free course enrollment, live class attendance, notes downloads, tuition requests, job applications, marketplace ordering.
 3. **Teacher**: Course authoring, live class scheduling, PDF notes publication, student attendance management, compensation tracking.
 4. **Businessman / Entrepreneur**: Business verification application, catalog management (Products/Services), inventory tracking, order fulfillment, job postings.
-5. **Normal User**: Marketplace purchasing, basic job exploration, link sharing.
+5. **General User**: Marketplace purchasing, basic job exploration, link sharing.
 
 ## 3. Core Modules & Key Specifications
 

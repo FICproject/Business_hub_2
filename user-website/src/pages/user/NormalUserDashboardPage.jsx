@@ -73,7 +73,7 @@ export const NormalUserDashboardPage = () => {
             <div className="space-y-2 z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30">
                 <Sparkles className="w-3.5 h-3.5"/>
-                Personalized Consumer & Member Portal
+                Personalized General User Portal
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 Welcome back, {user?.fullName}!
