@@ -100,7 +100,7 @@ export const LoginPage = () => {
         <p className="text-center text-xs text-slate-500">
           Don't have an account yet?{' '}
           <Link to="/register" className="font-bold text-teal-600 hover:text-teal-700">
-            Create an Account (18+)
+            Create an Account
           </Link>
         </p>
       </div>
