@@ -1,6 +1,6 @@
 // Base API Configuration for User Mobile
-// In development, localhost works for iOS simulator/web, 10.0.2.2 for Android emulator, or LAN IP for physical device.
-export const API_BASE_URL = 'http://localhost:5000/api';
+// Connected to production backend on Render
+export const API_BASE_URL = 'https://business-hub-2.onrender.com/api';
 
 class ApiClient {
   private token: string | null = null;

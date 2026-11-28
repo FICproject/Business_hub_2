@@ -1,5 +1,6 @@
 // Base API Configuration for Admin Mobile
-export const API_BASE_URL = 'http://localhost:5000/api';
+// Connected to production backend on Render
+export const API_BASE_URL = 'https://business-hub-2.onrender.com/api';
 
 class AdminApiClient {
   private token: string | null = null;
