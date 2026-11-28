@@ -11,6 +11,7 @@
     "admin-mobile"
   ],
   "scripts": {
+    "start": "npm start --prefix backend",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:user\" \"npm run dev:admin\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:user": "cd user-website && npm run dev",
