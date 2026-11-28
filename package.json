@@ -15,7 +15,10 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:user": "cd user-website && npm run dev",
     "dev:admin": "cd admin-website && npm run dev",
-    "build": "npm run build --workspaces",
+    "build": "npm run build --prefix user-website",
+    "build:user": "npm run build --prefix user-website",
+    "build:admin": "npm run build --prefix admin-website",
+    "build:all": "npm run build --workspaces --if-present",
     "seed": "cd backend && npm run seed",
     "test": "cd backend && npm test"
   },
